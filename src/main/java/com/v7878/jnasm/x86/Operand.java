@@ -18,7 +18,7 @@ public class Operand {
         this.encoding = new byte[6];
     }
 
-    Operand(Register reg) {
+    Operand(CpuRegister reg) {
         this();
         setModRM(3, reg);
     }
@@ -27,20 +27,20 @@ public class Operand {
         return (encodingAt(0) >> 6) & 3;
     }
 
-    public Register rm() {
-        return Register.values()[encodingAt(0) & 7];
+    public CpuRegister rm() {
+        return CpuRegister.values()[encodingAt(0) & 7];
     }
 
     public ScaleFactor scale() {
         return ScaleFactor.values()[(encodingAt(1) >> 6) & 3];
     }
 
-    public Register index() {
-        return Register.values()[(encodingAt(1) >> 3) & 7];
+    public CpuRegister index() {
+        return CpuRegister.values()[(encodingAt(1) >> 3) & 7];
     }
 
-    public Register base() {
-        return Register.values()[encodingAt(1) & 7];
+    public CpuRegister base() {
+        return CpuRegister.values()[encodingAt(1) & 7];
     }
 
     public int disp() {
@@ -61,9 +61,9 @@ public class Operand {
                 (encodingAt(length - 4) & 0xff);
     }
 
-    public boolean isRegister(Register reg) {
+    public boolean isRegister(CpuRegister reg) {
         return (encodingAt(0) & 0xF8) == 0xC0 &&  // Addressing mode is register only.
-                (encodingAt(0) & 0x07) == reg.ordinal(); // Register codes match.
+                (encodingAt(0) & 0x07) == reg.ordinal(); // CpuRegister codes match.
     }
 
     protected byte encodingAt(int index) {
@@ -79,13 +79,13 @@ public class Operand {
         this.fixup = fixup;
     }
 
-    protected void setModRM(int mod_in, Register rm_in) {
+    protected void setModRM(int mod_in, CpuRegister rm_in) {
         assert (mod_in & ~3) == 0;
         encoding[0] = (byte) ((mod_in << 6) | rm_in.ordinal());
         length = 1;
     }
 
-    protected void setSIB(ScaleFactor scale_in, Register index_in, Register base_in) {
+    protected void setSIB(ScaleFactor scale_in, CpuRegister index_in, CpuRegister base_in) {
         assert length == 1;
         encoding[1] = (byte) ((scale_in.getValue() << 6) |
                 (index_in.getValue() << 3) | base_in.getValue());

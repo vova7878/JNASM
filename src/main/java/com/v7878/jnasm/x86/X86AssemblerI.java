@@ -7,7 +7,7 @@ import com.v7878.jnasm.Label;
   Emit Machine Instructions.
  */
 public interface X86AssemblerI {
-    void call(Register reg);
+    void call(CpuRegister reg);
 
     void call(Address address);
 
@@ -15,93 +15,93 @@ public interface X86AssemblerI {
 
     void call(ExternalLabel label);
 
-    void pushl(Register reg);
+    void pushl(CpuRegister reg);
 
     void pushl(Address address);
 
     void pushl(Immediate imm);
 
-    void popl(Register reg);
+    void popl(CpuRegister reg);
 
     void popl(Address address);
 
-    void movl(Register dst, Immediate src);
+    void movl(CpuRegister dst, Immediate src);
 
-    void movl(Register dst, Register src);
+    void movl(CpuRegister dst, CpuRegister src);
 
-    void movl(Register dst, Address src);
+    void movl(CpuRegister dst, Address src);
 
-    void movl(Address dst, Register src);
+    void movl(Address dst, CpuRegister src);
 
     void movl(Address dst, Immediate imm);
 
     void movl(Address dst, Label lbl);
 
-    void movntl(Address dst, Register src);
+    void movntl(Address dst, CpuRegister src);
 
-    void blsi(Register dst, Register src);  // no addr variant (for now)
+    void blsi(CpuRegister dst, CpuRegister src);  // no addr variant (for now)
 
-    void blsmsk(Register dst, Register src);  // no addr variant (for now)
+    void blsmsk(CpuRegister dst, CpuRegister src);  // no addr variant (for now)
 
-    void blsr(Register dst, Register src);  // no addr varianr (for now)
+    void blsr(CpuRegister dst, CpuRegister src);  // no addr varianr (for now)
 
-    void bswapl(Register dst);
+    void bswapl(CpuRegister dst);
 
-    void bsfl(Register dst, Register src);
+    void bsfl(CpuRegister dst, CpuRegister src);
 
-    void bsfl(Register dst, Address src);
+    void bsfl(CpuRegister dst, Address src);
 
-    void bsrl(Register dst, Register src);
+    void bsrl(CpuRegister dst, CpuRegister src);
 
-    void bsrl(Register dst, Address src);
+    void bsrl(CpuRegister dst, Address src);
 
-    void popcntl(Register dst, Register src);
+    void popcntl(CpuRegister dst, CpuRegister src);
 
-    void popcntl(Register dst, Address src);
+    void popcntl(CpuRegister dst, Address src);
 
-    void rorl(Register reg, Immediate imm);
+    void rorl(CpuRegister reg, Immediate imm);
 
-    void rorl(Register operand, Register shifter);
+    void rorl(CpuRegister operand, CpuRegister shifter);
 
-    void roll(Register reg, Immediate imm);
+    void roll(CpuRegister reg, Immediate imm);
 
-    void roll(Register operand, Register shifter);
+    void roll(CpuRegister operand, CpuRegister shifter);
 
-    void movzxb(Register dst, ByteRegister src);
+    void movzxb(CpuRegister dst, ByteRegister src);
 
-    void movzxb(Register dst, Address src);
+    void movzxb(CpuRegister dst, Address src);
 
-    void movsxb(Register dst, ByteRegister src);
+    void movsxb(CpuRegister dst, ByteRegister src);
 
-    void movsxb(Register dst, Address src);
+    void movsxb(CpuRegister dst, Address src);
 
-    void movb(Register dst, Address src);
+    void movb(CpuRegister dst, Address src);
 
     void movb(Address dst, ByteRegister src);
 
     void movb(Address dst, Immediate imm);
 
-    void movzxw(Register dst, Register src);
+    void movzxw(CpuRegister dst, CpuRegister src);
 
-    void movzxw(Register dst, Address src);
+    void movzxw(CpuRegister dst, Address src);
 
-    void movsxw(Register dst, Register src);
+    void movsxw(CpuRegister dst, CpuRegister src);
 
-    void movsxw(Register dst, Address src);
+    void movsxw(CpuRegister dst, Address src);
 
-    void movw(Register dst, Address src);
+    void movw(CpuRegister dst, Address src);
 
-    void movw(Address dst, Register src);
+    void movw(Address dst, CpuRegister src);
 
     void movw(Address dst, Immediate imm);
 
-    void leal(Register dst, Address src);
+    void leal(CpuRegister dst, Address src);
 
-    void cmovl(Condition condition, Register dst, Register src);
+    void cmovl(Condition condition, CpuRegister dst, CpuRegister src);
 
-    void cmovl(Condition condition, Register dst, Address src);
+    void cmovl(Condition condition, CpuRegister dst, Address src);
 
-    void setb(Condition condition, Register dst);
+    void setb(Condition condition, CpuRegister dst);
 
     void movaps(XmmRegister dst, XmmRegister src);     // move
 
@@ -129,9 +129,9 @@ public interface X86AssemblerI {
 
     void movss(XmmRegister dst, XmmRegister src);
 
-    void movd(XmmRegister dst, Register src);
+    void movd(XmmRegister dst, CpuRegister src);
 
-    void movd(Register dst, XmmRegister src);
+    void movd(CpuRegister dst, XmmRegister src);
 
     void addss(XmmRegister dst, XmmRegister src);
 
@@ -307,21 +307,21 @@ public interface X86AssemblerI {
 
     void psubsw(XmmRegister dst, XmmRegister src);
 
-    void cvtsi2ss(XmmRegister dst, Register src);
+    void cvtsi2ss(XmmRegister dst, CpuRegister src);
 
-    void cvtsi2sd(XmmRegister dst, Register src);
+    void cvtsi2sd(XmmRegister dst, CpuRegister src);
 
-    void cvtss2si(Register dst, XmmRegister src);
+    void cvtss2si(CpuRegister dst, XmmRegister src);
 
     void cvtss2sd(XmmRegister dst, XmmRegister src);
 
-    void cvtsd2si(Register dst, XmmRegister src);
+    void cvtsd2si(CpuRegister dst, XmmRegister src);
 
     void cvtsd2ss(XmmRegister dst, XmmRegister src);
 
-    void cvttss2si(Register dst, XmmRegister src);
+    void cvttss2si(CpuRegister dst, XmmRegister src);
 
-    void cvttsd2si(Register dst, XmmRegister src);
+    void cvttsd2si(CpuRegister dst, XmmRegister src);
 
     void cvtdq2ps(XmmRegister dst, XmmRegister src);
 
@@ -383,7 +383,7 @@ public interface X86AssemblerI {
 
     void vandpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
 
-    void andn(Register dst, Register src1, Register src2);  // no addr variant (for now)
+    void andn(CpuRegister dst, CpuRegister src1, CpuRegister src2);  // no addr variant (for now)
 
     void andnpd(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
 
@@ -568,157 +568,157 @@ public interface X86AssemblerI {
 
     void xchgb(ByteRegister reg, Address address);
 
-    void xchgw(Register dst, Register src);
+    void xchgw(CpuRegister dst, CpuRegister src);
 
-    void xchgw(Register reg, Address address);
+    void xchgw(CpuRegister reg, Address address);
 
-    void xchgl(Register dst, Register src);
+    void xchgl(CpuRegister dst, CpuRegister src);
 
-    void xchgl(Register reg, Address address);
+    void xchgl(CpuRegister reg, Address address);
 
     void cmpb(Address address, Immediate imm);
 
     void cmpw(Address address, Immediate imm);
 
-    void cmpl(Register reg, Immediate imm);
+    void cmpl(CpuRegister reg, Immediate imm);
 
-    void cmpl(Register reg0, Register reg1);
+    void cmpl(CpuRegister reg0, CpuRegister reg1);
 
-    void cmpl(Register reg, Address address);
+    void cmpl(CpuRegister reg, Address address);
 
-    void cmpl(Address address, Register reg);
+    void cmpl(Address address, CpuRegister reg);
 
     void cmpl(Address address, Immediate imm);
 
-    void testl(Register reg1, Register reg2);
+    void testl(CpuRegister reg1, CpuRegister reg2);
 
-    void testl(Register reg, Immediate imm);
+    void testl(CpuRegister reg, Immediate imm);
 
-    void testl(Register reg1, Address address);
+    void testl(CpuRegister reg1, Address address);
 
     void testb(Address dst, Immediate imm);
 
     void testl(Address dst, Immediate imm);
 
-    void andl(Register dst, Immediate imm);
+    void andl(CpuRegister dst, Immediate imm);
 
-    void andl(Register dst, Register src);
+    void andl(CpuRegister dst, CpuRegister src);
 
-    void andl(Register dst, Address address);
+    void andl(CpuRegister dst, Address address);
 
     void andw(Address address, Immediate imm);
 
-    void orl(Register dst, Immediate imm);
+    void orl(CpuRegister dst, Immediate imm);
 
-    void orl(Register dst, Register src);
+    void orl(CpuRegister dst, CpuRegister src);
 
-    void orl(Register dst, Address address);
+    void orl(CpuRegister dst, Address address);
 
-    void xorl(Register dst, Register src);
+    void xorl(CpuRegister dst, CpuRegister src);
 
-    void xorl(Register dst, Immediate imm);
+    void xorl(CpuRegister dst, Immediate imm);
 
-    void xorl(Register dst, Address address);
+    void xorl(CpuRegister dst, Address address);
 
-    void addl(Register dst, Register src);
+    void addl(CpuRegister dst, CpuRegister src);
 
-    void addl(Register reg, Immediate imm);
+    void addl(CpuRegister reg, Immediate imm);
 
-    void addl(Register reg, Address address);
+    void addl(CpuRegister reg, Address address);
 
-    void addl(Address address, Register reg);
+    void addl(Address address, CpuRegister reg);
 
     void addl(Address address, Immediate imm);
 
     void addw(Address address, Immediate imm);
 
-    void adcl(Register dst, Register src);
+    void adcl(CpuRegister dst, CpuRegister src);
 
-    void adcl(Register reg, Immediate imm);
+    void adcl(CpuRegister reg, Immediate imm);
 
-    void adcl(Register dst, Address address);
+    void adcl(CpuRegister dst, Address address);
 
-    void subl(Register dst, Register src);
+    void subl(CpuRegister dst, CpuRegister src);
 
-    void subl(Register reg, Immediate imm);
+    void subl(CpuRegister reg, Immediate imm);
 
-    void subl(Register reg, Address address);
+    void subl(CpuRegister reg, Address address);
 
-    void subl(Address address, Register src);
+    void subl(Address address, CpuRegister src);
 
     void cdq();
 
-    void idivl(Register reg);
+    void idivl(CpuRegister reg);
 
-    void divl(Register reg);
+    void divl(CpuRegister reg);
 
-    void imull(Register dst, Register src);
+    void imull(CpuRegister dst, CpuRegister src);
 
-    void imull(Register reg, Immediate imm);
+    void imull(CpuRegister reg, Immediate imm);
 
-    void imull(Register dst, Register src, Immediate imm);
+    void imull(CpuRegister dst, CpuRegister src, Immediate imm);
 
-    void imull(Register reg, Address address);
+    void imull(CpuRegister reg, Address address);
 
-    void imull(Register reg);
+    void imull(CpuRegister reg);
 
     void imull(Address address);
 
-    void mull(Register reg);
+    void mull(CpuRegister reg);
 
     void mull(Address address);
 
-    void sbbl(Register dst, Register src);
+    void sbbl(CpuRegister dst, CpuRegister src);
 
-    void sbbl(Register reg, Immediate imm);
+    void sbbl(CpuRegister reg, Immediate imm);
 
-    void sbbl(Register reg, Address address);
+    void sbbl(CpuRegister reg, Address address);
 
-    void sbbl(Address address, Register src);
+    void sbbl(Address address, CpuRegister src);
 
-    void incl(Register reg);
+    void incl(CpuRegister reg);
 
     void incl(Address address);
 
-    void decl(Register reg);
+    void decl(CpuRegister reg);
 
     void decl(Address address);
 
-    void shll(Register reg, Immediate imm);
+    void shll(CpuRegister reg, Immediate imm);
 
-    void shll(Register operand, Register shifter);
+    void shll(CpuRegister operand, CpuRegister shifter);
 
     void shll(Address address, Immediate imm);
 
-    void shll(Address address, Register shifter);
+    void shll(Address address, CpuRegister shifter);
 
-    void shrl(Register reg, Immediate imm);
+    void shrl(CpuRegister reg, Immediate imm);
 
-    void shrl(Register operand, Register shifter);
+    void shrl(CpuRegister operand, CpuRegister shifter);
 
     void shrl(Address address, Immediate imm);
 
-    void shrl(Address address, Register shifter);
+    void shrl(Address address, CpuRegister shifter);
 
-    void sarl(Register reg, Immediate imm);
+    void sarl(CpuRegister reg, Immediate imm);
 
-    void sarl(Register operand, Register shifter);
+    void sarl(CpuRegister operand, CpuRegister shifter);
 
     void sarl(Address address, Immediate imm);
 
-    void sarl(Address address, Register shifter);
+    void sarl(Address address, CpuRegister shifter);
 
-    void shld(Register dst, Register src, Register shifter);
+    void shld(CpuRegister dst, CpuRegister src, CpuRegister shifter);
 
-    void shld(Register dst, Register src, Immediate imm);
+    void shld(CpuRegister dst, CpuRegister src, Immediate imm);
 
-    void shrd(Register dst, Register src, Register shifter);
+    void shrd(CpuRegister dst, CpuRegister src, CpuRegister shifter);
 
-    void shrd(Register dst, Register src, Immediate imm);
+    void shrd(CpuRegister dst, CpuRegister src, Immediate imm);
 
-    void negl(Register reg);
+    void negl(CpuRegister reg);
 
-    void notl(Register reg);
+    void notl(CpuRegister reg);
 
     void enter(Immediate imm);
 
@@ -740,7 +740,7 @@ public interface X86AssemblerI {
 
     void jecxz(NearLabel label);
 
-    void jmp(Register reg);
+    void jmp(CpuRegister reg);
 
     void jmp(Address address);
 
@@ -768,17 +768,17 @@ public interface X86AssemblerI {
 
     void cmpxchgb(Address address, ByteRegister reg);
 
-    void cmpxchgw(Address address, Register reg);
+    void cmpxchgw(Address address, CpuRegister reg);
 
-    void cmpxchgl(Address address, Register reg);
+    void cmpxchgl(Address address, CpuRegister reg);
 
     void cmpxchg8b(Address address);
 
     void xaddb(Address address, ByteRegister reg);
 
-    void xaddw(Address address, Register reg);
+    void xaddw(Address address, CpuRegister reg);
 
-    void xaddl(Address address, Register reg);
+    void xaddl(Address address, CpuRegister reg);
 
     void mfence();
 

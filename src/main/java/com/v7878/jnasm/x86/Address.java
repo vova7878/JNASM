@@ -1,8 +1,8 @@
 package com.v7878.jnasm.x86;
 
 import static com.v7878.jnasm.ScaleFactor.TIMES_1;
-import static com.v7878.jnasm.x86.Register.EBP;
-import static com.v7878.jnasm.x86.Register.ESP;
+import static com.v7878.jnasm.x86.CpuRegister.EBP;
+import static com.v7878.jnasm.x86.CpuRegister.ESP;
 
 import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.ScaleFactor;
@@ -11,31 +11,31 @@ public class Address extends Operand {
     public Address() {
     }
 
-    public Address(Register base, int disp) {
+    public Address(CpuRegister base, int disp) {
         init(base, disp);
     }
 
-    public Address(Register base, int disp, AssemblerFixup fixup) {
+    public Address(CpuRegister base, int disp, AssemblerFixup fixup) {
         init(base, disp);
         setFixup(fixup);
     }
 
-    public Address(Register index, ScaleFactor scale, int disp) {
+    public Address(CpuRegister index, ScaleFactor scale, int disp) {
         setModRM(0, ESP);
         setSIB(scale, index, EBP);
         setDisp32(disp);
     }
 
-    public Address(Register base, Register index, ScaleFactor scale, int disp) {
+    public Address(CpuRegister base, CpuRegister index, ScaleFactor scale, int disp) {
         init(base, index, scale, disp);
     }
 
-    public Address(Register base, Register index, ScaleFactor scale, int disp, AssemblerFixup fixup) {
+    public Address(CpuRegister base, CpuRegister index, ScaleFactor scale, int disp, AssemblerFixup fixup) {
         init(base, index, scale, disp);
         setFixup(fixup);
     }
 
-    private void init(Register base_in, int disp) {
+    private void init(CpuRegister base_in, int disp) {
         if (disp == 0 && base_in != EBP) {
             setModRM(0, base_in);
             if (base_in == ESP) setSIB(TIMES_1, ESP, base_in);
@@ -50,7 +50,7 @@ public class Address extends Operand {
         }
     }
 
-    private void init(Register base_in, Register index_in, ScaleFactor scale_in, int disp) {
+    private void init(CpuRegister base_in, CpuRegister index_in, ScaleFactor scale_in, int disp) {
         assert index_in != ESP;  // Illegal addressing mode.
         if (disp == 0 && base_in != EBP) {
             setModRM(0, ESP);
@@ -100,7 +100,7 @@ public class Address extends Operand {
         return newAddr;
     }
 
-    public Register getBaseRegister() {
+    public CpuRegister getBaseRegister() {
         return rm() == ESP ? base() : rm();
     }
 

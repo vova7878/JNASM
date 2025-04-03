@@ -1,18 +1,18 @@
 package com.v7878.jnasm.x86;
 
-import static com.v7878.jnasm.x86.Register.kNumberOfCpuRegisters;
+import static com.v7878.jnasm.x86.CpuRegister.kNumberOfCpuRegisters;
 import static com.v7878.jnasm.x86.X87Register.kNumberOfX87Registers;
 import static com.v7878.jnasm.x86.XmmRegister.kNumberOfXmmRegisters;
 
 import com.v7878.jnasm.ManagedRegister;
 
 // An instance of class 'ManagedRegister' represents a single cpu register
-// (enum Register), or xmm register (enum XmmRegister).
+// (enum CpuRegister), or xmm register (enum XmmRegister).
 // 'ManagedRegister::NoRegister()' provides an invalid register.
 // There is a one-to-one mapping between ManagedRegister and register id.
 public class X86ManagedRegister extends ManagedRegister {
     // ids map:
-    //   [0..R[  cpu registers (enum Register)
+    //   [0..R[  cpu registers (enum CpuRegister)
     //   [R..X[  xmm registers (enum XmmRegister)
     //   [X..S[  x87 registers (enum X87Register)
     // where
@@ -44,7 +44,7 @@ public class X86ManagedRegister extends ManagedRegister {
         return new X86ManagedRegister();
     }
 
-    public static X86ManagedRegister fromCpuRegister(Register r) {
+    public static X86ManagedRegister fromCpuRegister(CpuRegister r) {
         return new X86ManagedRegister(r.ordinal());
     }
 
@@ -68,8 +68,8 @@ public class X86ManagedRegister extends ManagedRegister {
         return 0 <= id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) && id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) < kNumberOfX87RegIds;
     }
 
-    public Register asCpuRegister() {
-        return Register.values()[id_];
+    public CpuRegister asCpuRegister() {
+        return CpuRegister.values()[id_];
     }
 
     public XmmRegister asXmmRegister() {

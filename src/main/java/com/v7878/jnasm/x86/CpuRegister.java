@@ -1,6 +1,6 @@
 package com.v7878.jnasm.x86;
 
-public enum Register {
+public enum CpuRegister {
     EAX(0),
     ECX(1),
     EDX(2),
@@ -17,7 +17,7 @@ public enum Register {
 
     private final int value;
 
-    Register(int value) {
+    CpuRegister(int value) {
         this.value = value;
     }
 
