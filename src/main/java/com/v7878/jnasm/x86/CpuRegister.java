@@ -11,9 +11,7 @@ public enum CpuRegister {
     EDI(7);
 
     public static final int kNumberOfCpuRegisters = 8;
-
-    //TODO?
-    //kFirstByteUnsafeRegister(4)
+    public static final int kFirstByteUnsafeRegister = 4;
 
     private final int value;
 

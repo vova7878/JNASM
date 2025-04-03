@@ -2,6 +2,7 @@ package com.v7878.jnasm.x86;
 
 import static com.v7878.jnasm.x86.CpuRegister.EAX;
 import static com.v7878.jnasm.x86.CpuRegister.ECX;
+import static com.v7878.jnasm.x86.CpuRegister.kFirstByteUnsafeRegister;
 
 import com.v7878.jnasm.Assembler;
 import com.v7878.jnasm.AssemblerFixup;
@@ -2814,7 +2815,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     public void testl(CpuRegister reg, Immediate immediate) {
         // For registers that have a byte variant (EAX, EBX, ECX, and EDX)
         // we only test the byte register to keep the encoding short.
-        if (immediate.isUInt8() && reg.getValue() < 4) {
+        if (immediate.isUInt8() && reg.getValue() < kFirstByteUnsafeRegister) {
             // Use zero-extended 8-bit immediate.
             if (reg == EAX) {
                 emit8(0xA8);

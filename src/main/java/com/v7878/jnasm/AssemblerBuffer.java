@@ -10,6 +10,7 @@ final class AssemblerBuffer implements CodeBuffer {
     }
 
     private AssemblerFixupContainer fixup_;
+    // TODO: private boolean finalized;
 
     public AssemblerBuffer() {
         this.fixup_ = null;
@@ -24,8 +25,11 @@ final class AssemblerBuffer implements CodeBuffer {
         }
     }
 
-    public byte[] finalizeInstructions() {
+    public void finalizeCode() {
         processFixups();
+    }
+
+    public byte[] getCode() {
         // TODO
     }
 

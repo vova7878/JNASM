@@ -51,6 +51,7 @@ public class Address extends Operand {
     }
 
     private void init(CpuRegister base_in, CpuRegister index_in, ScaleFactor scale_in, int disp) {
+        // TODO
         assert index_in != ESP;  // Illegal addressing mode.
         if (disp == 0 && base_in != EBP) {
             setModRM(0, ESP);
@@ -109,5 +110,32 @@ public class Address extends Operand {
         result.setModRM(0, EBP);
         result.setDisp32(addr);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return switch (mod()) {
+            case 0 -> {
+                if (rm() != ESP || index() == ESP) {
+                    yield "(%%%s)".formatted(rm());
+                } else if (base() == EBP) {
+                    yield "%d(,%%%s,%d)".formatted(disp32(), index(), 1 << scale().getValue());
+                }
+                yield "(%%%s,%%%s,%d)".formatted(base(), index(), 1 << scale().getValue());
+            }
+            case 1 -> {
+                if (rm() != ESP || index() == ESP) {
+                    yield "%s(%%%s)".formatted(disp8(), rm());
+                }
+                yield "%s(%%%s,%%%s,%d)".formatted(disp8(), base(), index(), 1 << scale().getValue());
+            }
+            case 2 -> {
+                if (rm() != ESP || index() == ESP) {
+                    yield "%d(%%%s)".formatted(disp32(), rm());
+                }
+                yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), 1 << scale().getValue());
+            }
+            default -> "<address?>";
+        };
     }
 }

@@ -23,6 +23,10 @@ public class Operand {
         setModRM(3, reg);
     }
 
+    public AssemblerFixup getFixup() {
+        return fixup;
+    }
+
     public int mod() {
         return (encodingAt(0) >> 6) & 3;
     }
@@ -66,26 +70,24 @@ public class Operand {
                 (encodingAt(0) & 0x07) == reg.ordinal(); // CpuRegister codes match.
     }
 
+    protected void setFixup(AssemblerFixup fixup) {
+        this.fixup = fixup;
+    }
+
     protected byte encodingAt(int index) {
         Objects.checkIndex(index, length);
         return encoding[index];
     }
 
-    public AssemblerFixup getFixup() {
-        return fixup;
-    }
-
-    public void setFixup(AssemblerFixup fixup) {
-        this.fixup = fixup;
-    }
-
     protected void setModRM(int mod_in, CpuRegister rm_in) {
+        // TODO
         assert (mod_in & ~3) == 0;
         encoding[0] = (byte) ((mod_in << 6) | rm_in.ordinal());
         length = 1;
     }
 
     protected void setSIB(ScaleFactor scale_in, CpuRegister index_in, CpuRegister base_in) {
+        // TODO
         assert length == 1;
         encoding[1] = (byte) ((scale_in.getValue() << 6) |
                 (index_in.getValue() << 3) | base_in.getValue());
@@ -93,12 +95,14 @@ public class Operand {
     }
 
     protected void setDisp8(byte disp) {
+        // TODO
         assert length == 1 || length == 2;
         encoding[length++] = disp;
         this.disp = disp;
     }
 
     protected void setDisp32(int disp) {
+        // TODO
         assert length == 1 || length == 2;
         // little-endian
         encoding[length++] = (byte) disp;
