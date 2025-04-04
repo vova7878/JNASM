@@ -23,6 +23,10 @@ public class Operand {
         setModRM(3, reg);
     }
 
+    public void setFixup(AssemblerFixup fixup) {
+        this.fixup = fixup;
+    }
+
     public AssemblerFixup getFixup() {
         return fixup;
     }
@@ -68,10 +72,6 @@ public class Operand {
     public boolean isRegister(CpuRegister reg) {
         return (encodingAt(0) & 0xF8) == 0xC0 &&  // Addressing mode is register only.
                 (encodingAt(0) & 0x07) == reg.ordinal(); // CpuRegister codes match.
-    }
-
-    protected void setFixup(AssemblerFixup fixup) {
-        this.fixup = fixup;
     }
 
     protected byte encodingAt(int index) {

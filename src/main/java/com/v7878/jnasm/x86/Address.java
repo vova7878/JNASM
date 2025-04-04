@@ -4,69 +4,57 @@ import static com.v7878.jnasm.ScaleFactor.TIMES_1;
 import static com.v7878.jnasm.x86.CpuRegister.EBP;
 import static com.v7878.jnasm.x86.CpuRegister.ESP;
 
-import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.ScaleFactor;
+import com.v7878.jnasm.Utils;
 
 public class Address extends Operand {
-    public Address() {
+    private Address() {
     }
 
     public Address(CpuRegister base, int disp) {
-        init(base, disp);
-    }
-
-    public Address(CpuRegister base, int disp, AssemblerFixup fixup) {
-        init(base, disp);
-        setFixup(fixup);
+        if (disp == 0 && base != EBP) {
+            setModRM(0, base);
+            if (base == ESP) setSIB(TIMES_1, ESP, base);
+        } else if (Utils.isInt8(disp)) {
+            setModRM(1, base);
+            if (base == ESP) setSIB(TIMES_1, ESP, base);
+            setDisp8((byte) disp);
+        } else {
+            setModRM(2, base);
+            if (base == ESP) setSIB(TIMES_1, ESP, base);
+            setDisp32(disp);
+        }
     }
 
     public Address(CpuRegister index, ScaleFactor scale, int disp) {
+        if (index == ESP) {
+            throw new IllegalArgumentException("%s in not allowed as index".formatted(index));
+        }
         setModRM(0, ESP);
         setSIB(scale, index, EBP);
         setDisp32(disp);
     }
 
     public Address(CpuRegister base, CpuRegister index, ScaleFactor scale, int disp) {
-        init(base, index, scale, disp);
-    }
-
-    public Address(CpuRegister base, CpuRegister index, ScaleFactor scale, int disp, AssemblerFixup fixup) {
-        init(base, index, scale, disp);
-        setFixup(fixup);
-    }
-
-    private void init(CpuRegister base_in, int disp) {
-        if (disp == 0 && base_in != EBP) {
-            setModRM(0, base_in);
-            if (base_in == ESP) setSIB(TIMES_1, ESP, base_in);
-        } else if (disp >= -128 && disp <= 127) {
-            setModRM(1, base_in);
-            if (base_in == ESP) setSIB(TIMES_1, ESP, base_in);
-            setDisp8((byte) disp);
-        } else {
-            setModRM(2, base_in);
-            if (base_in == ESP) setSIB(TIMES_1, ESP, base_in);
-            setDisp32(disp);
+        if (index == ESP) {
+            throw new IllegalArgumentException("%s in not allowed as index".formatted(index));
         }
-    }
-
-    private void init(CpuRegister base_in, CpuRegister index_in, ScaleFactor scale_in, int disp) {
-        // TODO
-        assert index_in != ESP;  // Illegal addressing mode.
-        if (disp == 0 && base_in != EBP) {
+        if (disp == 0 && base != EBP) {
             setModRM(0, ESP);
-            setSIB(scale_in, index_in, base_in);
-        } else if (disp >= -128 && disp <= 127) {
+            setSIB(scale, index, base);
+        } else if (Utils.isInt8(disp)) {
             setModRM(1, ESP);
-            setSIB(scale_in, index_in, base_in);
+            setSIB(scale, index, base);
             setDisp8((byte) disp);
         } else {
             setModRM(2, ESP);
-            setSIB(scale_in, index_in, base_in);
+            setSIB(scale, index, base);
             setDisp32(disp);
         }
     }
 
+    // Break the address into pieces and reassemble it again with a new displacement.
+    // Note that it may require a new addressing mode if displacement size is changed.
     public static Address displace(Address addr, int disp) {
         int newDisp = addr.disp() + disp;
         boolean sib = addr.rm() == ESP;
@@ -74,23 +62,27 @@ public class Address extends Operand {
 
         Address newAddr = new Address();
         if (addr.mod() == 0 && ebp) {
+            // Special case: mod 00b and EBP in r/m or SIB base => 32-bit displacement.
             newAddr.setModRM(0, addr.rm());
             if (sib) {
                 newAddr.setSIB(addr.scale(), addr.index(), addr.base());
             }
             newAddr.setDisp32(newDisp);
         } else if (newDisp == 0 && !ebp) {
+            // Mod 00b (excluding a special case for EBP) => no displacement.
             newAddr.setModRM(0, addr.rm());
             if (sib) {
                 newAddr.setSIB(addr.scale(), addr.index(), addr.base());
             }
-        } else if (-128 <= newDisp && newDisp <= 127) {
+        } else if (Utils.isInt8(newDisp)) {
+            // Mod 01b => 8-bit displacement.
             newAddr.setModRM(1, addr.rm());
             if (sib) {
                 newAddr.setSIB(addr.scale(), addr.index(), addr.base());
             }
             newAddr.setDisp8((byte) newDisp);
         } else {
+            // Mod 10b => 32-bit displacement.
             newAddr.setModRM(2, addr.rm());
             if (sib) {
                 newAddr.setSIB(addr.scale(), addr.index(), addr.base());
@@ -101,10 +93,6 @@ public class Address extends Operand {
         return newAddr;
     }
 
-    public CpuRegister getBaseRegister() {
-        return rm() == ESP ? base() : rm();
-    }
-
     public static Address absolute(int addr) {
         Address result = new Address();
         result.setModRM(0, EBP);
@@ -112,14 +100,23 @@ public class Address extends Operand {
         return result;
     }
 
+    public CpuRegister getBaseRegister() {
+        return rm() == ESP ? base() : rm();
+    }
+
     @Override
     public String toString() {
         return switch (mod()) {
             case 0 -> {
-                if (rm() != ESP || index() == ESP) {
-                    yield "(%%%s)".formatted(rm());
-                } else if (base() == EBP) {
-                    yield "%d(,%%%s,%d)".formatted(disp32(), index(), 1 << scale().getValue());
+                var rm = rm();
+                if ((rm == ESP ? base() : rm) == EBP) {
+                    if (rm == ESP) {
+                        yield "%d(,%%%s,%d)".formatted(disp32(), index(), 1 << scale().getValue());
+                    }
+                    yield "%d".formatted(disp32());
+                }
+                if (rm != ESP || index() == ESP) {
+                    yield "(%%%s)".formatted(rm);
                 }
                 yield "(%%%s,%%%s,%d)".formatted(base(), index(), 1 << scale().getValue());
             }
@@ -135,6 +132,7 @@ public class Address extends Operand {
                 }
                 yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), 1 << scale().getValue());
             }
+            // TODO?
             default -> "<address?>";
         };
     }
