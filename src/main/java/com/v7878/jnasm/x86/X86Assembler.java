@@ -31,12 +31,12 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     private static final int THREE_BYTE_VEX = 0xC4;
     private static final int VEX_INIT = 0x00;
 
-    private final boolean has_AVX_;
-    private final boolean has_AVX2_;
+    private final boolean has_AVX;
+    private final boolean has_AVX2;
 
-    public X86Assembler(boolean has_AVX_, boolean has_AVX2_) {
-        this.has_AVX_ = has_AVX_;
-        this.has_AVX2_ = has_AVX2_;
+    public X86Assembler(boolean has_AVX, boolean has_AVX2) {
+        this.has_AVX = has_AVX;
+        this.has_AVX2 = has_AVX2;
     }
 
     private static void CHECK(boolean value) {
@@ -67,7 +67,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     public boolean cpuHasAVXorAVX2FeatureFlag() {
-        return has_AVX_ || has_AVX2_;
+        return has_AVX || has_AVX2;
     }
 
     private void EmitRegisterOperand(int rm, int reg) {
