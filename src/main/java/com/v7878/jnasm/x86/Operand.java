@@ -31,36 +31,36 @@ public class Operand {
         return fixup;
     }
 
-    public int mod() {
+    int mod() {
         return (encodingAt(0) >> 6) & 3;
     }
 
-    public CpuRegister rm() {
+    CpuRegister rm() {
         return CpuRegister.values()[encodingAt(0) & 7];
     }
 
-    public ScaleFactor scale() {
+    ScaleFactor scale() {
         return ScaleFactor.values()[(encodingAt(1) >> 6) & 3];
     }
 
-    public CpuRegister index() {
+    CpuRegister index() {
         return CpuRegister.values()[(encodingAt(1) >> 3) & 7];
     }
 
-    public CpuRegister base() {
+    CpuRegister base() {
         return CpuRegister.values()[encodingAt(1) & 7];
     }
 
-    public int disp() {
+    int disp() {
         return disp;
     }
 
-    public byte disp8() {
+    byte disp8() {
         assert length >= 2;
         return encodingAt(length - 1);
     }
 
-    public int disp32() {
+    int disp32() {
         assert length >= 5;
         // little-endian
         return (encodingAt(length - 1) & 0xff) << 24 |
@@ -69,7 +69,7 @@ public class Operand {
                 (encodingAt(length - 4) & 0xff);
     }
 
-    public boolean isRegister(CpuRegister reg) {
+    boolean isRegister(CpuRegister reg) {
         return (encodingAt(0) & 0xF8) == 0xC0 &&  // Addressing mode is register only.
                 (encodingAt(0) & 0x07) == reg.ordinal(); // CpuRegister codes match.
     }
@@ -80,14 +80,12 @@ public class Operand {
     }
 
     protected void setModRM(int mod_in, CpuRegister rm_in) {
-        // TODO
         assert (mod_in & ~3) == 0;
         encoding[0] = (byte) ((mod_in << 6) | rm_in.ordinal());
         length = 1;
     }
 
     protected void setSIB(ScaleFactor scale_in, CpuRegister index_in, CpuRegister base_in) {
-        // TODO
         assert length == 1;
         encoding[1] = (byte) ((scale_in.getValue() << 6) |
                 (index_in.getValue() << 3) | base_in.getValue());
@@ -95,14 +93,12 @@ public class Operand {
     }
 
     protected void setDisp8(byte disp) {
-        // TODO
         assert length == 1 || length == 2;
         encoding[length++] = disp;
         this.disp = disp;
     }
 
     protected void setDisp32(int disp) {
-        // TODO
         assert length == 1 || length == 2;
         // little-endian
         encoding[length++] = (byte) disp;

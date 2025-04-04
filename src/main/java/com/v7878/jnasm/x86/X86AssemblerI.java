@@ -6,6 +6,7 @@ import com.v7878.jnasm.Label;
 /*
   Emit Machine Instructions.
  */
+// TODO: javadoc
 public interface X86AssemblerI {
     void call(CpuRegister reg);
 

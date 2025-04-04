@@ -1,23 +1,28 @@
 package com.v7878.jnasm;
 
 public class Label {
+    private static final int BIAS = 1;
+
+    // TODO: should be private, but raw value used in assemblers
     public int position;
 
     public Label() {
         this.position = 0;
     }
 
-    // TODO: replace Integer.BYTES with address size
-
     // Returns the position for bound and linked labels. Cannot be used for unused labels.
     public int getPosition() {
-        assert !isUnused() : "Label is unused";
-        return isBound() ? -(position + Integer.BYTES) : position - Integer.BYTES;
+        if (isUnused()) {
+            throw new IllegalStateException("Label is unused");
+        }
+        return isBound() ? -(position + BIAS) : position - BIAS;
     }
 
     public int getLinkPosition() {
-        assert isLinked() : "Label is not linked";
-        return position - Integer.BYTES;
+        if (!isLinked()) {
+            throw new IllegalStateException("Label is not linked");
+        }
+        return position - BIAS;
     }
 
     public boolean isBound() {
@@ -32,19 +37,25 @@ public class Label {
         return position > 0;
     }
 
-    public void reinitialize() {
+    public void reset() {
         this.position = 0;
     }
 
     public void bindTo(int position) {
-        assert !isBound() : "Label is already bound";
-        this.position = -(position + Integer.BYTES);
+        if (isBound()) {
+            throw new IllegalStateException("Label is already bound");
+        }
+        // position should be strictly negative
+        this.position = -(position + BIAS);
         assert isBound() : "Binding failed";
     }
 
     public void linkTo(int position) {
-        assert !isBound() : "Label is already bound";
-        this.position = position + Integer.BYTES;
+        if (isBound()) {
+            throw new IllegalStateException("Label is already bound");
+        }
+        // position should be strictly positive
+        this.position = position + BIAS;
         assert isLinked() : "Linking failed";
     }
 }

@@ -80,18 +80,17 @@ public class X86ManagedRegister extends ManagedRegister {
         return X87Register.values()[id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds)];
     }
 
-    // TODO: toString()
-    //public void print(java.io.PrintStream os) {
-    //    if (isNoRegister()) {
-    //        os.println("No Register");
-    //    } else if (isCpuRegister()) {
-    //        os.print("CPU: ").println(asCpuRegister());
-    //    } else if (isXmmRegister()) {
-    //        os.print("XMM: ").println(asXmmRegister());
-    //    } else if (isX87Register()) {
-    //        os.print("X87: ").println(asX87Register());
-    //    } else {
-    //        os.print("???: ").println(id_);
-    //    }
-    //}
+    @Override
+    public String toString() {
+        if (isNoRegister()) {
+            return "No Register";
+        } else if (isCpuRegister()) {
+            return "CPU: " + asCpuRegister();
+        } else if (isXmmRegister()) {
+            return "XMM: " + asXmmRegister();
+        } else if (isX87Register()) {
+            return "X87: " + asX87Register();
+        }
+        return "???: " + id_;
+    }
 }

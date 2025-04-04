@@ -14,7 +14,9 @@ public abstract class ManagedRegister {
     }
 
     public boolean equals(Object obj) {
-        return obj instanceof ManagedRegister other && this.id_ == other.id_;
+        return obj instanceof ManagedRegister other
+                && this.getClass() == other.getClass()
+                && this.id_ == other.id_;
     }
 
     public boolean isNoRegister() {

@@ -100,10 +100,6 @@ public class Address extends Operand {
         return result;
     }
 
-    public CpuRegister getBaseRegister() {
-        return rm() == ESP ? base() : rm();
-    }
-
     @Override
     public String toString() {
         return switch (mod()) {
