@@ -31,12 +31,10 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     private static final int THREE_BYTE_VEX = 0xC4;
     private static final int VEX_INIT = 0x00;
 
-    private final boolean has_AVX;
-    private final boolean has_AVX2;
+    private final boolean has_AVX_or_AVX2;
 
-    public X86Assembler(boolean has_AVX, boolean has_AVX2) {
-        this.has_AVX = has_AVX;
-        this.has_AVX2 = has_AVX2;
+    public X86Assembler(boolean has_AVX_or_AVX2) {
+        this.has_AVX_or_AVX2 = has_AVX_or_AVX2;
     }
 
     private static void CHECK(boolean value) {
@@ -54,20 +52,23 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         CHECK(a < b);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static void CHECK_LE(int a, int b) {
         CHECK(a <= b);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static void CHECK_GT(int a, int b) {
         CHECK(a > b);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static void CHECK_GE(int a, int b) {
         CHECK(a >= b);
     }
 
     public boolean cpuHasAVXorAVX2FeatureFlag() {
-        return has_AVX || has_AVX2;
+        return has_AVX_or_AVX2;
     }
 
     private void EmitRegisterOperand(int rm, int reg) {
@@ -94,7 +95,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(operand.encoding[0] + (reg_or_opcode << 3));
         // Emit the rest of the encoded operand.
         for (int i = 1; i < length; i++) {
-            this.emit8(operand.encoding[i]);
+            emit8(operand.encoding[i]);
         }
         AssemblerFixup fixup = operand.getFixup();
         if (fixup != null) {
@@ -202,6 +203,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return (byte) vex_prefix;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private byte EmitVexPrefixByteOne(boolean R, boolean X, boolean B, int SET_VEX_M) {
         /* Vex Byte 1, */
         int vex_prefix = VEX_INIT;
@@ -227,6 +229,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return (byte) vex_prefix;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private byte EmitVexPrefixByteOne(boolean R,
                                       X86ManagedRegister operand,
                                       int SET_VEX_L,
@@ -259,6 +262,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return (byte) vex_prefix;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private byte EmitVexPrefixByteTwo(boolean W,
                                       X86ManagedRegister operand,
                                       int SET_VEX_L,
@@ -383,9 +387,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         byte byte_two = EmitVexPrefixByteTwo(false,
                 X86ManagedRegister.fromCpuRegister(dst),
                 SET_VEX_L_128, SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
-        this.emit8(byte_two);
+        emit8(byte_zero);
+        emit8(byte_one);
+        emit8(byte_two);
         emit8(0xF3);
         EmitRegisterOperand(3, src.getValue());
     }
@@ -396,9 +400,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         byte byte_two = EmitVexPrefixByteTwo(false,
                 X86ManagedRegister.fromCpuRegister(dst),
                 SET_VEX_L_128, SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
-        this.emit8(byte_two);
+        emit8(byte_zero);
+        emit8(byte_one);
+        emit8(byte_two);
         emit8(0xF3);
         EmitRegisterOperand(2, src.getValue());
     }
@@ -409,9 +413,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         byte byte_two = EmitVexPrefixByteTwo(false,
                 X86ManagedRegister.fromCpuRegister(dst),
                 SET_VEX_L_128, SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
-        this.emit8(byte_two);
+        emit8(byte_zero);
+        emit8(byte_one);
+        emit8(byte_two);
         emit8(0xF3);
         EmitRegisterOperand(1, src.getValue());
     }
@@ -587,8 +591,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
+        emit8(byte_zero);
+        emit8(byte_one);
         /*Instruction Opcode*/
         emit8(0x28);
         /*Instruction Operands*/
@@ -617,8 +621,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         /*Instruction Opcode*/
         emit8(0x28);
         /*Instruction Operands*/
@@ -647,8 +651,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         /*Instruction Opcode*/
         emit8(0x10);
         /*Instruction Operands*/
@@ -677,8 +681,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         /*Instruction Opcode*/
         emit8(0x29);
         /*Instruction Operands*/
@@ -707,8 +711,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x11);
         // Instruction Operands
@@ -822,8 +826,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(add_left),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -840,8 +844,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(src1);
         byte_one = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
+        emit8(byte_zero);
+        emit8(byte_one);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -860,8 +864,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -880,8 +884,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -896,9 +900,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 /*B=*/ false,
                 SET_VEX_M_0F_38);
         ByteTwo = EmitVexPrefixByteTwo(/*W=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
-        this.emit8(ByteTwo);
+        emit8(ByteZero);
+        emit8(ByteOne);
+        emit8(ByteTwo);
         emit8(0xA9);
         EmitXmmRegisterOperand(acc.getValue(), right);
     }
@@ -913,9 +917,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 /*B=*/ false,
                 SET_VEX_M_0F_38);
         ByteTwo = EmitVexPrefixByteTwo(/*W=*/ true, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
-        this.emit8(ByteTwo);
+        emit8(ByteZero);
+        emit8(ByteOne);
+        emit8(ByteTwo);
         emit8(0xA9);
         EmitXmmRegisterOperand(acc.getValue(), right);
     }
@@ -943,8 +947,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x28);
         // Instruction Operands
@@ -974,8 +978,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x28);
         // Instruction Operands
@@ -1005,8 +1009,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x10);
         // Instruction Operands
@@ -1036,8 +1040,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x29);
         // Instruction Operands
@@ -1067,8 +1071,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x11);
         // Instruction Operands
@@ -1195,8 +1199,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(add_left),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1215,8 +1219,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -1236,8 +1240,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -1257,8 +1261,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
@@ -1284,8 +1288,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x6F);
         // Instruction Operands
@@ -1313,8 +1317,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x6F);
         // Instruction Operands
@@ -1342,8 +1346,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_F3);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x6F);
         // Instruction Operands
@@ -1371,8 +1375,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x7F);
         // Instruction Operands
@@ -1400,8 +1404,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 vvvv_reg,
                 SET_VEX_L_128,
                 SET_VEX_PP_F3);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x7F);
         // Instruction Operands
@@ -1421,8 +1425,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xFC);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1440,8 +1444,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xF8);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1459,8 +1463,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xFD);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1478,8 +1482,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xF9);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1504,8 +1508,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xFE);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1523,8 +1527,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xFA);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1549,9 +1553,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
-        this.emit8(ByteTwo);
+        emit8(ByteZero);
+        emit8(ByteOne);
+        emit8(ByteTwo);
         emit8(0x40);
         EmitRegisterOperand(dst.getValue(), src2.getValue());
     }
@@ -1564,8 +1568,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xD5);
         EmitRegisterOperand(dst.getValue(), src2.getValue());
     }
@@ -1583,8 +1587,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xD4);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1602,8 +1606,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(add_left);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xFB);
         EmitXmmRegisterOperand(dst.getValue(), add_right);
     }
@@ -1864,8 +1868,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0xEF);
         // Instruction Operands
@@ -1884,8 +1888,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x57);
         // Instruction Operands
@@ -1904,8 +1908,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x57);
         // Instruction Operands
@@ -1957,8 +1961,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0xDB);
         // Instruction Operands
@@ -1975,8 +1979,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x54);
         // Instruction Operands
@@ -1995,8 +1999,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x54);
         // Instruction Operands
@@ -2035,8 +2039,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0xDF);
         // Instruction Operands
@@ -2055,8 +2059,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x55);
         // Instruction Operands
@@ -2075,8 +2079,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x55);
         // Instruction Operands
@@ -2106,9 +2110,9 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromCpuRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(byte_zero);
-        this.emit8(byte_one);
-        this.emit8(byte_two);
+        emit8(byte_zero);
+        emit8(byte_one);
+        emit8(byte_two);
         // Opcode field
         emit8(0xF2);
         EmitRegisterOperand(dst.getValue(), src2.getValue());
@@ -2133,8 +2137,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0xEB);
         // Instruction Operands
@@ -2153,8 +2157,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_NONE);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x56);
         // Instruction Operands
@@ -2173,8 +2177,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                 X86ManagedRegister.fromXmmRegister(src1),
                 SET_VEX_L_128,
                 SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         // Instruction Opcode
         emit8(0x56);
         // Instruction Operands
@@ -2215,8 +2219,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         ByteZero = EmitVexPrefixByteZero(/* is_twobyte_form=*/ true);
         X86ManagedRegister vvvv_reg = X86ManagedRegister.fromXmmRegister(src1);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false, vvvv_reg, SET_VEX_L_128, SET_VEX_PP_66);
-        this.emit8(ByteZero);
-        this.emit8(ByteOne);
+        emit8(ByteZero);
+        emit8(ByteOne);
         emit8(0xF5);
         EmitXmmRegisterOperand(dst.getValue(), src2);
     }
