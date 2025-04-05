@@ -299,9 +299,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     public void call(ExternalLabel label) {
-        // TODO assert label.address() is 32 bit
         emit8(0xE8);
-        emit32((int) label.address());
+        emit32(label.address());
     }
 
     public void pushl(CpuRegister reg) {
