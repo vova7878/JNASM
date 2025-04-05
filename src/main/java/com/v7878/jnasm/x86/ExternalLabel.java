@@ -1,4 +1,4 @@
-package com.v7878.jnasm;
+package com.v7878.jnasm.x86;
 
 import java.util.Objects;
 

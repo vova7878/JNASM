@@ -6,7 +6,6 @@ import static com.v7878.jnasm.x86.CpuRegister.kFirstByteUnsafeRegister;
 
 import com.v7878.jnasm.Assembler;
 import com.v7878.jnasm.AssemblerFixup;
-import com.v7878.jnasm.ExternalLabel;
 import com.v7878.jnasm.Label;
 import com.v7878.jnasm.Utils;
 
@@ -2922,6 +2921,12 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitComplex(0, address, imm, /* is_16_op= */ true);
     }
 
+    public void addw(CpuRegister reg, Immediate imm) {
+        CHECK(imm.isUInt16() || imm.isInt16());
+        emit8(0x66);
+        EmitComplex(0, new Operand(reg), imm, /* is_16_op= */ true);
+    }
+
     public void adcl(CpuRegister reg, Immediate imm) {
         EmitComplex(2, new Operand(reg), imm);
     }
@@ -3290,6 +3295,11 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
             emit8(0xEB);
             EmitLabelLink(label);
         }
+    }
+
+    public void rdtsc() {
+        emit8(0x0F);
+        emit8(0x31);
     }
 
     public void repne_scasb() {

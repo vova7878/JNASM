@@ -1,6 +1,5 @@
 package com.v7878.jnasm.x86;
 
-import com.v7878.jnasm.ExternalLabel;
 import com.v7878.jnasm.Label;
 
 /*
@@ -59,6 +58,8 @@ public interface X86AssemblerI {
     void popcntl(CpuRegister dst, CpuRegister src);
 
     void popcntl(CpuRegister dst, Address src);
+
+    void rdtsc();
 
     void rorl(CpuRegister reg, Immediate imm);
 
@@ -632,6 +633,8 @@ public interface X86AssemblerI {
     void addl(Address address, Immediate imm);
 
     void addw(Address address, Immediate imm);
+
+    void addw(CpuRegister reg, Immediate imm);
 
     void adcl(CpuRegister dst, CpuRegister src);
 
