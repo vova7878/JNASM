@@ -32,6 +32,10 @@ public enum Condition {
         this.value = value;
     }
 
+    public static Condition of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

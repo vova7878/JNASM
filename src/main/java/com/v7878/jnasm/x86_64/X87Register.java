@@ -18,6 +18,10 @@ public enum X87Register {
         this.value = value;
     }
 
+    public static X87Register of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

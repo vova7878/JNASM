@@ -26,12 +26,16 @@ public enum CpuRegister {
         this.value = value;
     }
 
+    public static CpuRegister of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }
 
     public CpuRegister lowReg() {
-        return values()[lowBits()];
+        return of(lowBits());
     }
 
     public int lowBits() {

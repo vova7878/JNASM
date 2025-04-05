@@ -18,6 +18,10 @@ public enum XmmRegister {
         this.value = value;
     }
 
+    public static XmmRegister of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

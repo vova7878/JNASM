@@ -12,6 +12,10 @@ public enum ScaleFactor {
         this.value = value;
     }
 
+    public static ScaleFactor of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

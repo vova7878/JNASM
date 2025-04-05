@@ -19,6 +19,10 @@ public enum CpuRegister {
         this.value = value;
     }
 
+    public static CpuRegister of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

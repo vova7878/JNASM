@@ -37,19 +37,19 @@ public class Operand {
     }
 
     CpuRegister rm() {
-        return CpuRegister.values()[encodingAt(0) & 7];
+        return CpuRegister.of(encodingAt(0) & 7);
     }
 
     ScaleFactor scale() {
-        return ScaleFactor.values()[(encodingAt(1) >> 6) & 3];
+        return ScaleFactor.of((encodingAt(1) >> 6) & 3);
     }
 
     CpuRegister index() {
-        return CpuRegister.values()[(encodingAt(1) >> 3) & 7];
+        return CpuRegister.of((encodingAt(1) >> 3) & 7);
     }
 
     CpuRegister base() {
-        return CpuRegister.values()[encodingAt(1) & 7];
+        return CpuRegister.of(encodingAt(1) & 7);
     }
 
     int disp() {

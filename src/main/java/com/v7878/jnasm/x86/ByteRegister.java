@@ -16,6 +16,10 @@ public enum ByteRegister {
         this.value = value;
     }
 
+    public static ByteRegister of(int index) {
+        return values()[index];
+    }
+
     public int index() {
         return value;
     }

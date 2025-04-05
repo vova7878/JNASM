@@ -21,16 +21,9 @@ public class X86ManagedRegister extends ManagedRegister {
     //   S = X + kNumberOfX87RegIds
 
     public static final int kNumberOfCpuRegIds = kNumberOfCpuRegisters;
-    public static final int kNumberOfCpuAllocIds = kNumberOfCpuRegisters;
-
     public static final int kNumberOfXmmRegIds = kNumberOfXmmRegisters;
-    public static final int kNumberOfXmmAllocIds = kNumberOfXmmRegisters;
-
     public static final int kNumberOfX87RegIds = kNumberOfX87Registers;
-    public static final int kNumberOfX87AllocIds = kNumberOfX87Registers;
-
     public static final int kNumberOfRegIds = kNumberOfCpuRegIds + kNumberOfXmmRegIds + kNumberOfX87RegIds;
-    public static final int kNumberOfAllocIds = kNumberOfCpuAllocIds + kNumberOfXmmAllocIds + kNumberOfX87RegIds;
 
     private X86ManagedRegister(int regId) {
         super(regId);
@@ -69,15 +62,15 @@ public class X86ManagedRegister extends ManagedRegister {
     }
 
     public CpuRegister asCpuRegister() {
-        return CpuRegister.values()[id];
+        return CpuRegister.of(id);
     }
 
     public XmmRegister asXmmRegister() {
-        return XmmRegister.values()[id - kNumberOfCpuRegIds];
+        return XmmRegister.of(id - kNumberOfCpuRegIds);
     }
 
     public X87Register asX87Register() {
-        return X87Register.values()[id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds)];
+        return X87Register.of(id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds));
     }
 
     @Override

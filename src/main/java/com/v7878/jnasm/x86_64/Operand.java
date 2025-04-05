@@ -39,7 +39,7 @@ public class Operand {
     }
 
     ScaleFactor scale() {
-        return ScaleFactor.values()[(encodingAt(1) >> 6) & 3];
+        return ScaleFactor.of((encodingAt(1) >> 6) & 3);
     }
 
     private int rawRM() {
@@ -55,26 +55,26 @@ public class Operand {
     }
 
     CpuRegister lowRM() {
-        return CpuRegister.values()[rawRM()];
+        return CpuRegister.of(rawRM());
     }
 
     CpuRegister lowBase() {
-        return CpuRegister.values()[rawBase()];
+        return CpuRegister.of(rawBase());
     }
 
     CpuRegister rm() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.values()[rawRM() + ext];
+        return CpuRegister.of(rawRM() + ext);
     }
 
     CpuRegister index() {
         int ext = (rex & 0x2) != 0 ? 8 : 0;
-        return CpuRegister.values()[rawIndex() + ext];
+        return CpuRegister.of(rawIndex() + ext);
     }
 
     CpuRegister base() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.values()[rawBase() + ext];
+        return CpuRegister.of(rawBase() + ext);
     }
 
     int disp() {
