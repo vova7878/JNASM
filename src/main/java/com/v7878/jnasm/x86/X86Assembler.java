@@ -1,5 +1,17 @@
 package com.v7878.jnasm.x86;
 
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_B;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_L_128;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_M_0F_38;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_66;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_F3;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_NONE;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_R;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_W;
+import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_X;
+import static com.v7878.jnasm.common_x86.VEXConstants.THREE_BYTE_VEX;
+import static com.v7878.jnasm.common_x86.VEXConstants.TWO_BYTE_VEX;
+import static com.v7878.jnasm.common_x86.VEXConstants.VEX_INIT;
 import static com.v7878.jnasm.x86.CpuRegister.EAX;
 import static com.v7878.jnasm.x86.CpuRegister.ECX;
 import static com.v7878.jnasm.x86.CpuRegister.kFirstByteUnsafeRegister;
@@ -10,26 +22,6 @@ import com.v7878.jnasm.Label;
 import com.v7878.jnasm.Utils;
 
 public class X86Assembler extends Assembler implements X86AssemblerI {
-    private static final int GET_REX_R = 0x04;
-    private static final int GET_REX_X = 0x02;
-    private static final int GET_REX_B = 0x01;
-    private static final int SET_VEX_R = 0x80;
-    private static final int SET_VEX_X = 0x40;
-    private static final int SET_VEX_B = 0x20;
-    private static final int SET_VEX_M_0F = 0x01;
-    private static final int SET_VEX_M_0F_38 = 0x02;
-    private static final int SET_VEX_M_0F_3A = 0x03;
-    private static final int SET_VEX_W = 0x80;
-    private static final int SET_VEX_L_128 = 0x00;
-    private static final int SET_VEL_L_256 = 0x04;
-    private static final int SET_VEX_PP_NONE = 0x00;
-    private static final int SET_VEX_PP_66 = 0x01;
-    private static final int SET_VEX_PP_F3 = 0x02;
-    private static final int SET_VEX_PP_F2 = 0x03;
-    private static final int TWO_BYTE_VEX = 0xC5;
-    private static final int THREE_BYTE_VEX = 0xC4;
-    private static final int VEX_INIT = 0x00;
-
     private final boolean has_AVX_or_AVX2;
 
     public X86Assembler(boolean has_AVX_or_AVX2) {
@@ -188,42 +180,40 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     private byte EmitVexPrefixByteZero(boolean is_twobyte_form) {
-         /* Vex Byte 0,
-          Bits [7:0] must contain the value 11000101b (0xC5) for 2-byte Vex
-          Bits [7:0] must contain the value 11000100b (0xC4) for 3-byte Vex */
+        // Vex Byte 0,
+        // Bits [7:0] must contain the value 11000101b (0xC5) for 2-byte Vex
+        // Bits [7:0] must contain the value 11000100b (0xC4) for 3-byte Vex
         int vex_prefix = 0xC0;
         if (is_twobyte_form) {
-            // 2-Byte Vex
-            vex_prefix |= TWO_BYTE_VEX;
+            vex_prefix |= TWO_BYTE_VEX;  // 2-Byte Vex
         } else {
-            // 3-Byte Vex
-            vex_prefix |= THREE_BYTE_VEX;
+            vex_prefix |= THREE_BYTE_VEX;  // 3-Byte Vex
         }
         return (byte) vex_prefix;
     }
 
     @SuppressWarnings("SameParameterValue")
     private byte EmitVexPrefixByteOne(boolean R, boolean X, boolean B, int SET_VEX_M) {
-        /* Vex Byte 1, */
+        // Vex Byte 1,
         int vex_prefix = VEX_INIT;
-         /* Bit[7] This bit needs to be set to '1'
-          otherwise the instruction is LES or LDS */
+        // Bit[7] This bit needs to be set to '1'
+        // otherwise the instruction is LES or LDS
         if (!R) {
             // R .
             vex_prefix |= SET_VEX_R;
         }
-         /* Bit[6] This bit needs to be set to '1'
-          otherwise the instruction is LES or LDS */
+        // Bit[6] This bit needs to be set to '1'
+        // otherwise the instruction is LES or LDS
         if (!X) {
             // X .
             vex_prefix |= SET_VEX_X;
         }
-        /* Bit[5] This bit needs to be set to '1' */
+        // Bit[5] This bit needs to be set to '1'
         if (!B) {
             // B .
             vex_prefix |= SET_VEX_B;
         }
-        /* Bits[4:0], */
+        // Bits[4:0],
         vex_prefix |= SET_VEX_M;
         return (byte) vex_prefix;
     }
@@ -233,15 +223,15 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                                       X86ManagedRegister operand,
                                       int SET_VEX_L,
                                       int SET_VEX_PP) {
-        /* Vex Byte 1, */
+        // Vex Byte 1,
         int vex_prefix = VEX_INIT;
-         /* Bit[7] This bit needs to be set to '1'
-          otherwise the instruction is LES or LDS */
+        // Bit[7] This bit needs to be set to '1'
+        // otherwise the instruction is LES or LDS
         if (!R) {
             // R .
             vex_prefix |= SET_VEX_R;
         }
-        /* Bits[6:3] - 'vvvv' the source or dest register specifier */
+        // Bits[6:3] - 'vvvv' the source or dest register specifier
         if (operand.isNoRegister()) {
             vex_prefix |= 0x78;
         } else if (operand.isXmmRegister()) {
@@ -253,10 +243,10 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         }
-         /* Bit[2] - "L" If VEX.L = 1 indicates 256-bit vector operation ,
-          VEX.L = 0 indicates 128 bit vector operation */
+        // Bit[2] - "L" If VEX.L = 1 indicates 256-bit vector operation ,
+        // VEX.L = 0 indicates 128 bit vector operation
         vex_prefix |= SET_VEX_L;
-        /* Bits[1:0] -  "pp" */
+        // Bits[1:0] -  "pp"
         vex_prefix |= SET_VEX_PP;
         return (byte) vex_prefix;
     }
@@ -266,14 +256,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
                                       X86ManagedRegister operand,
                                       int SET_VEX_L,
                                       int SET_VEX_PP) {
-        /* Vex Byte 2, */
+        // Vex Byte 2,
         int vex_prefix = VEX_INIT;
-         /* Bit[7] This bits needs to be set to '1' with default value.
-          When using C4H form of VEX prefix, W value is ignored */
+        // Bit[7] This bits needs to be set to '1' with default value.
+        // When using C4H form of VEX prefix, W value is ignored
         if (W) {
             vex_prefix |= SET_VEX_W;
         }
-        /* Bits[6:3] - 'vvvv' the source or dest register specifier */
+        // Bits[6:3] - 'vvvv' the source or dest register specifier
         if (operand.isXmmRegister()) {
             XmmRegister vvvv = operand.asXmmRegister();
             int inverted_reg = 15 - vvvv.index();
@@ -283,8 +273,8 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         }
-         /* Bit[2] - "L" If VEX.L = 1 indicates 256-bit vector operation ,
-          VEX.L = 0 indicates 128 bit vector operation */
+        // Bit[2] - "L" If VEX.L = 1 indicates 256-bit vector operation ,
+        // VEX.L = 0 indicates 128 bit vector operation
         vex_prefix |= SET_VEX_L;
         // Bits[1:0] -  "pp"
         vex_prefix |= SET_VEX_PP;

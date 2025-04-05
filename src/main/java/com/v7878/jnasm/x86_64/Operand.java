@@ -34,6 +34,10 @@ public class Operand {
         return fixup;
     }
 
+    int rex() {
+        return rex;
+    }
+
     int mod() {
         return (encodingAt(0) >> 6) & 3;
     }
