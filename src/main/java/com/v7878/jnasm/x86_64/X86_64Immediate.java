@@ -2,7 +2,7 @@ package com.v7878.jnasm.x86_64;
 
 import com.v7878.jnasm.Utils;
 
-public record Immediate(long value) {
+public record X86_64Immediate(long value) {
     public boolean isInt8() {
         return Utils.isInt8(value);
     }

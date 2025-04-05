@@ -1,18 +1,18 @@
 package com.v7878.jnasm.x86_64;
 
 import static com.v7878.jnasm.ScaleFactor.TIMES_1;
-import static com.v7878.jnasm.x86_64.CpuRegister.RBP;
-import static com.v7878.jnasm.x86_64.CpuRegister.RSP;
+import static com.v7878.jnasm.x86_64.X86_64CpuRegister.RBP;
+import static com.v7878.jnasm.x86_64.X86_64CpuRegister.RSP;
 
 import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.ScaleFactor;
 import com.v7878.jnasm.Utils;
 
-public class Address extends Operand {
-    private Address() {
+public class X86_64Address extends X86_64Operand {
+    private X86_64Address() {
     }
 
-    public Address(CpuRegister base, int disp) {
+    public X86_64Address(X86_64CpuRegister base, int disp) {
         if (disp == 0 && base.lowReg() != RBP) {
             setModRM(0, base);
             if (base.lowReg() == RSP) {
@@ -33,7 +33,7 @@ public class Address extends Operand {
         }
     }
 
-    public Address(CpuRegister index, ScaleFactor scale, int disp) {
+    public X86_64Address(X86_64CpuRegister index, ScaleFactor scale, int disp) {
         if (index == RSP) {
             throw new IllegalArgumentException("%s in not allowed as index".formatted(index));
         }
@@ -42,7 +42,7 @@ public class Address extends Operand {
         setDisp32(disp);
     }
 
-    public Address(CpuRegister base, CpuRegister index, ScaleFactor scale, int disp) {
+    public X86_64Address(X86_64CpuRegister base, X86_64CpuRegister index, ScaleFactor scale, int disp) {
         if (index == RSP) {
             throw new IllegalArgumentException("%s in not allowed as index".formatted(index));
         }
@@ -61,8 +61,8 @@ public class Address extends Operand {
     }
 
     // If no_rip is true then the Absolute address isn't RIP relative.
-    public static Address absolute(int addr, boolean no_rip) {
-        Address result = new Address();
+    public static X86_64Address absolute(int addr, boolean no_rip) {
+        X86_64Address result = new X86_64Address();
         if (no_rip) {
             result.setModRM(0, RSP);
             result.setSIB(TIMES_1, RSP, RBP);
@@ -76,9 +76,13 @@ public class Address extends Operand {
         return result;
     }
 
+    public static X86_64Address absolute(int addr) {
+        return absolute(addr, true);
+    }
+
     // An RIP relative address that will be fixed up later.
-    public static Address RIP(AssemblerFixup fixup) {
-        Address result = new Address();
+    public static X86_64Address RIP(AssemblerFixup fixup) {
+        X86_64Address result = new X86_64Address();
         // RIP addressing is done using RBP as the base register.
         // The value in RBP isn't used. Instead the offset is added to RIP.
         result.setModRM(0, RBP);
@@ -89,12 +93,12 @@ public class Address extends Operand {
 
     // Break the address into pieces and reassemble it again with a new displacement.
     // Note that it may require a new addressing mode if displacement size is changed.
-    public static Address displace(Address addr, int disp) {
+    public static X86_64Address displace(X86_64Address addr, int disp) {
         int newDisp = addr.disp() + disp;
         boolean sib = addr.lowRM() == RSP;
         boolean rbp = RBP == (sib ? addr.lowBase() : addr.lowRM());
 
-        Address newAddr = new Address();
+        X86_64Address newAddr = new X86_64Address();
         if (addr.mod() == 0 && rbp) {
             // Special case: mod 00b and RBP in r/m or SIB base => 32-bit displacement.
             // This case includes RIP-relative addressing.

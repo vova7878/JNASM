@@ -1,6 +1,6 @@
 package com.v7878.jnasm.x86_64;
 
-public enum CpuRegister {
+public enum X86_64CpuRegister {
     RAX(0),
     RCX(1),
     RDX(2),
@@ -22,11 +22,11 @@ public enum CpuRegister {
 
     private final int value;
 
-    CpuRegister(int value) {
+    X86_64CpuRegister(int value) {
         this.value = value;
     }
 
-    public static CpuRegister of(int index) {
+    public static X86_64CpuRegister of(int index) {
         return values()[index];
     }
 
@@ -34,7 +34,7 @@ public enum CpuRegister {
         return value;
     }
 
-    public CpuRegister lowReg() {
+    public X86_64CpuRegister lowReg() {
         return of(lowBits());
     }
 

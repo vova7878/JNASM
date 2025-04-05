@@ -1,4 +1,4 @@
-package com.v7878.jnasm.x86_64;
+package com.v7878.jnasm.common_x86;
 
 public enum X87Register {
     ST0(0),

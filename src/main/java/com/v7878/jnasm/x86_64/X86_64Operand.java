@@ -1,27 +1,27 @@
 package com.v7878.jnasm.x86_64;
 
-import static com.v7878.jnasm.x86_64.CpuRegister.RBP;
-import static com.v7878.jnasm.x86_64.CpuRegister.RSP;
+import static com.v7878.jnasm.x86_64.X86_64CpuRegister.RBP;
+import static com.v7878.jnasm.x86_64.X86_64CpuRegister.RSP;
 
 import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.ScaleFactor;
 
 import java.util.Objects;
 
-public class Operand {
+public class X86_64Operand {
     protected int length;
     protected int rex;
     protected AssemblerFixup fixup;
     protected final byte[] encoding;
 
-    protected Operand() {
+    protected X86_64Operand() {
         this.length = 0;
         this.rex = 0;
         this.fixup = null;
         this.encoding = new byte[6];
     }
 
-    Operand(CpuRegister reg) {
+    X86_64Operand(X86_64CpuRegister reg) {
         this();
         setModRM(3, reg);
     }
@@ -58,27 +58,27 @@ public class Operand {
         return encodingAt(1) & 7;
     }
 
-    CpuRegister lowRM() {
-        return CpuRegister.of(rawRM());
+    X86_64CpuRegister lowRM() {
+        return X86_64CpuRegister.of(rawRM());
     }
 
-    CpuRegister lowBase() {
-        return CpuRegister.of(rawBase());
+    X86_64CpuRegister lowBase() {
+        return X86_64CpuRegister.of(rawBase());
     }
 
-    CpuRegister rm() {
+    X86_64CpuRegister rm() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.of(rawRM() + ext);
+        return X86_64CpuRegister.of(rawRM() + ext);
     }
 
-    CpuRegister index() {
+    X86_64CpuRegister index() {
         int ext = (rex & 0x2) != 0 ? 8 : 0;
-        return CpuRegister.of(rawIndex() + ext);
+        return X86_64CpuRegister.of(rawIndex() + ext);
     }
 
-    CpuRegister base() {
+    X86_64CpuRegister base() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.of(rawBase() + ext);
+        return X86_64CpuRegister.of(rawBase() + ext);
     }
 
     int disp() {
@@ -107,7 +107,8 @@ public class Operand {
                 (encodingAt(length - 4) & 0xff);
     }
 
-    boolean isRegister(CpuRegister reg) {
+    @SuppressWarnings("SameParameterValue")
+    boolean isRegister(X86_64CpuRegister reg) {
         return ((encodingAt(0) & 0xF8) == 0xC0)  // Addressing mode is register only.
                 && ((encodingAt(0) & 0x07) == reg.lowBits())  // Register codes match.
                 && (reg.needsRex() == ((rex & 1) != 0));  // REX.000B bits match.
@@ -118,7 +119,7 @@ public class Operand {
         return encoding[index];
     }
 
-    protected void setModRM(int mod_in, CpuRegister rm_in) {
+    protected void setModRM(int mod_in, X86_64CpuRegister rm_in) {
         assert (mod_in & ~3) == 0;
         if (rm_in.needsRex()) {
             rex |= 0x41;  // REX.000B
@@ -127,7 +128,7 @@ public class Operand {
         length = 1;
     }
 
-    protected void setSIB(ScaleFactor scale, CpuRegister index, CpuRegister base) {
+    protected void setSIB(ScaleFactor scale, X86_64CpuRegister index, X86_64CpuRegister base) {
         assert length == 1;
         if (base.needsRex()) {
             rex |= 0x41;  // REX.000B

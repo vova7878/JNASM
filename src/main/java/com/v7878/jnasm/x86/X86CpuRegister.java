@@ -1,6 +1,6 @@
 package com.v7878.jnasm.x86;
 
-public enum CpuRegister {
+public enum X86CpuRegister {
     EAX(0),
     ECX(1),
     EDX(2),
@@ -15,11 +15,11 @@ public enum CpuRegister {
 
     private final int value;
 
-    CpuRegister(int value) {
+    X86CpuRegister(int value) {
         this.value = value;
     }
 
-    public static CpuRegister of(int index) {
+    public static X86CpuRegister of(int index) {
         return values()[index];
     }
 

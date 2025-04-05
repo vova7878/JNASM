@@ -1,6 +1,6 @@
 package com.v7878.jnasm.x86;
 
-public enum XmmRegister {
+public enum X86XmmRegister {
     XMM0(0),
     XMM1(1),
     XMM2(2),
@@ -14,11 +14,11 @@ public enum XmmRegister {
 
     private final int value;
 
-    XmmRegister(int value) {
+    X86XmmRegister(int value) {
         this.value = value;
     }
 
-    public static XmmRegister of(int index) {
+    public static X86XmmRegister of(int index) {
         return values()[index];
     }
 

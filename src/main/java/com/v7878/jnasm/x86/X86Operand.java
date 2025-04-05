@@ -1,25 +1,25 @@
 package com.v7878.jnasm.x86;
 
-import static com.v7878.jnasm.x86.CpuRegister.EBP;
-import static com.v7878.jnasm.x86.CpuRegister.ESP;
+import static com.v7878.jnasm.x86.X86CpuRegister.EBP;
+import static com.v7878.jnasm.x86.X86CpuRegister.ESP;
 
 import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.ScaleFactor;
 
 import java.util.Objects;
 
-public class Operand {
+public class X86Operand {
     protected int length;
     protected AssemblerFixup fixup;
     protected final byte[] encoding;
 
-    protected Operand() {
+    protected X86Operand() {
         this.length = 0;
         this.fixup = null;
         this.encoding = new byte[6];
     }
 
-    Operand(CpuRegister reg) {
+    X86Operand(X86CpuRegister reg) {
         this();
         setModRM(3, reg);
     }
@@ -36,20 +36,20 @@ public class Operand {
         return (encodingAt(0) >> 6) & 3;
     }
 
-    CpuRegister rm() {
-        return CpuRegister.of(encodingAt(0) & 7);
+    X86CpuRegister rm() {
+        return X86CpuRegister.of(encodingAt(0) & 7);
     }
 
     ScaleFactor scale() {
         return ScaleFactor.of((encodingAt(1) >> 6) & 3);
     }
 
-    CpuRegister index() {
-        return CpuRegister.of((encodingAt(1) >> 3) & 7);
+    X86CpuRegister index() {
+        return X86CpuRegister.of((encodingAt(1) >> 3) & 7);
     }
 
-    CpuRegister base() {
-        return CpuRegister.of(encodingAt(1) & 7);
+    X86CpuRegister base() {
+        return X86CpuRegister.of(encodingAt(1) & 7);
     }
 
     int disp() {
@@ -78,9 +78,10 @@ public class Operand {
                 (encodingAt(length - 4) & 0xff);
     }
 
-    boolean isRegister(CpuRegister reg) {
+    @SuppressWarnings("SameParameterValue")
+    boolean isRegister(X86CpuRegister reg) {
         return (encodingAt(0) & 0xF8) == 0xC0 &&  // Addressing mode is register only.
-                (encodingAt(0) & 0x07) == reg.index(); // CpuRegister codes match.
+                (encodingAt(0) & 0x07) == reg.index(); // X86CpuRegister codes match.
     }
 
     protected byte encodingAt(int index) {
@@ -88,13 +89,13 @@ public class Operand {
         return encoding[index];
     }
 
-    protected void setModRM(int mod_in, CpuRegister rm) {
+    protected void setModRM(int mod_in, X86CpuRegister rm) {
         assert (mod_in & ~3) == 0;
         encoding[0] = (byte) ((mod_in << 6) | rm.index());
         length = 1;
     }
 
-    protected void setSIB(ScaleFactor scale, CpuRegister index, CpuRegister base) {
+    protected void setSIB(ScaleFactor scale, X86CpuRegister index, X86CpuRegister base) {
         assert length == 1;
         encoding[1] = (byte) ((scale.index() << 6) |
                 (index.index() << 3) | base.index());

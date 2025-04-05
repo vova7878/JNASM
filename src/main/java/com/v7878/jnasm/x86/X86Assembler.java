@@ -1,25 +1,27 @@
 package com.v7878.jnasm.x86;
 
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_B;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_L_128;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_M_0F_38;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_66;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_F3;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_PP_NONE;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_R;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_W;
-import static com.v7878.jnasm.common_x86.VEXConstants.SET_VEX_X;
-import static com.v7878.jnasm.common_x86.VEXConstants.THREE_BYTE_VEX;
-import static com.v7878.jnasm.common_x86.VEXConstants.TWO_BYTE_VEX;
-import static com.v7878.jnasm.common_x86.VEXConstants.VEX_INIT;
-import static com.v7878.jnasm.x86.CpuRegister.EAX;
-import static com.v7878.jnasm.x86.CpuRegister.ECX;
-import static com.v7878.jnasm.x86.CpuRegister.kFirstByteUnsafeRegister;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_B;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_L_128;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_M_0F_38;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_PP_66;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_PP_F3;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_PP_NONE;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_R;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_W;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_X;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.THREE_BYTE_VEX;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.TWO_BYTE_VEX;
+import static com.v7878.jnasm.common_x86.X86VEXConstants.VEX_INIT;
+import static com.v7878.jnasm.x86.X86CpuRegister.EAX;
+import static com.v7878.jnasm.x86.X86CpuRegister.ECX;
+import static com.v7878.jnasm.x86.X86CpuRegister.kFirstByteUnsafeRegister;
 
 import com.v7878.jnasm.Assembler;
 import com.v7878.jnasm.AssemblerFixup;
 import com.v7878.jnasm.Label;
 import com.v7878.jnasm.Utils;
+import com.v7878.jnasm.common_x86.X86Condition;
+import com.v7878.jnasm.common_x86.X86NearLabel;
 
 public class X86Assembler extends Assembler implements X86AssemblerI {
     private final boolean has_AVX_or_AVX2;
@@ -68,7 +70,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xC0 + (rm << 3) + reg);
     }
 
-    private void EmitXmmRegisterOperand(int rm, XmmRegister reg) {
+    private void EmitXmmRegisterOperand(int rm, X86XmmRegister reg) {
         EmitRegisterOperand(rm, reg.index());
     }
 
@@ -76,7 +78,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0x66);
     }
 
-    private void EmitOperand(int reg_or_opcode, Operand operand) {
+    private void EmitOperand(int reg_or_opcode, X86Operand operand) {
         CHECK_GE(reg_or_opcode, 0);
         CHECK_LT(reg_or_opcode, 8);
         final int length = operand.length;
@@ -94,7 +96,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    private void EmitImmediate(Immediate imm, boolean is_16_op) {
+    private void EmitImmediate(X86Immediate imm, boolean is_16_op) {
         if (is_16_op) {
             emit8(imm.value() & 0xFF);
             emit8(imm.value() >> 8);
@@ -103,11 +105,11 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    private void EmitImmediate(Immediate imm) {
+    private void EmitImmediate(X86Immediate imm) {
         EmitImmediate(imm, false);
     }
 
-    private void EmitComplex(int reg_or_opcode, Operand operand, Immediate immediate, boolean is_16_op) {
+    private void EmitComplex(int reg_or_opcode, X86Operand operand, X86Immediate immediate, boolean is_16_op) {
         CHECK_GE(reg_or_opcode, 0);
         CHECK_LT(reg_or_opcode, 8);
         if (immediate.isInt8()) {
@@ -126,7 +128,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    private void EmitComplex(int rm, Operand operand, Immediate immediate) {
+    private void EmitComplex(int rm, X86Operand operand, X86Immediate immediate) {
         EmitComplex(rm, operand, immediate, false);
     }
 
@@ -147,7 +149,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         label.linkTo(position);
     }
 
-    private void EmitLabelLink(NearLabel label) {
+    private void EmitLabelLink(X86NearLabel label) {
         CHECK(!label.isBound());
         int position = size();
         if (label.isLinked()) {
@@ -161,7 +163,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         label.linkTo(position);
     }
 
-    private void EmitGenericShift(int reg_or_opcode, Operand operand, Immediate imm) {
+    private void EmitGenericShift(int reg_or_opcode, X86Operand operand, X86Immediate imm) {
         CHECK(imm.isInt8());
         if (imm.value() == 1) {
             emit8(0xD1);
@@ -173,7 +175,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    private void EmitGenericShift(int reg_or_opcode, Operand operand, CpuRegister shifter) {
+    private void EmitGenericShift(int reg_or_opcode, X86Operand operand, X86CpuRegister shifter) {
         CHECK_EQ(shifter.index(), ECX.index());
         emit8(0xD3);
         EmitOperand(reg_or_opcode, operand);
@@ -235,11 +237,11 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         if (operand.isNoRegister()) {
             vex_prefix |= 0x78;
         } else if (operand.isXmmRegister()) {
-            XmmRegister vvvv = operand.asXmmRegister();
+            X86XmmRegister vvvv = operand.asXmmRegister();
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         } else if (operand.isCpuRegister()) {
-            CpuRegister vvvv = operand.asCpuRegister();
+            X86CpuRegister vvvv = operand.asCpuRegister();
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         }
@@ -265,11 +267,11 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
         // Bits[6:3] - 'vvvv' the source or dest register specifier
         if (operand.isXmmRegister()) {
-            XmmRegister vvvv = operand.asXmmRegister();
+            X86XmmRegister vvvv = operand.asXmmRegister();
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         } else if (operand.isCpuRegister()) {
-            CpuRegister vvvv = operand.asCpuRegister();
+            X86CpuRegister vvvv = operand.asCpuRegister();
             int inverted_reg = 15 - vvvv.index();
             vex_prefix |= ((inverted_reg & 0x0F) << 3);
         }
@@ -281,12 +283,12 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return (byte) vex_prefix;
     }
 
-    public void call(CpuRegister reg) {
+    public void call(X86CpuRegister reg) {
         emit8(0xFF);
         EmitRegisterOperand(2, reg.index());
     }
 
-    public void call(Address address) {
+    public void call(X86Address address) {
         emit8(0xFF);
         EmitOperand(2, address);
     }
@@ -298,21 +300,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitLabel(label, kSize - 1);
     }
 
-    public void call(ExternalLabel label) {
+    public void call(X86ExternalLabel label) {
         emit8(0xE8);
         emit32(label.address());
     }
 
-    public void pushl(CpuRegister reg) {
+    public void pushl(X86CpuRegister reg) {
         emit8(0x50 + reg.index());
     }
 
-    public void pushl(Address address) {
+    public void pushl(X86Address address) {
         emit8(0xFF);
         EmitOperand(6, address);
     }
 
-    public void pushl(Immediate imm) {
+    public void pushl(X86Immediate imm) {
         if (imm.isInt8()) {
             emit8(0x6A);
             emit8(imm.value() & 0xFF);
@@ -322,54 +324,54 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    public void popl(CpuRegister reg) {
+    public void popl(X86CpuRegister reg) {
         emit8(0x58 + reg.index());
     }
 
-    public void popl(Address address) {
+    public void popl(X86Address address) {
         emit8(0x8F);
         EmitOperand(0, address);
     }
 
-    public void movl(CpuRegister dst, Immediate imm) {
+    public void movl(X86CpuRegister dst, X86Immediate imm) {
         emit8(0xB8 + dst.index());
         EmitImmediate(imm);
     }
 
-    public void movl(CpuRegister dst, CpuRegister src) {
+    public void movl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x89);
         EmitRegisterOperand(src.index(), dst.index());
     }
 
-    public void movl(CpuRegister dst, Address src) {
+    public void movl(X86CpuRegister dst, X86Address src) {
         emit8(0x8B);
         EmitOperand(dst.index(), src);
     }
 
-    public void movl(Address dst, CpuRegister src) {
+    public void movl(X86Address dst, X86CpuRegister src) {
         emit8(0x89);
         EmitOperand(src.index(), dst);
     }
 
-    public void movl(Address dst, Immediate imm) {
+    public void movl(X86Address dst, X86Immediate imm) {
         emit8(0xC7);
         EmitOperand(0, dst);
         EmitImmediate(imm);
     }
 
-    public void movl(Address dst, Label lbl) {
+    public void movl(X86Address dst, Label lbl) {
         emit8(0xC7);
         EmitOperand(0, dst);
         EmitLabel(lbl, dst.length + 5);
     }
 
-    public void movntl(Address dst, CpuRegister src) {
+    public void movntl(X86Address dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xC3);
         EmitOperand(src.index(), dst);
     }
 
-    public void blsi(CpuRegister dst, CpuRegister src) {
+    public void blsi(X86CpuRegister dst, X86CpuRegister src) {
         byte byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
         byte byte_one = EmitVexPrefixByteOne(false, false, false, SET_VEX_M_0F_38);
         byte byte_two = EmitVexPrefixByteTwo(false,
@@ -382,7 +384,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(3, src.index());
     }
 
-    public void blsmsk(CpuRegister dst, CpuRegister src) {
+    public void blsmsk(X86CpuRegister dst, X86CpuRegister src) {
         byte byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
         byte byte_one = EmitVexPrefixByteOne(false, false, false, SET_VEX_M_0F_38);
         byte byte_two = EmitVexPrefixByteTwo(false,
@@ -395,7 +397,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(2, src.index());
     }
 
-    public void blsr(CpuRegister dst, CpuRegister src) {
+    public void blsr(X86CpuRegister dst, X86CpuRegister src) {
         byte byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
         byte byte_one = EmitVexPrefixByteOne(false, false, false, SET_VEX_M_0F_38);
         byte byte_two = EmitVexPrefixByteTwo(false,
@@ -408,124 +410,124 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(1, src.index());
     }
 
-    public void bswapl(CpuRegister dst) {
+    public void bswapl(X86CpuRegister dst) {
         emit8(0x0F);
         emit8(0xC8 + dst.index());
     }
 
-    public void bsfl(CpuRegister dst, CpuRegister src) {
+    public void bsfl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xBC);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void bsfl(CpuRegister dst, Address src) {
+    public void bsfl(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xBC);
         EmitOperand(dst.index(), src);
     }
 
-    public void bsrl(CpuRegister dst, CpuRegister src) {
+    public void bsrl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xBD);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void bsrl(CpuRegister dst, Address src) {
+    public void bsrl(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xBD);
         EmitOperand(dst.index(), src);
     }
 
-    public void popcntl(CpuRegister dst, CpuRegister src) {
+    public void popcntl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0xB8);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void popcntl(CpuRegister dst, Address src) {
+    public void popcntl(X86CpuRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0xB8);
         EmitOperand(dst.index(), src);
     }
 
-    public void movzxb(CpuRegister dst, ByteRegister src) {
+    public void movzxb(X86CpuRegister dst, X86ByteRegister src) {
         emit8(0x0F);
         emit8(0xB6);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void movzxb(CpuRegister dst, Address src) {
+    public void movzxb(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xB6);
         EmitOperand(dst.index(), src);
     }
 
-    public void movsxb(CpuRegister dst, ByteRegister src) {
+    public void movsxb(X86CpuRegister dst, X86ByteRegister src) {
         emit8(0x0F);
         emit8(0xBE);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void movsxb(CpuRegister dst, Address src) {
+    public void movsxb(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xBE);
         EmitOperand(dst.index(), src);
     }
 
-    public void movb(CpuRegister dst, Address src) {
+    public void movb(X86CpuRegister dst, X86Address src) {
         throw new IllegalStateException("Use movzxb or movsxb instead");
     }
 
-    public void movb(Address dst, ByteRegister src) {
+    public void movb(X86Address dst, X86ByteRegister src) {
         emit8(0x88);
         EmitOperand(src.index(), dst);
     }
 
-    public void movb(Address dst, Immediate imm) {
+    public void movb(X86Address dst, X86Immediate imm) {
         emit8(0xC6);
         EmitOperand(EAX.index(), dst);
         CHECK(imm.isInt8());
         emit8(imm.value() & 0xFF);
     }
 
-    public void movzxw(CpuRegister dst, CpuRegister src) {
+    public void movzxw(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xB7);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void movzxw(CpuRegister dst, Address src) {
+    public void movzxw(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xB7);
         EmitOperand(dst.index(), src);
     }
 
-    public void movsxw(CpuRegister dst, CpuRegister src) {
+    public void movsxw(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xBF);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void movsxw(CpuRegister dst, Address src) {
+    public void movsxw(X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0xBF);
         EmitOperand(dst.index(), src);
     }
 
-    public void movw(CpuRegister dst, Address src) {
+    public void movw(X86CpuRegister dst, X86Address src) {
         throw new IllegalStateException("Use movzxw or movsxw instead");
     }
 
-    public void movw(Address dst, CpuRegister src) {
+    public void movw(X86Address dst, X86CpuRegister src) {
         EmitOperandSizeOverride();
         emit8(0x89);
         EmitOperand(src.index(), dst);
     }
 
-    public void movw(Address dst, Immediate imm) {
+    public void movw(X86Address dst, X86Immediate imm) {
         EmitOperandSizeOverride();
         emit8(0xC7);
         EmitOperand(0, dst);
@@ -534,30 +536,30 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(imm.value() >> 8);
     }
 
-    public void leal(CpuRegister dst, Address src) {
+    public void leal(X86CpuRegister dst, X86Address src) {
         emit8(0x8D);
         EmitOperand(dst.index(), src);
     }
 
-    public void cmovl(Condition condition, CpuRegister dst, CpuRegister src) {
+    public void cmovl(X86Condition condition, X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0x40 + condition.index());
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void cmovl(Condition condition, CpuRegister dst, Address src) {
+    public void cmovl(X86Condition condition, X86CpuRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0x40 + condition.index());
         EmitOperand(dst.index(), src);
     }
 
-    public void setb(Condition condition, CpuRegister dst) {
+    public void setb(X86Condition condition, X86CpuRegister dst) {
         emit8(0x0F);
         emit8(0x90 + condition.index());
-        EmitOperand(0, new Operand(dst));
+        EmitOperand(0, new X86Operand(dst));
     }
 
-    public void movaps(XmmRegister dst, XmmRegister src) {
+    public void movaps(X86XmmRegister dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovaps(dst, src);
             return;
@@ -568,7 +570,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.0F.WIG 28 /r VMOVAPS xmm1, xmm2*/
-    public void vmovaps(XmmRegister dst, XmmRegister src) {
+    public void vmovaps(X86XmmRegister dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -587,7 +589,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void movaps(XmmRegister dst, Address src) {
+    public void movaps(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovaps(dst, src);
             return;
@@ -598,7 +600,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.0F.WIG 28 /r VMOVAPS xmm1, m128*/
-    public void vmovaps(XmmRegister dst, Address src) {
+    public void vmovaps(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -617,7 +619,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movups(XmmRegister dst, Address src) {
+    public void movups(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovups(dst, src);
             return;
@@ -628,7 +630,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.0F.WIG 10 /r VMOVUPS xmm1, m128*/
-    public void vmovups(XmmRegister dst, Address src) {
+    public void vmovups(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -647,7 +649,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movaps(Address dst, XmmRegister src) {
+    public void movaps(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovaps(dst, src);
             return;
@@ -658,7 +660,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.0F.WIG 29 /r VMOVAPS m128, xmm1*/
-    public void vmovaps(Address dst, XmmRegister src) {
+    public void vmovaps(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -677,7 +679,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void movups(Address dst, XmmRegister src) {
+    public void movups(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovups(dst, src);
             return;
@@ -688,7 +690,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.0F.WIG 11 /r VMOVUPS m128, xmm1*/
-    public void vmovups(Address dst, XmmRegister src) {
+    public void vmovups(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -707,106 +709,106 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void movss(XmmRegister dst, Address src) {
+    public void movss(X86XmmRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x10);
         EmitOperand(dst.index(), src);
     }
 
-    public void movss(Address dst, XmmRegister src) {
+    public void movss(X86Address dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x11);
         EmitOperand(src.index(), dst);
     }
 
-    public void movss(XmmRegister dst, XmmRegister src) {
+    public void movss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x11);
         EmitXmmRegisterOperand(src.index(), dst);
     }
 
-    public void movd(XmmRegister dst, CpuRegister src) {
+    public void movd(X86XmmRegister dst, X86CpuRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x6E);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void movd(CpuRegister dst, XmmRegister src) {
+    public void movd(X86CpuRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x7E);
-        Operand operand = new Operand(dst);
+        X86Operand operand = new X86Operand(dst);
         EmitOperand(src.index(), operand);
     }
 
-    public void addss(XmmRegister dst, XmmRegister src) {
+    public void addss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void addss(XmmRegister dst, Address src) {
+    public void addss(X86XmmRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x58);
         EmitOperand(dst.index(), src);
     }
 
-    public void subss(XmmRegister dst, XmmRegister src) {
+    public void subss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void subss(XmmRegister dst, Address src) {
+    public void subss(X86XmmRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x5C);
         EmitOperand(dst.index(), src);
     }
 
-    public void mulss(XmmRegister dst, XmmRegister src) {
+    public void mulss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void mulss(XmmRegister dst, Address src) {
+    public void mulss(X86XmmRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x59);
         EmitOperand(dst.index(), src);
     }
 
-    public void divss(XmmRegister dst, XmmRegister src) {
+    public void divss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void divss(XmmRegister dst, Address src) {
+    public void divss(X86XmmRegister dst, X86Address src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x5E);
         EmitOperand(dst.index(), src);
     }
 
-    public void addps(XmmRegister dst, XmmRegister src) {
+    public void addps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vaddps(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vaddps(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -820,13 +822,13 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void subps(XmmRegister dst, XmmRegister src) {
+    public void subps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vsubps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vsubps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte byte_zero, byte_one;
         byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -838,13 +840,13 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void mulps(XmmRegister dst, XmmRegister src) {
+    public void mulps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vmulps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vmulps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -858,13 +860,13 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void divps(XmmRegister dst, XmmRegister src) {
+    public void divps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vdivps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vdivps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -878,7 +880,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void vfmadd213ss(XmmRegister acc, XmmRegister left, XmmRegister right) {
+    public void vfmadd213ss(X86XmmRegister acc, X86XmmRegister left, X86XmmRegister right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne, ByteTwo;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
@@ -895,7 +897,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(acc.index(), right);
     }
 
-    public void vfmadd213sd(XmmRegister acc, XmmRegister left, XmmRegister right) {
+    public void vfmadd213sd(X86XmmRegister acc, X86XmmRegister left, X86XmmRegister right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne, ByteTwo;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
@@ -912,7 +914,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(acc.index(), right);
     }
 
-    public void movapd(XmmRegister dst, XmmRegister src) {
+    public void movapd(X86XmmRegister dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovapd(dst, src);
             return;
@@ -924,7 +926,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 28 /r VMOVAPD xmm1, xmm2*/
-    public void vmovapd(XmmRegister dst, XmmRegister src) {
+    public void vmovapd(X86XmmRegister dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -943,7 +945,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void movapd(XmmRegister dst, Address src) {
+    public void movapd(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovapd(dst, src);
             return;
@@ -955,7 +957,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 28 /r VMOVAPD xmm1, m128*/
-    public void vmovapd(XmmRegister dst, Address src) {
+    public void vmovapd(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -974,7 +976,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movupd(XmmRegister dst, Address src) {
+    public void movupd(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovupd(dst, src);
             return;
@@ -986,7 +988,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 10 /r VMOVUPD xmm1, m128*/
-    public void vmovupd(XmmRegister dst, Address src) {
+    public void vmovupd(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix*/
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1005,7 +1007,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movapd(Address dst, XmmRegister src) {
+    public void movapd(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovapd(dst, src);
             return;
@@ -1017,7 +1019,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 29 /r VMOVAPD m128, xmm1 */
-    public void vmovapd(Address dst, XmmRegister src) {
+    public void vmovapd(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1036,7 +1038,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void movupd(Address dst, XmmRegister src) {
+    public void movupd(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovupd(dst, src);
             return;
@@ -1048,7 +1050,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 11 /r VMOVUPD m128, xmm1 */
-    public void vmovupd(Address dst, XmmRegister src) {
+    public void vmovupd(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1067,120 +1069,120 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void flds(Address src) {
+    public void flds(X86Address src) {
         emit8(0xD9);
         EmitOperand(0, src);
     }
 
-    public void fsts(Address dst) {
+    public void fsts(X86Address dst) {
         emit8(0xD9);
         EmitOperand(2, dst);
     }
 
-    public void fstps(Address dst) {
+    public void fstps(X86Address dst) {
         emit8(0xD9);
         EmitOperand(3, dst);
     }
 
-    public void movsd(XmmRegister dst, Address src) {
+    public void movsd(X86XmmRegister dst, X86Address src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x10);
         EmitOperand(dst.index(), src);
     }
 
-    public void movsd(Address dst, XmmRegister src) {
+    public void movsd(X86Address dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x11);
         EmitOperand(src.index(), dst);
     }
 
-    public void movsd(XmmRegister dst, XmmRegister src) {
+    public void movsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x11);
         EmitXmmRegisterOperand(src.index(), dst);
     }
 
-    public void movhpd(XmmRegister dst, Address src) {
+    public void movhpd(X86XmmRegister dst, X86Address src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x16);
         EmitOperand(dst.index(), src);
     }
 
-    public void movhpd(Address dst, XmmRegister src) {
+    public void movhpd(X86Address dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x17);
         EmitOperand(src.index(), dst);
     }
 
-    public void addsd(XmmRegister dst, XmmRegister src) {
+    public void addsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void addsd(XmmRegister dst, Address src) {
+    public void addsd(X86XmmRegister dst, X86Address src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x58);
         EmitOperand(dst.index(), src);
     }
 
-    public void subsd(XmmRegister dst, XmmRegister src) {
+    public void subsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void subsd(XmmRegister dst, Address src) {
+    public void subsd(X86XmmRegister dst, X86Address src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x5C);
         EmitOperand(dst.index(), src);
     }
 
-    public void mulsd(XmmRegister dst, XmmRegister src) {
+    public void mulsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void mulsd(XmmRegister dst, Address src) {
+    public void mulsd(X86XmmRegister dst, X86Address src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x59);
         EmitOperand(dst.index(), src);
     }
 
-    public void divsd(XmmRegister dst, XmmRegister src) {
+    public void divsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void divsd(XmmRegister dst, Address src) {
+    public void divsd(X86XmmRegister dst, X86Address src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x5E);
         EmitOperand(dst.index(), src);
     }
 
-    public void addpd(XmmRegister dst, XmmRegister src) {
+    public void addpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x58);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vaddpd(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vaddpd(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false,
@@ -1193,14 +1195,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void subpd(XmmRegister dst, XmmRegister src) {
+    public void subpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x5C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vsubpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vsubpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form*/ true);
         ByteOne = EmitVexPrefixByteOne(/*R=*/ false,
@@ -1213,14 +1215,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void mulpd(XmmRegister dst, XmmRegister src) {
+    public void mulpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x59);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vmulpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vmulpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1234,14 +1236,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void divpd(XmmRegister dst, XmmRegister src) {
+    public void divpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x5E);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vdivpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vdivpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1255,7 +1257,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void movdqa(XmmRegister dst, XmmRegister src) {
+    public void movdqa(X86XmmRegister dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovdqa(dst, src);
             return;
@@ -1267,7 +1269,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 6F /r VMOVDQA xmm1, xmm2 */
-    public void vmovdqa(XmmRegister dst, XmmRegister src) {
+    public void vmovdqa(X86XmmRegister dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1284,7 +1286,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void movdqa(XmmRegister dst, Address src) {
+    public void movdqa(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovdqa(dst, src);
             return;
@@ -1296,7 +1298,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 6F /r VMOVDQA xmm1, m128 */
-    public void vmovdqa(XmmRegister dst, Address src) {
+    public void vmovdqa(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1313,7 +1315,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movdqu(XmmRegister dst, Address src) {
+    public void movdqu(X86XmmRegister dst, X86Address src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovdqu(dst, src);
             return;
@@ -1325,7 +1327,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.F3.0F.WIG 6F /r VMOVDQU xmm1, m128 */
-    public void vmovdqu(XmmRegister dst, Address src) {
+    public void vmovdqu(X86XmmRegister dst, X86Address src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1342,7 +1344,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(dst.index(), src);
     }
 
-    public void movdqa(Address dst, XmmRegister src) {
+    public void movdqa(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovdqa(dst, src);
             return;
@@ -1354,7 +1356,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.66.0F.WIG 7F /r VMOVDQA m128, xmm1 */
-    public void vmovdqa(Address dst, XmmRegister src) {
+    public void vmovdqa(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         /*Instruction VEX Prefix */
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1371,7 +1373,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void movdqu(Address dst, XmmRegister src) {
+    public void movdqu(X86Address dst, X86XmmRegister src) {
         if (cpuHasAVXorAVX2FeatureFlag()) {
             vmovdqu(dst, src);
             return;
@@ -1383,7 +1385,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /*VEX.128.F3.0F.WIG 7F /r VMOVDQU m128, xmm1 */
-    public void vmovdqu(Address dst, XmmRegister src) {
+    public void vmovdqu(X86Address dst, X86XmmRegister src) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         // Instruction VEX Prefix
         byte ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1400,14 +1402,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitOperand(src.index(), dst);
     }
 
-    public void paddb(XmmRegister dst, XmmRegister src) {
+    public void paddb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xFC);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpaddb(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpaddb(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteOne, ByteZero;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1419,14 +1421,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void psubb(XmmRegister dst, XmmRegister src) {
+    public void psubb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xF8);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpsubb(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpsubb(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1438,14 +1440,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void paddw(XmmRegister dst, XmmRegister src) {
+    public void paddw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xFD);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpaddw(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpaddw(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1457,14 +1459,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void psubw(XmmRegister dst, XmmRegister src) {
+    public void psubw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xF9);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpsubw(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpsubw(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1476,21 +1478,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void pmullw(XmmRegister dst, XmmRegister src) {
+    public void pmullw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xD5);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void paddd(XmmRegister dst, XmmRegister src) {
+    public void paddd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xFE);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpaddd(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpaddd(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1502,14 +1504,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void psubd(XmmRegister dst, XmmRegister src) {
+    public void psubd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xFA);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpsubd(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpsubd(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1521,7 +1523,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void pmulld(XmmRegister dst, XmmRegister src) {
+    public void pmulld(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -1529,7 +1531,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpmulld(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpmulld(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne, ByteTwo;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
@@ -1548,7 +1550,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(dst.index(), src2.index());
     }
 
-    public void vpmullw(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpmullw(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1562,14 +1564,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(dst.index(), src2.index());
     }
 
-    public void paddq(XmmRegister dst, XmmRegister src) {
+    public void paddq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xD4);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpaddq(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpaddq(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1581,14 +1583,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void psubq(XmmRegister dst, XmmRegister src) {
+    public void psubq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xFB);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpsubq(XmmRegister dst, XmmRegister add_left, XmmRegister add_right) {
+    public void vpsubq(X86XmmRegister dst, X86XmmRegister add_left, X86XmmRegister add_right) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ true);
@@ -1600,186 +1602,186 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), add_right);
     }
 
-    public void paddusb(XmmRegister dst, XmmRegister src) {
+    public void paddusb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDC);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void paddsb(XmmRegister dst, XmmRegister src) {
+    public void paddsb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xEC);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void paddusw(XmmRegister dst, XmmRegister src) {
+    public void paddusw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDD);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void paddsw(XmmRegister dst, XmmRegister src) {
+    public void paddsw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xED);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psubusb(XmmRegister dst, XmmRegister src) {
+    public void psubusb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xD8);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psubsb(XmmRegister dst, XmmRegister src) {
+    public void psubsb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xE8);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psubusw(XmmRegister dst, XmmRegister src) {
+    public void psubusw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xD9);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psubsw(XmmRegister dst, XmmRegister src) {
+    public void psubsw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xE9);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtsi2ss(XmmRegister dst, CpuRegister src) {
+    public void cvtsi2ss(X86XmmRegister dst, X86CpuRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x2A);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void cvtsi2sd(XmmRegister dst, CpuRegister src) {
+    public void cvtsi2sd(X86XmmRegister dst, X86CpuRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x2A);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void cvtss2si(CpuRegister dst, XmmRegister src) {
+    public void cvtss2si(X86CpuRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x2D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtss2sd(XmmRegister dst, XmmRegister src) {
+    public void cvtss2sd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x5A);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtsd2si(CpuRegister dst, XmmRegister src) {
+    public void cvtsd2si(X86CpuRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x2D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvttss2si(CpuRegister dst, XmmRegister src) {
+    public void cvttss2si(X86CpuRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x2C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvttsd2si(CpuRegister dst, XmmRegister src) {
+    public void cvttsd2si(X86CpuRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x2C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtsd2ss(XmmRegister dst, XmmRegister src) {
+    public void cvtsd2ss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x5A);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtdq2ps(XmmRegister dst, XmmRegister src) {
+    public void cvtdq2ps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x5B);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void cvtdq2pd(XmmRegister dst, XmmRegister src) {
+    public void cvtdq2pd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0xE6);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void comiss(XmmRegister a, XmmRegister b) {
+    public void comiss(X86XmmRegister a, X86XmmRegister b) {
         emit8(0x0F);
         emit8(0x2F);
         EmitXmmRegisterOperand(a.index(), b);
     }
 
-    public void comiss(XmmRegister a, Address b) {
+    public void comiss(X86XmmRegister a, X86Address b) {
         emit8(0x0F);
         emit8(0x2F);
         EmitOperand(a.index(), b);
     }
 
-    public void comisd(XmmRegister a, XmmRegister b) {
+    public void comisd(X86XmmRegister a, X86XmmRegister b) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x2F);
         EmitXmmRegisterOperand(a.index(), b);
     }
 
-    public void comisd(XmmRegister a, Address b) {
+    public void comisd(X86XmmRegister a, X86Address b) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x2F);
         EmitOperand(a.index(), b);
     }
 
-    public void ucomiss(XmmRegister a, XmmRegister b) {
+    public void ucomiss(X86XmmRegister a, X86XmmRegister b) {
         emit8(0x0F);
         emit8(0x2E);
         EmitXmmRegisterOperand(a.index(), b);
     }
 
-    public void ucomiss(XmmRegister a, Address b) {
+    public void ucomiss(X86XmmRegister a, X86Address b) {
         emit8(0x0F);
         emit8(0x2E);
         EmitOperand(a.index(), b);
     }
 
-    public void ucomisd(XmmRegister a, XmmRegister b) {
+    public void ucomisd(X86XmmRegister a, X86XmmRegister b) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x2E);
         EmitXmmRegisterOperand(a.index(), b);
     }
 
-    public void ucomisd(XmmRegister a, Address b) {
+    public void ucomisd(X86XmmRegister a, X86Address b) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x2E);
         EmitOperand(a.index(), b);
     }
 
-    public void roundsd(XmmRegister dst, XmmRegister src, Immediate imm) {
+    public void roundsd(X86XmmRegister dst, X86XmmRegister src, X86Immediate imm) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x3A);
@@ -1788,7 +1790,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(imm.value());
     }
 
-    public void roundss(XmmRegister dst, XmmRegister src, Immediate imm) {
+    public void roundss(X86XmmRegister dst, X86XmmRegister src, X86Immediate imm) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x3A);
@@ -1797,47 +1799,47 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(imm.value());
     }
 
-    public void sqrtsd(XmmRegister dst, XmmRegister src) {
+    public void sqrtsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x51);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void sqrtss(XmmRegister dst, XmmRegister src) {
+    public void sqrtss(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF3);
         emit8(0x0F);
         emit8(0x51);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void xorpd(XmmRegister dst, Address src) {
+    public void xorpd(X86XmmRegister dst, X86Address src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x57);
         EmitOperand(dst.index(), src);
     }
 
-    public void xorpd(XmmRegister dst, XmmRegister src) {
+    public void xorpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x57);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void xorps(XmmRegister dst, Address src) {
+    public void xorps(X86XmmRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0x57);
         EmitOperand(dst.index(), src);
     }
 
-    public void xorps(XmmRegister dst, XmmRegister src) {
+    public void xorps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x57);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pxor(XmmRegister dst, XmmRegister src) {
+    public void pxor(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xEF);
@@ -1845,7 +1847,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F.WIG EF /r VPXOR xmm1, xmm2, xmm3/m128 */
-    public void vpxor(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpxor(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1865,7 +1867,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.0F.WIG 57 /r VXORPS xmm1,xmm2, xmm3/m128 */
-    public void vxorps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vxorps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1885,7 +1887,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F.WIG 57 /r VXORPD xmm1,xmm2, xmm3/m128 */
-    public void vxorpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vxorpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1904,33 +1906,33 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void andpd(XmmRegister dst, XmmRegister src) {
+    public void andpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x54);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void andpd(XmmRegister dst, Address src) {
+    public void andpd(X86XmmRegister dst, X86Address src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x54);
         EmitOperand(dst.index(), src);
     }
 
-    public void andps(XmmRegister dst, XmmRegister src) {
+    public void andps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x54);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void andps(XmmRegister dst, Address src) {
+    public void andps(X86XmmRegister dst, X86Address src) {
         emit8(0x0F);
         emit8(0x54);
         EmitOperand(dst.index(), src);
     }
 
-    public void pand(XmmRegister dst, XmmRegister src) {
+    public void pand(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDB);
@@ -1938,7 +1940,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F.WIG DB /r VPAND xmm1, xmm2, xmm3/m128 */
-    public void vpand(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpand(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1958,7 +1960,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.0F 54 /r VANDPS xmm1,xmm2, xmm3/m128 */
-    public void vandps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vandps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1976,7 +1978,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F 54 /r VANDPD xmm1, xmm2, xmm3/m128 */
-    public void vandpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vandpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -1995,20 +1997,20 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void andnpd(XmmRegister dst, XmmRegister src) {
+    public void andnpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x55);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void andnps(XmmRegister dst, XmmRegister src) {
+    public void andnps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x55);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pandn(XmmRegister dst, XmmRegister src) {
+    public void pandn(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDF);
@@ -2016,7 +2018,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F.WIG DF /r VPANDN xmm1, xmm2, xmm3/m128 */
-    public void vpandn(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpandn(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2036,7 +2038,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.0F 55 /r VANDNPS xmm1, xmm2, xmm3/m128 */
-    public void vandnps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vandnps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2056,7 +2058,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F 55 /r VANDNPD xmm1, xmm2, xmm3/m128 */
-    public void vandnpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vandnpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2075,20 +2077,20 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void orpd(XmmRegister dst, XmmRegister src) {
+    public void orpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x56);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void orps(XmmRegister dst, XmmRegister src) {
+    public void orps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x56);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void andn(CpuRegister dst, CpuRegister src1, CpuRegister src2) {
+    public void andn(X86CpuRegister dst, X86CpuRegister src1, X86CpuRegister src2) {
         byte byte_zero = EmitVexPrefixByteZero(/*is_twobyte_form=*/ false);
         byte byte_one = EmitVexPrefixByteOne(/*R=*/ false,
                 /*X=*/ false,
@@ -2106,7 +2108,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(dst.index(), src2.index());
     }
 
-    public void por(XmmRegister dst, XmmRegister src) {
+    public void por(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xEB);
@@ -2114,7 +2116,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F.WIG EB /r VPOR xmm1, xmm2, xmm3/m128 */
-    public void vpor(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpor(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2134,7 +2136,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.0F 56 /r VORPS xmm1,xmm2, xmm3/m128 */
-    public void vorps(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vorps(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2154,7 +2156,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
     }
 
     /* VEX.128.66.0F 56 /r VORPD xmm1,xmm2, xmm3/m128 */
-    public void vorpd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vorpd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         /* Instruction VEX Prefix */
@@ -2173,35 +2175,35 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void pavgb(XmmRegister dst, XmmRegister src) {
+    public void pavgb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xE0);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pavgw(XmmRegister dst, XmmRegister src) {
+    public void pavgw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xE3);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psadbw(XmmRegister dst, XmmRegister src) {
+    public void psadbw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xF6);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaddwd(XmmRegister dst, XmmRegister src) {
+    public void pmaddwd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xF5);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void vpmaddwd(XmmRegister dst, XmmRegister src1, XmmRegister src2) {
+    public void vpmaddwd(X86XmmRegister dst, X86XmmRegister src1, X86XmmRegister src2) {
         CHECK(cpuHasAVXorAVX2FeatureFlag());
         byte ByteZero, ByteOne;
         ByteZero = EmitVexPrefixByteZero(/* is_twobyte_form=*/ true);
@@ -2213,7 +2215,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src2);
     }
 
-    public void phaddw(XmmRegister dst, XmmRegister src) {
+    public void phaddw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2221,7 +2223,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void phaddd(XmmRegister dst, XmmRegister src) {
+    public void phaddd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2229,21 +2231,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void haddps(XmmRegister dst, XmmRegister src) {
+    public void haddps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x7C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void haddpd(XmmRegister dst, XmmRegister src) {
+    public void haddpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x7C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void phsubw(XmmRegister dst, XmmRegister src) {
+    public void phsubw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2251,7 +2253,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void phsubd(XmmRegister dst, XmmRegister src) {
+    public void phsubd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2259,21 +2261,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void hsubps(XmmRegister dst, XmmRegister src) {
+    public void hsubps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0xF2);
         emit8(0x0F);
         emit8(0x7D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void hsubpd(XmmRegister dst, XmmRegister src) {
+    public void hsubpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x7D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminsb(XmmRegister dst, XmmRegister src) {
+    public void pminsb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2281,7 +2283,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxsb(XmmRegister dst, XmmRegister src) {
+    public void pmaxsb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2289,21 +2291,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminsw(XmmRegister dst, XmmRegister src) {
+    public void pminsw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xEA);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxsw(XmmRegister dst, XmmRegister src) {
+    public void pmaxsw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xEE);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminsd(XmmRegister dst, XmmRegister src) {
+    public void pminsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2311,7 +2313,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxsd(XmmRegister dst, XmmRegister src) {
+    public void pmaxsd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2319,21 +2321,21 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminub(XmmRegister dst, XmmRegister src) {
+    public void pminub(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDA);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxub(XmmRegister dst, XmmRegister src) {
+    public void pmaxub(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xDE);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminuw(XmmRegister dst, XmmRegister src) {
+    public void pminuw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2341,7 +2343,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxuw(XmmRegister dst, XmmRegister src) {
+    public void pmaxuw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2349,7 +2351,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pminud(XmmRegister dst, XmmRegister src) {
+    public void pminud(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2357,7 +2359,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pmaxud(XmmRegister dst, XmmRegister src) {
+    public void pmaxud(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2365,54 +2367,54 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void minps(XmmRegister dst, XmmRegister src) {
+    public void minps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x5D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void maxps(XmmRegister dst, XmmRegister src) {
+    public void maxps(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x0F);
         emit8(0x5F);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void minpd(XmmRegister dst, XmmRegister src) {
+    public void minpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x5D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void maxpd(XmmRegister dst, XmmRegister src) {
+    public void maxpd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x5F);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpeqb(XmmRegister dst, XmmRegister src) {
+    public void pcmpeqb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x74);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpeqw(XmmRegister dst, XmmRegister src) {
+    public void pcmpeqw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x75);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpeqd(XmmRegister dst, XmmRegister src) {
+    public void pcmpeqd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x76);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpeqq(XmmRegister dst, XmmRegister src) {
+    public void pcmpeqq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2420,28 +2422,28 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpgtb(XmmRegister dst, XmmRegister src) {
+    public void pcmpgtb(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x64);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpgtw(XmmRegister dst, XmmRegister src) {
+    public void pcmpgtw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x65);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpgtd(XmmRegister dst, XmmRegister src) {
+    public void pcmpgtd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x66);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void pcmpgtq(XmmRegister dst, XmmRegister src) {
+    public void pcmpgtq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x38);
@@ -2449,7 +2451,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void shufpd(XmmRegister dst, XmmRegister src, Immediate imm) {
+    public void shufpd(X86XmmRegister dst, X86XmmRegister src, X86Immediate imm) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0xC6);
@@ -2457,14 +2459,14 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(imm.value());
     }
 
-    public void shufps(XmmRegister dst, XmmRegister src, Immediate imm) {
+    public void shufps(X86XmmRegister dst, X86XmmRegister src, X86Immediate imm) {
         emit8(0x0F);
         emit8(0xC6);
         EmitXmmRegisterOperand(dst.index(), src);
         emit8(imm.value());
     }
 
-    public void pshufd(XmmRegister dst, XmmRegister src, Immediate imm) {
+    public void pshufd(X86XmmRegister dst, X86XmmRegister src, X86Immediate imm) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x70);
@@ -2472,63 +2474,63 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(imm.value());
     }
 
-    public void punpcklbw(XmmRegister dst, XmmRegister src) {
+    public void punpcklbw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x60);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpcklwd(XmmRegister dst, XmmRegister src) {
+    public void punpcklwd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x61);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpckldq(XmmRegister dst, XmmRegister src) {
+    public void punpckldq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x62);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpcklqdq(XmmRegister dst, XmmRegister src) {
+    public void punpcklqdq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x6C);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpckhbw(XmmRegister dst, XmmRegister src) {
+    public void punpckhbw(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x68);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpckhwd(XmmRegister dst, XmmRegister src) {
+    public void punpckhwd(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x69);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpckhdq(XmmRegister dst, XmmRegister src) {
+    public void punpckhdq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x6A);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void punpckhqdq(XmmRegister dst, XmmRegister src) {
+    public void punpckhqdq(X86XmmRegister dst, X86XmmRegister src) {
         emit8(0x66);
         emit8(0x0F);
         emit8(0x6D);
         EmitXmmRegisterOperand(dst.index(), src);
     }
 
-    public void psllw(XmmRegister reg, Immediate shift_count) {
+    public void psllw(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2537,7 +2539,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void pslld(XmmRegister reg, Immediate shift_count) {
+    public void pslld(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2546,7 +2548,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psllq(XmmRegister reg, Immediate shift_count) {
+    public void psllq(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2555,7 +2557,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psraw(XmmRegister reg, Immediate shift_count) {
+    public void psraw(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2564,7 +2566,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psrad(XmmRegister reg, Immediate shift_count) {
+    public void psrad(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2573,7 +2575,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psrlw(XmmRegister reg, Immediate shift_count) {
+    public void psrlw(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2582,7 +2584,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psrld(XmmRegister reg, Immediate shift_count) {
+    public void psrld(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2591,7 +2593,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psrlq(XmmRegister reg, Immediate shift_count) {
+    public void psrlq(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2600,7 +2602,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void psrldq(XmmRegister reg, Immediate shift_count) {
+    public void psrldq(X86XmmRegister reg, X86Immediate shift_count) {
         CHECK(shift_count.isUInt8());
         emit8(0x66);
         emit8(0x0F);
@@ -2609,17 +2611,17 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(shift_count.value());
     }
 
-    public void fldl(Address src) {
+    public void fldl(X86Address src) {
         emit8(0xDD);
         EmitOperand(0, src);
     }
 
-    public void fstl(Address dst) {
+    public void fstl(X86Address dst) {
         emit8(0xDD);
         EmitOperand(2, dst);
     }
 
-    public void fstpl(Address dst) {
+    public void fstpl(X86Address dst) {
         emit8(0xDD);
         EmitOperand(3, dst);
     }
@@ -2630,32 +2632,32 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xE0);
     }
 
-    public void fnstcw(Address dst) {
+    public void fnstcw(X86Address dst) {
         emit8(0xD9);
         EmitOperand(7, dst);
     }
 
-    public void fldcw(Address src) {
+    public void fldcw(X86Address src) {
         emit8(0xD9);
         EmitOperand(5, src);
     }
 
-    public void fistpl(Address dst) {
+    public void fistpl(X86Address dst) {
         emit8(0xDF);
         EmitOperand(7, dst);
     }
 
-    public void fistps(Address dst) {
+    public void fistps(X86Address dst) {
         emit8(0xDB);
         EmitOperand(3, dst);
     }
 
-    public void fildl(Address src) {
+    public void fildl(X86Address src) {
         emit8(0xDF);
         EmitOperand(5, src);
     }
 
-    public void filds(Address src) {
+    public void filds(X86Address src) {
         emit8(0xDB);
         EmitOperand(0, src);
     }
@@ -2665,7 +2667,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xF7);
     }
 
-    public void ffree(Immediate index) {
+    public void ffree(X86Immediate index) {
         CHECK_LT(index.value(), 7);
         emit8(0xDD);
         emit8(0xC0 + index.value());
@@ -2696,7 +2698,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xF8);
     }
 
-    private boolean try_xchg_eax(CpuRegister dst, CpuRegister src) {
+    private boolean try_xchg_eax(X86CpuRegister dst, X86CpuRegister src) {
         if (src != EAX && dst != EAX) {
             return false;
         }
@@ -2707,17 +2709,17 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return true;
     }
 
-    public void xchgb(ByteRegister dst, ByteRegister src) {
+    public void xchgb(X86ByteRegister dst, X86ByteRegister src) {
         emit8(0x86);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void xchgb(ByteRegister reg, Address address) {
+    public void xchgb(X86ByteRegister reg, X86Address address) {
         emit8(0x86);
         EmitOperand(reg.index(), address);
     }
 
-    public void xchgw(CpuRegister dst, CpuRegister src) {
+    public void xchgw(X86CpuRegister dst, X86CpuRegister src) {
         EmitOperandSizeOverride();
         if (try_xchg_eax(dst, src)) {
             // A short version for AX.
@@ -2728,13 +2730,13 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void xchgw(CpuRegister reg, Address address) {
+    public void xchgw(X86CpuRegister reg, X86Address address) {
         EmitOperandSizeOverride();
         emit8(0x87);
         EmitOperand(reg.index(), address);
     }
 
-    public void xchgl(CpuRegister dst, CpuRegister src) {
+    public void xchgl(X86CpuRegister dst, X86CpuRegister src) {
         if (try_xchg_eax(dst, src)) {
             // A short version for EAX.
             return;
@@ -2744,67 +2746,67 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void xchgl(CpuRegister reg, Address address) {
+    public void xchgl(X86CpuRegister reg, X86Address address) {
         emit8(0x87);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpb(Address address, Immediate imm) {
+    public void cmpb(X86Address address, X86Immediate imm) {
         emit8(0x80);
         EmitOperand(7, address);
         emit8(imm.value() & 0xFF);
     }
 
-    public void cmpw(Address address, Immediate imm) {
+    public void cmpw(X86Address address, X86Immediate imm) {
         emit8(0x66);
         EmitComplex(7, address, imm, /* is_16_op= */ true);
     }
 
-    public void cmpl(CpuRegister reg, Immediate imm) {
-        EmitComplex(7, new Operand(reg), imm);
+    public void cmpl(X86CpuRegister reg, X86Immediate imm) {
+        EmitComplex(7, new X86Operand(reg), imm);
     }
 
-    public void cmpl(CpuRegister reg0, CpuRegister reg1) {
+    public void cmpl(X86CpuRegister reg0, X86CpuRegister reg1) {
         emit8(0x3B);
-        Operand operand = new Operand(reg1);
+        X86Operand operand = new X86Operand(reg1);
         EmitOperand(reg0.index(), operand);
     }
 
-    public void cmpl(CpuRegister reg, Address address) {
+    public void cmpl(X86CpuRegister reg, X86Address address) {
         emit8(0x3B);
         EmitOperand(reg.index(), address);
     }
 
-    public void addl(CpuRegister dst, CpuRegister src) {
+    public void addl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x03);
         EmitRegisterOperand(dst.index(), src.index());
     }
 
-    public void addl(CpuRegister reg, Address address) {
+    public void addl(X86CpuRegister reg, X86Address address) {
         emit8(0x03);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpl(Address address, CpuRegister reg) {
+    public void cmpl(X86Address address, X86CpuRegister reg) {
         emit8(0x39);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpl(Address address, Immediate imm) {
+    public void cmpl(X86Address address, X86Immediate imm) {
         EmitComplex(7, address, imm);
     }
 
-    public void testl(CpuRegister reg1, CpuRegister reg2) {
+    public void testl(X86CpuRegister reg1, X86CpuRegister reg2) {
         emit8(0x85);
         EmitRegisterOperand(reg1.index(), reg2.index());
     }
 
-    public void testl(CpuRegister reg, Address address) {
+    public void testl(X86CpuRegister reg, X86Address address) {
         emit8(0x85);
         EmitOperand(reg.index(), address);
     }
 
-    public void testl(CpuRegister reg, Immediate immediate) {
+    public void testl(X86CpuRegister reg, X86Immediate immediate) {
         // For registers that have a byte variant (EAX, EBX, ECX, and EDX)
         // we only test the byte register to keep the encoding short.
         if (immediate.isUInt8() && reg.index() < kFirstByteUnsafeRegister) {
@@ -2822,131 +2824,131 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
             EmitImmediate(immediate);
         } else {
             emit8(0xF7);
-            EmitOperand(0, new Operand(reg));
+            EmitOperand(0, new X86Operand(reg));
             EmitImmediate(immediate);
         }
     }
 
-    public void testb(Address dst, Immediate imm) {
+    public void testb(X86Address dst, X86Immediate imm) {
         emit8(0xF6);
         EmitOperand(EAX.index(), dst);
         CHECK(imm.isInt8());
         emit8(imm.value() & 0xFF);
     }
 
-    public void testl(Address dst, Immediate imm) {
+    public void testl(X86Address dst, X86Immediate imm) {
         emit8(0xF7);
         EmitOperand(0, dst);
         EmitImmediate(imm);
     }
 
-    public void andl(CpuRegister dst, CpuRegister src) {
+    public void andl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x23);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void andl(CpuRegister reg, Address address) {
+    public void andl(X86CpuRegister reg, X86Address address) {
         emit8(0x23);
         EmitOperand(reg.index(), address);
     }
 
-    public void andl(CpuRegister dst, Immediate imm) {
-        EmitComplex(4, new Operand(dst), imm);
+    public void andl(X86CpuRegister dst, X86Immediate imm) {
+        EmitComplex(4, new X86Operand(dst), imm);
     }
 
-    public void andw(Address address, Immediate imm) {
+    public void andw(X86Address address, X86Immediate imm) {
         CHECK(imm.isUInt16() || imm.isInt16());
         EmitOperandSizeOverride();
         EmitComplex(4, address, imm, /* is_16_op= */ true);
     }
 
-    public void orl(CpuRegister dst, CpuRegister src) {
+    public void orl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0B);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void orl(CpuRegister reg, Address address) {
+    public void orl(X86CpuRegister reg, X86Address address) {
         emit8(0x0B);
         EmitOperand(reg.index(), address);
     }
 
-    public void orl(CpuRegister dst, Immediate imm) {
-        EmitComplex(1, new Operand(dst), imm);
+    public void orl(X86CpuRegister dst, X86Immediate imm) {
+        EmitComplex(1, new X86Operand(dst), imm);
     }
 
-    public void xorl(CpuRegister dst, CpuRegister src) {
+    public void xorl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x33);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void xorl(CpuRegister reg, Address address) {
+    public void xorl(X86CpuRegister reg, X86Address address) {
         emit8(0x33);
         EmitOperand(reg.index(), address);
     }
 
-    public void xorl(CpuRegister dst, Immediate imm) {
-        EmitComplex(6, new Operand(dst), imm);
+    public void xorl(X86CpuRegister dst, X86Immediate imm) {
+        EmitComplex(6, new X86Operand(dst), imm);
     }
 
-    public void addl(CpuRegister reg, Immediate imm) {
-        EmitComplex(0, new Operand(reg), imm);
+    public void addl(X86CpuRegister reg, X86Immediate imm) {
+        EmitComplex(0, new X86Operand(reg), imm);
     }
 
-    public void addl(Address address, CpuRegister reg) {
+    public void addl(X86Address address, X86CpuRegister reg) {
         emit8(0x01);
         EmitOperand(reg.index(), address);
     }
 
-    public void addl(Address address, Immediate imm) {
+    public void addl(X86Address address, X86Immediate imm) {
         EmitComplex(0, address, imm);
     }
 
-    public void addw(Address address, Immediate imm) {
+    public void addw(X86Address address, X86Immediate imm) {
         CHECK(imm.isUInt16() || imm.isInt16());
         emit8(0x66);
         EmitComplex(0, address, imm, /* is_16_op= */ true);
     }
 
-    public void addw(CpuRegister reg, Immediate imm) {
+    public void addw(X86CpuRegister reg, X86Immediate imm) {
         CHECK(imm.isUInt16() || imm.isInt16());
         emit8(0x66);
-        EmitComplex(0, new Operand(reg), imm, /* is_16_op= */ true);
+        EmitComplex(0, new X86Operand(reg), imm, /* is_16_op= */ true);
     }
 
-    public void adcl(CpuRegister reg, Immediate imm) {
-        EmitComplex(2, new Operand(reg), imm);
+    public void adcl(X86CpuRegister reg, X86Immediate imm) {
+        EmitComplex(2, new X86Operand(reg), imm);
     }
 
-    public void adcl(CpuRegister dst, CpuRegister src) {
+    public void adcl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x13);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void adcl(CpuRegister dst, Address address) {
+    public void adcl(X86CpuRegister dst, X86Address address) {
         emit8(0x13);
         EmitOperand(dst.index(), address);
     }
 
-    public void subl(CpuRegister dst, CpuRegister src) {
+    public void subl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x2B);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void subl(CpuRegister reg, Immediate imm) {
-        EmitComplex(5, new Operand(reg), imm);
+    public void subl(X86CpuRegister reg, X86Immediate imm) {
+        EmitComplex(5, new X86Operand(reg), imm);
     }
 
-    public void subl(CpuRegister reg, Address address) {
+    public void subl(X86CpuRegister reg, X86Address address) {
         emit8(0x2B);
         EmitOperand(reg.index(), address);
     }
 
-    public void subl(Address address, CpuRegister reg) {
+    public void subl(X86Address address, X86CpuRegister reg) {
         emit8(0x29);
         EmitOperand(reg.index(), address);
     }
@@ -2955,211 +2957,211 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0x99);
     }
 
-    public void idivl(CpuRegister reg) {
+    public void idivl(X86CpuRegister reg) {
         emit8(0xF7);
         emit8(0xF8 | reg.index());
     }
 
-    public void divl(CpuRegister reg) {
+    public void divl(X86CpuRegister reg) {
         emit8(0xF7);
         emit8(0xF0 | reg.index());
     }
 
-    public void imull(CpuRegister dst, CpuRegister src) {
+    public void imull(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x0F);
         emit8(0xAF);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void imull(CpuRegister dst, CpuRegister src, Immediate imm) {
+    public void imull(X86CpuRegister dst, X86CpuRegister src, X86Immediate imm) {
         // See whether imm can be represented as a sign-extended 8bit value.
         if (imm.isInt8()) {
             // Sign-extension works.
             emit8(0x6B);
-            Operand operand = new Operand(src);
+            X86Operand operand = new X86Operand(src);
             EmitOperand(dst.index(), operand);
             emit8(imm.value() & 0xFF);
         } else {
             // Not representable, use full immediate.
             emit8(0x69);
-            Operand operand = new Operand(src);
+            X86Operand operand = new X86Operand(src);
             EmitOperand(dst.index(), operand);
             EmitImmediate(imm);
         }
     }
 
-    public void imull(CpuRegister reg, Immediate imm) {
+    public void imull(X86CpuRegister reg, X86Immediate imm) {
         imull(reg, reg, imm);
     }
 
-    public void imull(CpuRegister reg, Address address) {
+    public void imull(X86CpuRegister reg, X86Address address) {
         emit8(0x0F);
         emit8(0xAF);
         EmitOperand(reg.index(), address);
     }
 
-    public void imull(CpuRegister reg) {
+    public void imull(X86CpuRegister reg) {
         emit8(0xF7);
-        EmitOperand(5, new Operand(reg));
+        EmitOperand(5, new X86Operand(reg));
     }
 
-    public void imull(Address address) {
+    public void imull(X86Address address) {
         emit8(0xF7);
         EmitOperand(5, address);
     }
 
-    public void mull(CpuRegister reg) {
+    public void mull(X86CpuRegister reg) {
         emit8(0xF7);
-        EmitOperand(4, new Operand(reg));
+        EmitOperand(4, new X86Operand(reg));
     }
 
-    public void mull(Address address) {
+    public void mull(X86Address address) {
         emit8(0xF7);
         EmitOperand(4, address);
     }
 
-    public void sbbl(CpuRegister dst, CpuRegister src) {
+    public void sbbl(X86CpuRegister dst, X86CpuRegister src) {
         emit8(0x1B);
-        Operand operand = new Operand(src);
+        X86Operand operand = new X86Operand(src);
         EmitOperand(dst.index(), operand);
     }
 
-    public void sbbl(CpuRegister reg, Immediate imm) {
-        EmitComplex(3, new Operand(reg), imm);
+    public void sbbl(X86CpuRegister reg, X86Immediate imm) {
+        EmitComplex(3, new X86Operand(reg), imm);
     }
 
-    public void sbbl(CpuRegister dst, Address address) {
+    public void sbbl(X86CpuRegister dst, X86Address address) {
         emit8(0x1B);
         EmitOperand(dst.index(), address);
     }
 
-    public void sbbl(Address address, CpuRegister src) {
+    public void sbbl(X86Address address, X86CpuRegister src) {
         emit8(0x19);
         EmitOperand(src.index(), address);
     }
 
-    public void incl(CpuRegister reg) {
+    public void incl(X86CpuRegister reg) {
         emit8(0x40 + reg.index());
     }
 
-    public void incl(Address address) {
+    public void incl(X86Address address) {
         emit8(0xFF);
         EmitOperand(0, address);
     }
 
-    public void decl(CpuRegister reg) {
+    public void decl(X86CpuRegister reg) {
         emit8(0x48 + reg.index());
     }
 
-    public void decl(Address address) {
+    public void decl(X86Address address) {
         emit8(0xFF);
         EmitOperand(1, address);
     }
 
-    public void shll(CpuRegister reg, Immediate imm) {
-        EmitGenericShift(4, new Operand(reg), imm);
+    public void shll(X86CpuRegister reg, X86Immediate imm) {
+        EmitGenericShift(4, new X86Operand(reg), imm);
     }
 
-    public void shll(CpuRegister operand, CpuRegister shifter) {
-        EmitGenericShift(4, new Operand(operand), shifter);
+    public void shll(X86CpuRegister operand, X86CpuRegister shifter) {
+        EmitGenericShift(4, new X86Operand(operand), shifter);
     }
 
-    public void shll(Address address, Immediate imm) {
+    public void shll(X86Address address, X86Immediate imm) {
         EmitGenericShift(4, address, imm);
     }
 
-    public void shll(Address address, CpuRegister shifter) {
+    public void shll(X86Address address, X86CpuRegister shifter) {
         EmitGenericShift(4, address, shifter);
     }
 
-    public void shrl(CpuRegister reg, Immediate imm) {
-        EmitGenericShift(5, new Operand(reg), imm);
+    public void shrl(X86CpuRegister reg, X86Immediate imm) {
+        EmitGenericShift(5, new X86Operand(reg), imm);
     }
 
-    public void shrl(CpuRegister operand, CpuRegister shifter) {
-        EmitGenericShift(5, new Operand(operand), shifter);
+    public void shrl(X86CpuRegister operand, X86CpuRegister shifter) {
+        EmitGenericShift(5, new X86Operand(operand), shifter);
     }
 
-    public void shrl(Address address, Immediate imm) {
+    public void shrl(X86Address address, X86Immediate imm) {
         EmitGenericShift(5, address, imm);
     }
 
-    public void shrl(Address address, CpuRegister shifter) {
+    public void shrl(X86Address address, X86CpuRegister shifter) {
         EmitGenericShift(5, address, shifter);
     }
 
-    public void sarl(CpuRegister reg, Immediate imm) {
-        EmitGenericShift(7, new Operand(reg), imm);
+    public void sarl(X86CpuRegister reg, X86Immediate imm) {
+        EmitGenericShift(7, new X86Operand(reg), imm);
     }
 
-    public void sarl(CpuRegister operand, CpuRegister shifter) {
-        EmitGenericShift(7, new Operand(operand), shifter);
+    public void sarl(X86CpuRegister operand, X86CpuRegister shifter) {
+        EmitGenericShift(7, new X86Operand(operand), shifter);
     }
 
-    public void sarl(Address address, Immediate imm) {
+    public void sarl(X86Address address, X86Immediate imm) {
         EmitGenericShift(7, address, imm);
     }
 
-    public void sarl(Address address, CpuRegister shifter) {
+    public void sarl(X86Address address, X86CpuRegister shifter) {
         EmitGenericShift(7, address, shifter);
     }
 
-    public void shld(CpuRegister dst, CpuRegister src, CpuRegister shifter) {
+    public void shld(X86CpuRegister dst, X86CpuRegister src, X86CpuRegister shifter) {
         CHECK_EQ(ECX.index(), shifter.index());
         emit8(0x0F);
         emit8(0xA5);
         EmitRegisterOperand(src.index(), dst.index());
     }
 
-    public void shld(CpuRegister dst, CpuRegister src, Immediate imm) {
+    public void shld(X86CpuRegister dst, X86CpuRegister src, X86Immediate imm) {
         emit8(0x0F);
         emit8(0xA4);
         EmitRegisterOperand(src.index(), dst.index());
         emit8(imm.value() & 0xFF);
     }
 
-    public void shrd(CpuRegister dst, CpuRegister src, CpuRegister shifter) {
+    public void shrd(X86CpuRegister dst, X86CpuRegister src, X86CpuRegister shifter) {
         CHECK_EQ(ECX.index(), shifter.index());
         emit8(0x0F);
         emit8(0xAD);
         EmitRegisterOperand(src.index(), dst.index());
     }
 
-    public void shrd(CpuRegister dst, CpuRegister src, Immediate imm) {
+    public void shrd(X86CpuRegister dst, X86CpuRegister src, X86Immediate imm) {
         emit8(0x0F);
         emit8(0xAC);
         EmitRegisterOperand(src.index(), dst.index());
         emit8(imm.value() & 0xFF);
     }
 
-    public void roll(CpuRegister reg, Immediate imm) {
-        EmitGenericShift(0, new Operand(reg), imm);
+    public void roll(X86CpuRegister reg, X86Immediate imm) {
+        EmitGenericShift(0, new X86Operand(reg), imm);
     }
 
-    public void roll(CpuRegister operand, CpuRegister shifter) {
-        EmitGenericShift(0, new Operand(operand), shifter);
+    public void roll(X86CpuRegister operand, X86CpuRegister shifter) {
+        EmitGenericShift(0, new X86Operand(operand), shifter);
     }
 
-    public void rorl(CpuRegister reg, Immediate imm) {
-        EmitGenericShift(1, new Operand(reg), imm);
+    public void rorl(X86CpuRegister reg, X86Immediate imm) {
+        EmitGenericShift(1, new X86Operand(reg), imm);
     }
 
-    public void rorl(CpuRegister operand, CpuRegister shifter) {
-        EmitGenericShift(1, new Operand(operand), shifter);
+    public void rorl(X86CpuRegister operand, X86CpuRegister shifter) {
+        EmitGenericShift(1, new X86Operand(operand), shifter);
     }
 
-    public void negl(CpuRegister reg) {
+    public void negl(X86CpuRegister reg) {
         emit8(0xF7);
-        EmitOperand(3, new Operand(reg));
+        EmitOperand(3, new X86Operand(reg));
     }
 
-    public void notl(CpuRegister reg) {
+    public void notl(X86CpuRegister reg) {
         emit8(0xF7);
         emit8(0xD0 | reg.index());
     }
 
-    public void enter(Immediate imm) {
+    public void enter(X86Immediate imm) {
         emit8(0xC8);
         CHECK(imm.isUInt16());
         emit8(imm.value() & 0xFF);
@@ -3175,7 +3177,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xC3);
     }
 
-    public void ret(Immediate imm) {
+    public void ret(X86Immediate imm) {
         emit8(0xC2);
         CHECK(imm.isUInt16());
         emit8(imm.value() & 0xFF);
@@ -3194,7 +3196,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         emit8(0xF4);
     }
 
-    public void j(Condition condition, Label label) {
+    public void j(X86Condition condition, Label label) {
         if (label.isBound()) {
             final int kShortSize = 2;
             final int kLongSize = 6;
@@ -3215,7 +3217,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    public void j(Condition condition, NearLabel label) {
+    public void j(X86Condition condition, X86NearLabel label) {
         if (label.isBound()) {
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
@@ -3229,7 +3231,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    public void jecxz(NearLabel label) {
+    public void jecxz(X86NearLabel label) {
         if (label.isBound()) {
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
@@ -3243,12 +3245,12 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    public void jmp(CpuRegister reg) {
+    public void jmp(X86CpuRegister reg) {
         emit8(0xFF);
         EmitRegisterOperand(4, reg.index());
     }
 
-    public void jmp(Address address) {
+    public void jmp(X86Address address) {
         emit8(0xFF);
         EmitOperand(4, address);
     }
@@ -3272,7 +3274,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         }
     }
 
-    public void jmp(NearLabel label) {
+    public void jmp(X86NearLabel label) {
         if (label.isBound()) {
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
@@ -3339,45 +3341,45 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         return this;
     }
 
-    public void cmpxchgb(Address address, ByteRegister reg) {
+    public void cmpxchgb(X86Address address, X86ByteRegister reg) {
         emit8(0x0F);
         emit8(0xB0);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpxchgw(Address address, CpuRegister reg) {
+    public void cmpxchgw(X86Address address, X86CpuRegister reg) {
         EmitOperandSizeOverride();
         emit8(0x0F);
         emit8(0xB1);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpxchgl(Address address, CpuRegister reg) {
+    public void cmpxchgl(X86Address address, X86CpuRegister reg) {
         emit8(0x0F);
         emit8(0xB1);
         EmitOperand(reg.index(), address);
     }
 
-    public void cmpxchg8b(Address address) {
+    public void cmpxchg8b(X86Address address) {
         emit8(0x0F);
         emit8(0xC7);
         EmitOperand(1, address);
     }
 
-    public void xaddb(Address address, ByteRegister reg) {
+    public void xaddb(X86Address address, X86ByteRegister reg) {
         emit8(0x0F);
         emit8(0xC0);
         EmitOperand(reg.index(), address);
     }
 
-    public void xaddw(Address address, CpuRegister reg) {
+    public void xaddw(X86Address address, X86CpuRegister reg) {
         EmitOperandSizeOverride();
         emit8(0x0F);
         emit8(0xC1);
         EmitOperand(reg.index(), address);
     }
 
-    public void xaddl(Address address, CpuRegister reg) {
+    public void xaddl(X86Address address, X86CpuRegister reg) {
         emit8(0x0F);
         emit8(0xC1);
         EmitOperand(reg.index(), address);
@@ -3414,7 +3416,7 @@ public class X86Assembler extends Assembler implements X86AssemblerI {
         label.bindTo(bound);
     }
 
-    public void bind(NearLabel label) {
+    public void bind(X86NearLabel label) {
         int bound = size();
         CHECK(!label.isBound());  // Labels can only be bound once.
         while (label.isLinked()) {

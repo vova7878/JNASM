@@ -1,6 +1,6 @@
 package com.v7878.jnasm.common_x86;
 
-public class VEXConstants {
+public class X86VEXConstants {
     public static final int GET_REX_R = 0x04;
     public static final int GET_REX_X = 0x02;
     public static final int GET_REX_B = 0x01;

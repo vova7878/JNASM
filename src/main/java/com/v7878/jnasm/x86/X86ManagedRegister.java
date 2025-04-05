@@ -1,19 +1,20 @@
 package com.v7878.jnasm.x86;
 
-import static com.v7878.jnasm.x86.CpuRegister.kNumberOfCpuRegisters;
-import static com.v7878.jnasm.x86.X87Register.kNumberOfX87Registers;
-import static com.v7878.jnasm.x86.XmmRegister.kNumberOfXmmRegisters;
+import static com.v7878.jnasm.common_x86.X87Register.kNumberOfX87Registers;
+import static com.v7878.jnasm.x86.X86CpuRegister.kNumberOfCpuRegisters;
+import static com.v7878.jnasm.x86.X86XmmRegister.kNumberOfXmmRegisters;
 
 import com.v7878.jnasm.ManagedRegister;
+import com.v7878.jnasm.common_x86.X87Register;
 
 // An instance of class 'ManagedRegister' represents a single cpu register
-// (enum CpuRegister), or xmm register (enum XmmRegister).
+// (enum X86CpuRegister), or xmm register (enum X86XmmRegister).
 // 'ManagedRegister::NoRegister()' provides an invalid register.
 // There is a one-to-one mapping between ManagedRegister and register id.
 public class X86ManagedRegister extends ManagedRegister {
     // ids map:
-    //   [0..R[  cpu registers (enum CpuRegister)
-    //   [R..X[  xmm registers (enum XmmRegister)
+    //   [0..R[  cpu registers (enum X86CpuRegister)
+    //   [R..X[  xmm registers (enum X86XmmRegister)
     //   [X..S[  x87 registers (enum X87Register)
     // where
     //   R = kNumberOfCpuRegIds
@@ -37,11 +38,11 @@ public class X86ManagedRegister extends ManagedRegister {
         return new X86ManagedRegister();
     }
 
-    public static X86ManagedRegister fromCpuRegister(CpuRegister r) {
+    public static X86ManagedRegister fromCpuRegister(X86CpuRegister r) {
         return new X86ManagedRegister(r.index());
     }
 
-    public static X86ManagedRegister fromXmmRegister(XmmRegister r) {
+    public static X86ManagedRegister fromXmmRegister(X86XmmRegister r) {
         return new X86ManagedRegister(r.index() + kNumberOfCpuRegIds);
     }
 
@@ -61,12 +62,12 @@ public class X86ManagedRegister extends ManagedRegister {
         return 0 <= id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) && id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) < kNumberOfX87RegIds;
     }
 
-    public CpuRegister asCpuRegister() {
-        return CpuRegister.of(id);
+    public X86CpuRegister asCpuRegister() {
+        return X86CpuRegister.of(id);
     }
 
-    public XmmRegister asXmmRegister() {
-        return XmmRegister.of(id - kNumberOfCpuRegIds);
+    public X86XmmRegister asXmmRegister() {
+        return X86XmmRegister.of(id - kNumberOfCpuRegIds);
     }
 
     public X87Register asX87Register() {

@@ -1,6 +1,6 @@
 package com.v7878.jnasm.x86;
 
-public enum ByteRegister {
+public enum X86ByteRegister {
     AL(0),
     CL(1),
     DL(2),
@@ -12,19 +12,15 @@ public enum ByteRegister {
 
     private final int value;
 
-    ByteRegister(int value) {
+    X86ByteRegister(int value) {
         this.value = value;
     }
 
-    public static ByteRegister of(int index) {
+    public static X86ByteRegister of(int index) {
         return values()[index];
     }
 
     public int index() {
         return value;
-    }
-
-    public static String toString(ByteRegister reg) {
-        return "ByteRegister[" + reg.index() + "]";
     }
 }

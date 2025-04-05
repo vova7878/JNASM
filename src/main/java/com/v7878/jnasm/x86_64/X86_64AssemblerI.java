@@ -1,560 +1,562 @@
 package com.v7878.jnasm.x86_64;
 
 import com.v7878.jnasm.Label;
+import com.v7878.jnasm.common_x86.X86Condition;
+import com.v7878.jnasm.common_x86.X86NearLabel;
 
 /*
   Emit Machine Instructions.
  */
 // TODO: javadoc
 public interface X86_64AssemblerI {
-    void call(CpuRegister reg);
+    void call(X86_64CpuRegister reg);
 
-    void call(Address address);
+    void call(X86_64Address address);
 
     void call(Label label);
 
-    void pushq(CpuRegister reg);
+    void pushq(X86_64CpuRegister reg);
 
-    void pushq(Address address);
+    void pushq(X86_64Address address);
 
-    void pushq(Immediate imm);
+    void pushq(X86_64Immediate imm);
 
-    void popq(CpuRegister reg);
+    void popq(X86_64CpuRegister reg);
 
-    void popq(Address address);
+    void popq(X86_64Address address);
 
-    void movq(CpuRegister dst, Immediate src);
+    void movq(X86_64CpuRegister dst, X86_64Immediate src);
 
-    void movl(CpuRegister dst, Immediate src);
+    void movl(X86_64CpuRegister dst, X86_64Immediate src);
 
-    void movq(CpuRegister dst, CpuRegister src);
+    void movq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movl(CpuRegister dst, CpuRegister src);
+    void movl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movntl(Address dst, CpuRegister src);
+    void movntl(X86_64Address dst, X86_64CpuRegister src);
 
-    void movntq(Address dst, CpuRegister src);
+    void movntq(X86_64Address dst, X86_64CpuRegister src);
 
-    void movq(CpuRegister dst, Address src);
+    void movq(X86_64CpuRegister dst, X86_64Address src);
 
-    void movl(CpuRegister dst, Address src);
+    void movl(X86_64CpuRegister dst, X86_64Address src);
 
-    void movq(Address dst, CpuRegister src);
+    void movq(X86_64Address dst, X86_64CpuRegister src);
 
-    void movq(Address dst, Immediate imm);
+    void movq(X86_64Address dst, X86_64Immediate imm);
 
-    void movl(Address dst, CpuRegister src);
+    void movl(X86_64Address dst, X86_64CpuRegister src);
 
-    void movl(Address dst, Immediate imm);
+    void movl(X86_64Address dst, X86_64Immediate imm);
 
-    void cmov(Condition c, CpuRegister dst, CpuRegister src);  // This is the 64b version.
+    void cmov(X86Condition c, X86_64CpuRegister dst, X86_64CpuRegister src);  // This is the 64b version.
 
-    void cmov(Condition c, CpuRegister dst, CpuRegister src, boolean is64bit);
+    void cmov(X86Condition c, X86_64CpuRegister dst, X86_64CpuRegister src, boolean is64bit);
 
-    void cmov(Condition c, CpuRegister dst, Address src, boolean is64bit);
+    void cmov(X86Condition c, X86_64CpuRegister dst, X86_64Address src, boolean is64bit);
 
-    void movzxb(CpuRegister dst, CpuRegister src);
+    void movzxb(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movzxb(CpuRegister dst, Address src);
+    void movzxb(X86_64CpuRegister dst, X86_64Address src);
 
-    void movsxb(CpuRegister dst, CpuRegister src);
+    void movsxb(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movsxb(CpuRegister dst, Address src);
+    void movsxb(X86_64CpuRegister dst, X86_64Address src);
 
-    void movb(CpuRegister dst, Address src);
+    void movb(X86_64CpuRegister dst, X86_64Address src);
 
-    void movb(Address dst, CpuRegister src);
+    void movb(X86_64Address dst, X86_64CpuRegister src);
 
-    void movb(Address dst, Immediate imm);
+    void movb(X86_64Address dst, X86_64Immediate imm);
 
-    void movzxw(CpuRegister dst, CpuRegister src);
+    void movzxw(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movzxw(CpuRegister dst, Address src);
+    void movzxw(X86_64CpuRegister dst, X86_64Address src);
 
-    void movsxw(CpuRegister dst, CpuRegister src);
+    void movsxw(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movsxw(CpuRegister dst, Address src);
+    void movsxw(X86_64CpuRegister dst, X86_64Address src);
 
-    void movw(CpuRegister dst, Address src);
+    void movw(X86_64CpuRegister dst, X86_64Address src);
 
-    void movw(Address dst, CpuRegister src);
+    void movw(X86_64Address dst, X86_64CpuRegister src);
 
-    void movw(Address dst, Immediate imm);
+    void movw(X86_64Address dst, X86_64Immediate imm);
 
-    void leaq(CpuRegister dst, Address src);
+    void leaq(X86_64CpuRegister dst, X86_64Address src);
 
-    void leal(CpuRegister dst, Address src);
+    void leal(X86_64CpuRegister dst, X86_64Address src);
 
-    void movaps(XmmRegister dst, XmmRegister src);     // move
+    void movaps(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void movaps(XmmRegister dst, Address src);  // load aligned
+    void movaps(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void movups(XmmRegister dst, Address src);  // load unaligned
+    void movups(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void movaps(Address dst, XmmRegister src);  // store aligned
+    void movaps(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void movups(Address dst, XmmRegister src);  // store unaligned
+    void movups(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void vmovaps(XmmRegister dst, XmmRegister src);     // move
+    void vmovaps(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void vmovaps(XmmRegister dst, Address src);  // load aligned
+    void vmovaps(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void vmovaps(Address dst, XmmRegister src);  // store aligned
+    void vmovaps(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void vmovups(XmmRegister dst, Address src);  // load unaligned
+    void vmovups(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void vmovups(Address dst, XmmRegister src);  // store unaligned
+    void vmovups(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void movss(XmmRegister dst, Address src);
+    void movss(X86_64XmmRegister dst, X86_64Address src);
 
-    void movss(Address dst, XmmRegister src);
+    void movss(X86_64Address dst, X86_64XmmRegister src);
 
-    void movss(XmmRegister dst, XmmRegister src);
+    void movss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void movsxd(CpuRegister dst, CpuRegister src);
+    void movsxd(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void movsxd(CpuRegister dst, Address src);
+    void movsxd(X86_64CpuRegister dst, X86_64Address src);
 
-    void movq(XmmRegister dst, CpuRegister src);
+    void movq(X86_64XmmRegister dst, X86_64CpuRegister src);
 
-    void movq(CpuRegister dst, XmmRegister src);
+    void movq(X86_64CpuRegister dst, X86_64XmmRegister src);
 
-    void movd(XmmRegister dst, CpuRegister src);
+    void movd(X86_64XmmRegister dst, X86_64CpuRegister src);
 
-    void movd(CpuRegister dst, XmmRegister src);
+    void movd(X86_64CpuRegister dst, X86_64XmmRegister src);
 
-    void addss(XmmRegister dst, XmmRegister src);
+    void addss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void addss(XmmRegister dst, Address src);
+    void addss(X86_64XmmRegister dst, X86_64Address src);
 
-    void subss(XmmRegister dst, XmmRegister src);
+    void subss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void subss(XmmRegister dst, Address src);
+    void subss(X86_64XmmRegister dst, X86_64Address src);
 
-    void mulss(XmmRegister dst, XmmRegister src);
+    void mulss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void mulss(XmmRegister dst, Address src);
+    void mulss(X86_64XmmRegister dst, X86_64Address src);
 
-    void divss(XmmRegister dst, XmmRegister src);
+    void divss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void divss(XmmRegister dst, Address src);
+    void divss(X86_64XmmRegister dst, X86_64Address src);
 
-    void addps(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void addps(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void subps(XmmRegister dst, XmmRegister src);
+    void subps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void mulps(XmmRegister dst, XmmRegister src);
+    void mulps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void divps(XmmRegister dst, XmmRegister src);
+    void divps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vmulps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vmulps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vmulpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vmulpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vdivps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vdivps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vdivpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vdivpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vaddps(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vaddps(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vsubps(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vsubps(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vsubpd(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vsubpd(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vaddpd(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vaddpd(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vfmadd213ss(XmmRegister accumulator, XmmRegister left, XmmRegister right);
+    void vfmadd213ss(X86_64XmmRegister accumulator, X86_64XmmRegister left, X86_64XmmRegister right);
 
-    void vfmadd213sd(XmmRegister accumulator, XmmRegister left, XmmRegister right);
+    void vfmadd213sd(X86_64XmmRegister accumulator, X86_64XmmRegister left, X86_64XmmRegister right);
 
-    void movapd(XmmRegister dst, XmmRegister src);     // move
+    void movapd(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void movapd(XmmRegister dst, Address src);  // load aligned
+    void movapd(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void movupd(XmmRegister dst, Address src);  // load unaligned
+    void movupd(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void movapd(Address dst, XmmRegister src);  // store aligned
+    void movapd(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void movupd(Address dst, XmmRegister src);  // store unaligned
+    void movupd(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void vmovapd(XmmRegister dst, XmmRegister src);     // move
+    void vmovapd(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void vmovapd(XmmRegister dst, Address src);  // load aligned
+    void vmovapd(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void vmovapd(Address dst, XmmRegister src);  // store aligned
+    void vmovapd(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void vmovupd(XmmRegister dst, Address src);  // load unaligned
+    void vmovupd(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void vmovupd(Address dst, XmmRegister src);  // store unaligned
+    void vmovupd(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void movsd(XmmRegister dst, Address src);
+    void movsd(X86_64XmmRegister dst, X86_64Address src);
 
-    void movsd(Address dst, XmmRegister src);
+    void movsd(X86_64Address dst, X86_64XmmRegister src);
 
-    void movsd(XmmRegister dst, XmmRegister src);
+    void movsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void addsd(XmmRegister dst, XmmRegister src);
+    void addsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void addsd(XmmRegister dst, Address src);
+    void addsd(X86_64XmmRegister dst, X86_64Address src);
 
-    void subsd(XmmRegister dst, XmmRegister src);
+    void subsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void subsd(XmmRegister dst, Address src);
+    void subsd(X86_64XmmRegister dst, X86_64Address src);
 
-    void mulsd(XmmRegister dst, XmmRegister src);
+    void mulsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void mulsd(XmmRegister dst, Address src);
+    void mulsd(X86_64XmmRegister dst, X86_64Address src);
 
-    void divsd(XmmRegister dst, XmmRegister src);
+    void divsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void divsd(XmmRegister dst, Address src);
+    void divsd(X86_64XmmRegister dst, X86_64Address src);
 
-    void addpd(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void addpd(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void subpd(XmmRegister dst, XmmRegister src);
+    void subpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void mulpd(XmmRegister dst, XmmRegister src);
+    void mulpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void divpd(XmmRegister dst, XmmRegister src);
+    void divpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void movdqa(XmmRegister dst, XmmRegister src);     // move
+    void movdqa(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void movdqa(XmmRegister dst, Address src);  // load aligned
+    void movdqa(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void movdqu(XmmRegister dst, Address src);  // load unaligned
+    void movdqu(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void movdqa(Address dst, XmmRegister src);  // store aligned
+    void movdqa(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void movdqu(Address dst, XmmRegister src);  // store unaligned
+    void movdqu(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void vmovdqa(XmmRegister dst, XmmRegister src);     // move
+    void vmovdqa(X86_64XmmRegister dst, X86_64XmmRegister src);     // move
 
-    void vmovdqa(XmmRegister dst, Address src);  // load aligned
+    void vmovdqa(X86_64XmmRegister dst, X86_64Address src);  // load aligned
 
-    void vmovdqa(Address dst, XmmRegister src);  // store aligned
+    void vmovdqa(X86_64Address dst, X86_64XmmRegister src);  // store aligned
 
-    void vmovdqu(XmmRegister dst, Address src);  // load unaligned
+    void vmovdqu(X86_64XmmRegister dst, X86_64Address src);  // load unaligned
 
-    void vmovdqu(Address dst, XmmRegister src);  // store unaligned
+    void vmovdqu(X86_64Address dst, X86_64XmmRegister src);  // store unaligned
 
-    void paddb(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void paddb(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void psubb(XmmRegister dst, XmmRegister src);
+    void psubb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpaddb(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vpaddb(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vpaddw(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vpaddw(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void paddw(XmmRegister dst, XmmRegister src);
+    void paddw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubw(XmmRegister dst, XmmRegister src);
+    void psubw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmullw(XmmRegister dst, XmmRegister src);
+    void pmullw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpmullw(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpmullw(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vpsubb(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpsubb(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vpsubw(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpsubw(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vpsubd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpsubd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void paddd(XmmRegister dst, XmmRegister src);
+    void paddd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubd(XmmRegister dst, XmmRegister src);
+    void psubd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmulld(XmmRegister dst, XmmRegister src);
+    void pmulld(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpmulld(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpmulld(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vpaddd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpaddd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void paddq(XmmRegister dst, XmmRegister src);
+    void paddq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubq(XmmRegister dst, XmmRegister src);
+    void psubq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpaddq(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vpaddq(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void vpsubq(XmmRegister dst, XmmRegister add_left, XmmRegister add_right);
+    void vpsubq(X86_64XmmRegister dst, X86_64XmmRegister add_left, X86_64XmmRegister add_right);
 
-    void paddusb(XmmRegister dst, XmmRegister src);
+    void paddusb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void paddsb(XmmRegister dst, XmmRegister src);
+    void paddsb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void paddusw(XmmRegister dst, XmmRegister src);
+    void paddusw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void paddsw(XmmRegister dst, XmmRegister src);
+    void paddsw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubusb(XmmRegister dst, XmmRegister src);
+    void psubusb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubsb(XmmRegister dst, XmmRegister src);
+    void psubsb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubusw(XmmRegister dst, XmmRegister src);
+    void psubusw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psubsw(XmmRegister dst, XmmRegister src);
+    void psubsw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void cvtsi2ss(XmmRegister dst, CpuRegister src);  // Note: this is the r/m32 version.
+    void cvtsi2ss(X86_64XmmRegister dst, X86_64CpuRegister src);  // Note: this is the r/m32 version.
 
-    void cvtsi2ss(XmmRegister dst, CpuRegister src, boolean is64bit);
+    void cvtsi2ss(X86_64XmmRegister dst, X86_64CpuRegister src, boolean is64bit);
 
-    void cvtsi2ss(XmmRegister dst, Address src, boolean is64bit);
+    void cvtsi2ss(X86_64XmmRegister dst, X86_64Address src, boolean is64bit);
 
-    void cvtsi2sd(XmmRegister dst, CpuRegister src);  // Note: this is the r/m32 version.
+    void cvtsi2sd(X86_64XmmRegister dst, X86_64CpuRegister src);  // Note: this is the r/m32 version.
 
-    void cvtsi2sd(XmmRegister dst, CpuRegister src, boolean is64bit);
+    void cvtsi2sd(X86_64XmmRegister dst, X86_64CpuRegister src, boolean is64bit);
 
-    void cvtsi2sd(XmmRegister dst, Address src, boolean is64bit);
+    void cvtsi2sd(X86_64XmmRegister dst, X86_64Address src, boolean is64bit);
 
-    void cvtss2si(CpuRegister dst, XmmRegister src);  // Note: this is the r32 version.
+    void cvtss2si(X86_64CpuRegister dst, X86_64XmmRegister src);  // Note: this is the r32 version.
 
-    void cvtss2sd(XmmRegister dst, XmmRegister src);
+    void cvtss2sd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void cvtss2sd(XmmRegister dst, Address src);
+    void cvtss2sd(X86_64XmmRegister dst, X86_64Address src);
 
-    void cvtsd2si(CpuRegister dst, XmmRegister src);  // Note: this is the r32 version.
+    void cvtsd2si(X86_64CpuRegister dst, X86_64XmmRegister src);  // Note: this is the r32 version.
 
-    void cvtsd2ss(XmmRegister dst, XmmRegister src);
+    void cvtsd2ss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void cvtsd2ss(XmmRegister dst, Address src);
+    void cvtsd2ss(X86_64XmmRegister dst, X86_64Address src);
 
-    void cvttss2si(CpuRegister dst, XmmRegister src);  // Note: this is the r32 version.
+    void cvttss2si(X86_64CpuRegister dst, X86_64XmmRegister src);  // Note: this is the r32 version.
 
-    void cvttss2si(CpuRegister dst, XmmRegister src, boolean is64bit);
+    void cvttss2si(X86_64CpuRegister dst, X86_64XmmRegister src, boolean is64bit);
 
-    void cvttsd2si(CpuRegister dst, XmmRegister src);  // Note: this is the r32 version.
+    void cvttsd2si(X86_64CpuRegister dst, X86_64XmmRegister src);  // Note: this is the r32 version.
 
-    void cvttsd2si(CpuRegister dst, XmmRegister src, boolean is64bit);
+    void cvttsd2si(X86_64CpuRegister dst, X86_64XmmRegister src, boolean is64bit);
 
-    void cvtdq2ps(XmmRegister dst, XmmRegister src);
+    void cvtdq2ps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void cvtdq2pd(XmmRegister dst, XmmRegister src);
+    void cvtdq2pd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void comiss(XmmRegister a, XmmRegister b);
+    void comiss(X86_64XmmRegister a, X86_64XmmRegister b);
 
-    void comiss(XmmRegister a, Address b);
+    void comiss(X86_64XmmRegister a, X86_64Address b);
 
-    void comisd(XmmRegister a, XmmRegister b);
+    void comisd(X86_64XmmRegister a, X86_64XmmRegister b);
 
-    void comisd(XmmRegister a, Address b);
+    void comisd(X86_64XmmRegister a, X86_64Address b);
 
-    void ucomiss(XmmRegister a, XmmRegister b);
+    void ucomiss(X86_64XmmRegister a, X86_64XmmRegister b);
 
-    void ucomiss(XmmRegister a, Address b);
+    void ucomiss(X86_64XmmRegister a, X86_64Address b);
 
-    void ucomisd(XmmRegister a, XmmRegister b);
+    void ucomisd(X86_64XmmRegister a, X86_64XmmRegister b);
 
-    void ucomisd(XmmRegister a, Address b);
+    void ucomisd(X86_64XmmRegister a, X86_64Address b);
 
-    void roundsd(XmmRegister dst, XmmRegister src, Immediate imm);
+    void roundsd(X86_64XmmRegister dst, X86_64XmmRegister src, X86_64Immediate imm);
 
-    void roundss(XmmRegister dst, XmmRegister src, Immediate imm);
+    void roundss(X86_64XmmRegister dst, X86_64XmmRegister src, X86_64Immediate imm);
 
-    void sqrtsd(XmmRegister dst, XmmRegister src);
+    void sqrtsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void sqrtss(XmmRegister dst, XmmRegister src);
+    void sqrtss(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void xorpd(XmmRegister dst, Address src);
+    void xorpd(X86_64XmmRegister dst, X86_64Address src);
 
-    void xorpd(XmmRegister dst, XmmRegister src);
+    void xorpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void xorps(XmmRegister dst, Address src);
+    void xorps(X86_64XmmRegister dst, X86_64Address src);
 
-    void xorps(XmmRegister dst, XmmRegister src);
+    void xorps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pxor(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void pxor(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void vpxor(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpxor(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vxorps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vxorps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vxorpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vxorpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void andpd(XmmRegister dst, Address src);
+    void andpd(X86_64XmmRegister dst, X86_64Address src);
 
-    void andpd(XmmRegister dst, XmmRegister src);
+    void andpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void andps(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void andps(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void pand(XmmRegister dst, XmmRegister src);
+    void pand(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpand(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpand(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vandps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vandps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vandpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vandpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void andn(CpuRegister dst, CpuRegister src1, CpuRegister src2);
+    void andn(X86_64CpuRegister dst, X86_64CpuRegister src1, X86_64CpuRegister src2);
 
-    void andnpd(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void andnpd(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void andnps(XmmRegister dst, XmmRegister src);
+    void andnps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pandn(XmmRegister dst, XmmRegister src);
+    void pandn(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpandn(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpandn(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vandnps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vandnps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vandnpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vandnpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void orpd(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void orpd(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void orps(XmmRegister dst, XmmRegister src);
+    void orps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void por(XmmRegister dst, XmmRegister src);
+    void por(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpor(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpor(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vorps(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vorps(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void vorpd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vorpd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void pavgb(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void pavgb(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void pavgw(XmmRegister dst, XmmRegister src);
+    void pavgw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psadbw(XmmRegister dst, XmmRegister src);
+    void psadbw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmaddwd(XmmRegister dst, XmmRegister src);
+    void pmaddwd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void vpmaddwd(XmmRegister dst, XmmRegister src1, XmmRegister src2);
+    void vpmaddwd(X86_64XmmRegister dst, X86_64XmmRegister src1, X86_64XmmRegister src2);
 
-    void phaddw(XmmRegister dst, XmmRegister src);
+    void phaddw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void phaddd(XmmRegister dst, XmmRegister src);
+    void phaddd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void haddps(XmmRegister dst, XmmRegister src);
+    void haddps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void haddpd(XmmRegister dst, XmmRegister src);
+    void haddpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void phsubw(XmmRegister dst, XmmRegister src);
+    void phsubw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void phsubd(XmmRegister dst, XmmRegister src);
+    void phsubd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void hsubps(XmmRegister dst, XmmRegister src);
+    void hsubps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void hsubpd(XmmRegister dst, XmmRegister src);
+    void hsubpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminsb(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void pminsb(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void pmaxsb(XmmRegister dst, XmmRegister src);
+    void pmaxsb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminsw(XmmRegister dst, XmmRegister src);
+    void pminsw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmaxsw(XmmRegister dst, XmmRegister src);
+    void pmaxsw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminsd(XmmRegister dst, XmmRegister src);
+    void pminsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmaxsd(XmmRegister dst, XmmRegister src);
+    void pmaxsd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminub(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void pminub(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void pmaxub(XmmRegister dst, XmmRegister src);
+    void pmaxub(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminuw(XmmRegister dst, XmmRegister src);
+    void pminuw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmaxuw(XmmRegister dst, XmmRegister src);
+    void pmaxuw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pminud(XmmRegister dst, XmmRegister src);
+    void pminud(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pmaxud(XmmRegister dst, XmmRegister src);
+    void pmaxud(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void minps(XmmRegister dst, XmmRegister src);  // no addr variant (for now)
+    void minps(X86_64XmmRegister dst, X86_64XmmRegister src);  // no addr variant (for now)
 
-    void maxps(XmmRegister dst, XmmRegister src);
+    void maxps(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void minpd(XmmRegister dst, XmmRegister src);
+    void minpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void maxpd(XmmRegister dst, XmmRegister src);
+    void maxpd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpeqb(XmmRegister dst, XmmRegister src);
+    void pcmpeqb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpeqw(XmmRegister dst, XmmRegister src);
+    void pcmpeqw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpeqd(XmmRegister dst, XmmRegister src);
+    void pcmpeqd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpeqq(XmmRegister dst, XmmRegister src);
+    void pcmpeqq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpgtb(XmmRegister dst, XmmRegister src);
+    void pcmpgtb(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpgtw(XmmRegister dst, XmmRegister src);
+    void pcmpgtw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpgtd(XmmRegister dst, XmmRegister src);
+    void pcmpgtd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void pcmpgtq(XmmRegister dst, XmmRegister src);  // SSE4.2
+    void pcmpgtq(X86_64XmmRegister dst, X86_64XmmRegister src);  // SSE4.2
 
-    void shufpd(XmmRegister dst, XmmRegister src, Immediate imm);
+    void shufpd(X86_64XmmRegister dst, X86_64XmmRegister src, X86_64Immediate imm);
 
-    void shufps(XmmRegister dst, XmmRegister src, Immediate imm);
+    void shufps(X86_64XmmRegister dst, X86_64XmmRegister src, X86_64Immediate imm);
 
-    void pshufd(XmmRegister dst, XmmRegister src, Immediate imm);
+    void pshufd(X86_64XmmRegister dst, X86_64XmmRegister src, X86_64Immediate imm);
 
-    void punpcklbw(XmmRegister dst, XmmRegister src);
+    void punpcklbw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpcklwd(XmmRegister dst, XmmRegister src);
+    void punpcklwd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpckldq(XmmRegister dst, XmmRegister src);
+    void punpckldq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpcklqdq(XmmRegister dst, XmmRegister src);
+    void punpcklqdq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpckhbw(XmmRegister dst, XmmRegister src);
+    void punpckhbw(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpckhwd(XmmRegister dst, XmmRegister src);
+    void punpckhwd(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpckhdq(XmmRegister dst, XmmRegister src);
+    void punpckhdq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void punpckhqdq(XmmRegister dst, XmmRegister src);
+    void punpckhqdq(X86_64XmmRegister dst, X86_64XmmRegister src);
 
-    void psllw(XmmRegister reg, Immediate shift_count);
+    void psllw(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void pslld(XmmRegister reg, Immediate shift_count);
+    void pslld(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psllq(XmmRegister reg, Immediate shift_count);
+    void psllq(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psraw(XmmRegister reg, Immediate shift_count);
+    void psraw(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psrad(XmmRegister reg, Immediate shift_count);
+    void psrad(X86_64XmmRegister reg, X86_64Immediate shift_count);
     // no psraq
 
-    void psrlw(XmmRegister reg, Immediate shift_count);
+    void psrlw(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psrld(XmmRegister reg, Immediate shift_count);
+    void psrld(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psrlq(XmmRegister reg, Immediate shift_count);
+    void psrlq(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void psrldq(XmmRegister reg, Immediate shift_count);
+    void psrldq(X86_64XmmRegister reg, X86_64Immediate shift_count);
 
-    void flds(Address src);
+    void flds(X86_64Address src);
 
-    void fstps(Address dst);
+    void fstps(X86_64Address dst);
 
-    void fsts(Address dst);
+    void fsts(X86_64Address dst);
 
-    void fldl(Address src);
+    void fldl(X86_64Address src);
 
-    void fstpl(Address dst);
+    void fstpl(X86_64Address dst);
 
-    void fstl(Address dst);
+    void fstl(X86_64Address dst);
 
     void fstsw();
 
     void fucompp();
 
-    void fnstcw(Address dst);
+    void fnstcw(X86_64Address dst);
 
-    void fldcw(Address src);
+    void fldcw(X86_64Address src);
 
-    void fistpl(Address dst);
+    void fistpl(X86_64Address dst);
 
-    void fistps(Address dst);
+    void fistps(X86_64Address dst);
 
-    void fildl(Address src);
+    void fildl(X86_64Address src);
 
-    void filds(Address src);
+    void filds(X86_64Address src);
 
     void fincstp();
 
-    void ffree(Immediate index);
+    void ffree(X86_64Immediate index);
 
     void fsin();
 
@@ -564,223 +566,223 @@ public interface X86_64AssemblerI {
 
     void fprem();
 
-    void xchgb(CpuRegister dst, CpuRegister src);
+    void xchgb(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xchgb(CpuRegister reg, Address address);
+    void xchgb(X86_64CpuRegister reg, X86_64Address address);
 
-    void xchgw(CpuRegister dst, CpuRegister src);
+    void xchgw(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xchgw(CpuRegister reg, Address address);
+    void xchgw(X86_64CpuRegister reg, X86_64Address address);
 
-    void xchgl(CpuRegister dst, CpuRegister src);
+    void xchgl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xchgl(CpuRegister reg, Address address);
+    void xchgl(X86_64CpuRegister reg, X86_64Address address);
 
-    void xchgq(CpuRegister dst, CpuRegister src);
+    void xchgq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xchgq(CpuRegister reg, Address address);
+    void xchgq(X86_64CpuRegister reg, X86_64Address address);
 
-    void xaddb(CpuRegister dst, CpuRegister src);
+    void xaddb(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xaddb(Address address, CpuRegister reg);
+    void xaddb(X86_64Address address, X86_64CpuRegister reg);
 
-    void xaddw(CpuRegister dst, CpuRegister src);
+    void xaddw(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xaddw(Address address, CpuRegister reg);
+    void xaddw(X86_64Address address, X86_64CpuRegister reg);
 
-    void xaddl(CpuRegister dst, CpuRegister src);
+    void xaddl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xaddl(Address address, CpuRegister reg);
+    void xaddl(X86_64Address address, X86_64CpuRegister reg);
 
-    void xaddq(CpuRegister dst, CpuRegister src);
+    void xaddq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xaddq(Address address, CpuRegister reg);
+    void xaddq(X86_64Address address, X86_64CpuRegister reg);
 
-    void cmpb(Address address, Immediate imm);
+    void cmpb(X86_64Address address, X86_64Immediate imm);
 
-    void cmpw(Address address, Immediate imm);
+    void cmpw(X86_64Address address, X86_64Immediate imm);
 
-    void cmpl(CpuRegister reg, Immediate imm);
+    void cmpl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void cmpl(CpuRegister reg0, CpuRegister reg1);
+    void cmpl(X86_64CpuRegister reg0, X86_64CpuRegister reg1);
 
-    void cmpl(CpuRegister reg, Address address);
+    void cmpl(X86_64CpuRegister reg, X86_64Address address);
 
-    void cmpl(Address address, CpuRegister reg);
+    void cmpl(X86_64Address address, X86_64CpuRegister reg);
 
-    void cmpl(Address address, Immediate imm);
+    void cmpl(X86_64Address address, X86_64Immediate imm);
 
-    void cmpq(CpuRegister reg0, CpuRegister reg1);
+    void cmpq(X86_64CpuRegister reg0, X86_64CpuRegister reg1);
 
-    void cmpq(CpuRegister reg0, Immediate imm);
+    void cmpq(X86_64CpuRegister reg0, X86_64Immediate imm);
 
-    void cmpq(CpuRegister reg0, Address address);
+    void cmpq(X86_64CpuRegister reg0, X86_64Address address);
 
-    void cmpq(Address address, Immediate imm);
+    void cmpq(X86_64Address address, X86_64Immediate imm);
 
-    void testl(CpuRegister reg1, CpuRegister reg2);
+    void testl(X86_64CpuRegister reg1, X86_64CpuRegister reg2);
 
-    void testl(CpuRegister reg, Address address);
+    void testl(X86_64CpuRegister reg, X86_64Address address);
 
-    void testl(CpuRegister reg, Immediate imm);
+    void testl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void testq(CpuRegister reg1, CpuRegister reg2);
+    void testq(X86_64CpuRegister reg1, X86_64CpuRegister reg2);
 
-    void testq(CpuRegister reg, Address address);
+    void testq(X86_64CpuRegister reg, X86_64Address address);
 
-    void testb(Address address, Immediate imm);
+    void testb(X86_64Address address, X86_64Immediate imm);
 
-    void testl(Address address, Immediate imm);
+    void testl(X86_64Address address, X86_64Immediate imm);
 
-    void andl(CpuRegister dst, Immediate imm);
+    void andl(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void andl(CpuRegister dst, CpuRegister src);
+    void andl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void andl(CpuRegister reg, Address address);
+    void andl(X86_64CpuRegister reg, X86_64Address address);
 
-    void andq(CpuRegister dst, Immediate imm);
+    void andq(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void andq(CpuRegister dst, CpuRegister src);
+    void andq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void andq(CpuRegister reg, Address address);
+    void andq(X86_64CpuRegister reg, X86_64Address address);
 
-    void andw(Address address, Immediate imm);
+    void andw(X86_64Address address, X86_64Immediate imm);
 
-    void orl(CpuRegister dst, Immediate imm);
+    void orl(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void orl(CpuRegister dst, CpuRegister src);
+    void orl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void orl(CpuRegister reg, Address address);
+    void orl(X86_64CpuRegister reg, X86_64Address address);
 
-    void orq(CpuRegister dst, CpuRegister src);
+    void orq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void orq(CpuRegister dst, Immediate imm);
+    void orq(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void orq(CpuRegister reg, Address address);
+    void orq(X86_64CpuRegister reg, X86_64Address address);
 
-    void xorl(CpuRegister dst, CpuRegister src);
+    void xorl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xorl(CpuRegister dst, Immediate imm);
+    void xorl(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void xorl(CpuRegister reg, Address address);
+    void xorl(X86_64CpuRegister reg, X86_64Address address);
 
-    void xorq(CpuRegister dst, Immediate imm);
+    void xorq(X86_64CpuRegister dst, X86_64Immediate imm);
 
-    void xorq(CpuRegister dst, CpuRegister src);
+    void xorq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void xorq(CpuRegister reg, Address address);
+    void xorq(X86_64CpuRegister reg, X86_64Address address);
 
-    void addl(CpuRegister dst, CpuRegister src);
+    void addl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void addl(CpuRegister reg, Immediate imm);
+    void addl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void addl(CpuRegister reg, Address address);
+    void addl(X86_64CpuRegister reg, X86_64Address address);
 
-    void addl(Address address, CpuRegister reg);
+    void addl(X86_64Address address, X86_64CpuRegister reg);
 
-    void addl(Address address, Immediate imm);
+    void addl(X86_64Address address, X86_64Immediate imm);
 
-    void addw(CpuRegister reg, Immediate imm);
+    void addw(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void addw(Address address, Immediate imm);
+    void addw(X86_64Address address, X86_64Immediate imm);
 
-    void addw(Address address, CpuRegister reg);
+    void addw(X86_64Address address, X86_64CpuRegister reg);
 
-    void addq(CpuRegister reg, Immediate imm);
+    void addq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void addq(CpuRegister dst, CpuRegister src);
+    void addq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void addq(CpuRegister dst, Address address);
+    void addq(X86_64CpuRegister dst, X86_64Address address);
 
-    void subl(CpuRegister dst, CpuRegister src);
+    void subl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void subl(CpuRegister reg, Immediate imm);
+    void subl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void subl(CpuRegister reg, Address address);
+    void subl(X86_64CpuRegister reg, X86_64Address address);
 
-    void subq(CpuRegister reg, Immediate imm);
+    void subq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void subq(CpuRegister dst, CpuRegister src);
+    void subq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void subq(CpuRegister dst, Address address);
+    void subq(X86_64CpuRegister dst, X86_64Address address);
 
     void cdq();
 
     void cqo();
 
-    void idivl(CpuRegister reg);
+    void idivl(X86_64CpuRegister reg);
 
-    void idivq(CpuRegister reg);
+    void idivq(X86_64CpuRegister reg);
 
-    void divl(CpuRegister reg);
+    void divl(X86_64CpuRegister reg);
 
-    void divq(CpuRegister reg);
+    void divq(X86_64CpuRegister reg);
 
-    void imull(CpuRegister dst, CpuRegister src);
+    void imull(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void imull(CpuRegister reg, Immediate imm);
+    void imull(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void imull(CpuRegister dst, CpuRegister src, Immediate imm);
+    void imull(X86_64CpuRegister dst, X86_64CpuRegister src, X86_64Immediate imm);
 
-    void imull(CpuRegister reg, Address address);
+    void imull(X86_64CpuRegister reg, X86_64Address address);
 
-    void imulq(CpuRegister src);
+    void imulq(X86_64CpuRegister src);
 
-    void imulq(CpuRegister dst, CpuRegister src);
+    void imulq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void imulq(CpuRegister reg, Immediate imm);
+    void imulq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void imulq(CpuRegister reg, Address address);
+    void imulq(X86_64CpuRegister reg, X86_64Address address);
 
-    void imulq(CpuRegister dst, CpuRegister reg, Immediate imm);
+    void imulq(X86_64CpuRegister dst, X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void imull(CpuRegister reg);
+    void imull(X86_64CpuRegister reg);
 
-    void imull(Address address);
+    void imull(X86_64Address address);
 
-    void mull(CpuRegister reg);
+    void mull(X86_64CpuRegister reg);
 
-    void mull(Address address);
+    void mull(X86_64Address address);
 
-    void shll(CpuRegister reg, Immediate imm);
+    void shll(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void shll(CpuRegister operand, CpuRegister shifter);
+    void shll(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void shrl(CpuRegister reg, Immediate imm);
+    void shrl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void shrl(CpuRegister operand, CpuRegister shifter);
+    void shrl(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void sarl(CpuRegister reg, Immediate imm);
+    void sarl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void sarl(CpuRegister operand, CpuRegister shifter);
+    void sarl(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void shlq(CpuRegister reg, Immediate imm);
+    void shlq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void shlq(CpuRegister operand, CpuRegister shifter);
+    void shlq(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void shrq(CpuRegister reg, Immediate imm);
+    void shrq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void shrq(CpuRegister operand, CpuRegister shifter);
+    void shrq(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void sarq(CpuRegister reg, Immediate imm);
+    void sarq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void sarq(CpuRegister operand, CpuRegister shifter);
+    void sarq(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void negl(CpuRegister reg);
+    void negl(X86_64CpuRegister reg);
 
-    void negq(CpuRegister reg);
+    void negq(X86_64CpuRegister reg);
 
-    void notl(CpuRegister reg);
+    void notl(X86_64CpuRegister reg);
 
-    void notq(CpuRegister reg);
+    void notq(X86_64CpuRegister reg);
 
-    void enter(Immediate imm);
+    void enter(X86_64Immediate imm);
 
     void leave();
 
     void ret();
 
-    void ret(Immediate imm);
+    void ret(X86_64Immediate imm);
 
     void nop();
 
@@ -788,87 +790,87 @@ public interface X86_64AssemblerI {
 
     void hlt();
 
-    void j(Condition condition, Label label);
+    void j(X86Condition condition, Label label);
 
-    void j(Condition condition, NearLabel label);
+    void j(X86Condition condition, X86NearLabel label);
 
-    void jrcxz(NearLabel label);
+    void jrcxz(X86NearLabel label);
 
-    void jmp(CpuRegister reg);
+    void jmp(X86_64CpuRegister reg);
 
-    void jmp(Address address);
+    void jmp(X86_64Address address);
 
     void jmp(Label label);
 
-    void jmp(NearLabel label);
+    void jmp(X86NearLabel label);
 
     X86_64AssemblerI lock();
 
-    void cmpxchgb(Address address, CpuRegister reg);
+    void cmpxchgb(X86_64Address address, X86_64CpuRegister reg);
 
-    void cmpxchgw(Address address, CpuRegister reg);
+    void cmpxchgw(X86_64Address address, X86_64CpuRegister reg);
 
-    void cmpxchgl(Address address, CpuRegister reg);
+    void cmpxchgl(X86_64Address address, X86_64CpuRegister reg);
 
-    void cmpxchgq(Address address, CpuRegister reg);
+    void cmpxchgq(X86_64Address address, X86_64CpuRegister reg);
 
     void mfence();
 
     X86_64AssemblerI gs();
 
-    void setcc(Condition condition, CpuRegister dst);
+    void setcc(X86Condition condition, X86_64CpuRegister dst);
 
-    void bswapl(CpuRegister dst);
+    void bswapl(X86_64CpuRegister dst);
 
-    void bswapq(CpuRegister dst);
+    void bswapq(X86_64CpuRegister dst);
 
-    void bsfl(CpuRegister dst, CpuRegister src);
+    void bsfl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void bsfl(CpuRegister dst, Address src);
+    void bsfl(X86_64CpuRegister dst, X86_64Address src);
 
-    void bsfq(CpuRegister dst, CpuRegister src);
+    void bsfq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void bsfq(CpuRegister dst, Address src);
+    void bsfq(X86_64CpuRegister dst, X86_64Address src);
 
-    void blsi(CpuRegister dst, CpuRegister src);  // no addr variant (for now)
+    void blsi(X86_64CpuRegister dst, X86_64CpuRegister src);  // no addr variant (for now)
 
-    void blsmsk(CpuRegister dst, CpuRegister src);  // no addr variant (for now)
+    void blsmsk(X86_64CpuRegister dst, X86_64CpuRegister src);  // no addr variant (for now)
 
-    void blsr(CpuRegister dst, CpuRegister src);  // no addr variant (for now)
+    void blsr(X86_64CpuRegister dst, X86_64CpuRegister src);  // no addr variant (for now)
 
-    void bsrl(CpuRegister dst, CpuRegister src);
+    void bsrl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void bsrl(CpuRegister dst, Address src);
+    void bsrl(X86_64CpuRegister dst, X86_64Address src);
 
-    void bsrq(CpuRegister dst, CpuRegister src);
+    void bsrq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void bsrq(CpuRegister dst, Address src);
+    void bsrq(X86_64CpuRegister dst, X86_64Address src);
 
-    void popcntl(CpuRegister dst, CpuRegister src);
+    void popcntl(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void popcntl(CpuRegister dst, Address src);
+    void popcntl(X86_64CpuRegister dst, X86_64Address src);
 
-    void popcntq(CpuRegister dst, CpuRegister src);
+    void popcntq(X86_64CpuRegister dst, X86_64CpuRegister src);
 
-    void popcntq(CpuRegister dst, Address src);
+    void popcntq(X86_64CpuRegister dst, X86_64Address src);
 
     void rdtsc();
 
-    void rorl(CpuRegister reg, Immediate imm);
+    void rorl(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void rorl(CpuRegister operand, CpuRegister shifter);
+    void rorl(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void roll(CpuRegister reg, Immediate imm);
+    void roll(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void roll(CpuRegister operand, CpuRegister shifter);
+    void roll(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void rorq(CpuRegister reg, Immediate imm);
+    void rorq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void rorq(CpuRegister operand, CpuRegister shifter);
+    void rorq(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
-    void rolq(CpuRegister reg, Immediate imm);
+    void rolq(X86_64CpuRegister reg, X86_64Immediate imm);
 
-    void rolq(CpuRegister operand, CpuRegister shifter);
+    void rolq(X86_64CpuRegister operand, X86_64CpuRegister shifter);
 
     void repne_scasb();
 
