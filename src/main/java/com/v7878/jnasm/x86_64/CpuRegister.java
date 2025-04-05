@@ -30,6 +30,10 @@ public enum CpuRegister {
         return value;
     }
 
+    public CpuRegister lowReg() {
+        return values()[lowBits()];
+    }
+
     public int lowBits() {
         return value & 7;
     }
