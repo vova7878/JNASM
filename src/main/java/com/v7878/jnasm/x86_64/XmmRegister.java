@@ -26,8 +26,12 @@ public enum XmmRegister {
         this.value = value;
     }
 
-    public int getValue() {
+    public int index() {
         return value;
+    }
+
+    public XmmRegister lowReg() {
+        return values()[lowBits()];
     }
 
     public int lowBits() {

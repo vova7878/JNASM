@@ -38,49 +38,49 @@ public class Operand {
         return (encodingAt(0) >> 6) & 3;
     }
 
-    private int raw_rm() {
-        return encodingAt(0) & 7;
-    }
-
     ScaleFactor scale() {
         return ScaleFactor.values()[(encodingAt(1) >> 6) & 3];
     }
 
-    private int raw_index() {
+    private int rawRM() {
+        return encodingAt(0) & 7;
+    }
+
+    private int rawIndex() {
         return (encodingAt(1) >> 3) & 7;
     }
 
-    private int raw_base() {
+    private int rawBase() {
         return encodingAt(1) & 7;
     }
 
-    CpuRegister low_rm() {
-        return CpuRegister.values()[raw_rm()];
+    CpuRegister lowRM() {
+        return CpuRegister.values()[rawRM()];
     }
 
-    CpuRegister low_base() {
-        return CpuRegister.values()[raw_base()];
+    CpuRegister lowBase() {
+        return CpuRegister.values()[rawBase()];
     }
 
     CpuRegister rm() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.values()[raw_rm() + ext];
+        return CpuRegister.values()[rawRM() + ext];
     }
 
     CpuRegister index() {
         int ext = (rex & 0x2) != 0 ? 8 : 0;
-        return CpuRegister.values()[raw_index() + ext];
+        return CpuRegister.values()[rawIndex() + ext];
     }
 
     CpuRegister base() {
         int ext = (rex & 0x1) != 0 ? 8 : 0;
-        return CpuRegister.values()[raw_base() + ext];
+        return CpuRegister.values()[rawBase() + ext];
     }
 
     int disp() {
         return switch (mod()) {
             // With mod 00b RBP is special and means disp32 (either in r/m or in SIB base).
-            case 0 -> (low_rm() == RBP || (low_rm() == RSP && low_base() == RBP)) ? disp32() : 0;
+            case 0 -> (lowRM() == RBP || (lowRM() == RSP && lowBase() == RBP)) ? disp32() : 0;
             case 1 -> disp8();
             case 2 -> disp32();
             // Mod 11b means reg/reg, so there is no address and consequently no displacement.
@@ -131,7 +131,7 @@ public class Operand {
         if (index.needsRex()) {
             rex |= 0x42;  // REX.00X0
         }
-        encoding[1] = (byte) ((scale.getValue() << 6) |
+        encoding[1] = (byte) ((scale.index() << 6) |
                 (index.lowBits() << 3) | base.lowBits());
         length = 2;
     }

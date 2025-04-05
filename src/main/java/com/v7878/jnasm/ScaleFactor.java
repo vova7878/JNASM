@@ -12,7 +12,11 @@ public enum ScaleFactor {
         this.value = value;
     }
 
-    public int getValue() {
+    public int index() {
         return value;
+    }
+
+    public int value() {
+        return 1 << value;
     }
 }

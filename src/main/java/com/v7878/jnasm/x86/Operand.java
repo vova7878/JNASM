@@ -80,7 +80,7 @@ public class Operand {
 
     boolean isRegister(CpuRegister reg) {
         return (encodingAt(0) & 0xF8) == 0xC0 &&  // Addressing mode is register only.
-                (encodingAt(0) & 0x07) == reg.getValue(); // CpuRegister codes match.
+                (encodingAt(0) & 0x07) == reg.index(); // CpuRegister codes match.
     }
 
     protected byte encodingAt(int index) {
@@ -90,14 +90,14 @@ public class Operand {
 
     protected void setModRM(int mod_in, CpuRegister rm) {
         assert (mod_in & ~3) == 0;
-        encoding[0] = (byte) ((mod_in << 6) | rm.getValue());
+        encoding[0] = (byte) ((mod_in << 6) | rm.index());
         length = 1;
     }
 
     protected void setSIB(ScaleFactor scale, CpuRegister index, CpuRegister base) {
         assert length == 1;
-        encoding[1] = (byte) ((scale.getValue() << 6) |
-                (index.getValue() << 3) | base.getValue());
+        encoding[1] = (byte) ((scale.index() << 6) |
+                (index.index() << 3) | base.index());
         length = 2;
     }
 

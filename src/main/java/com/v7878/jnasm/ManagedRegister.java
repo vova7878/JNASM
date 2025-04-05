@@ -3,36 +3,36 @@ package com.v7878.jnasm;
 public abstract class ManagedRegister {
     private static final int kNoRegister = -1;
 
-    protected final int id_;
+    protected final int id;
 
     protected ManagedRegister(int regId) {
-        this.id_ = regId;
+        this.id = regId;
     }
 
     protected ManagedRegister() {
-        this.id_ = kNoRegister;
+        this.id = kNoRegister;
     }
 
     public boolean equals(Object obj) {
         return obj instanceof ManagedRegister other
                 && this.getClass() == other.getClass()
-                && this.id_ == other.id_;
+                && this.id == other.id;
     }
 
     public boolean isNoRegister() {
-        return id_ == kNoRegister;
+        return id == kNoRegister;
     }
 
     public boolean isRegister() {
-        return id_ != kNoRegister;
+        return id != kNoRegister;
     }
 
     public int regId() {
-        return id_;
+        return id;
     }
 
     @Override
     public String toString() {
-        return "ManagedRegister(" + id_ + ")";
+        return "ManagedRegister(" + id + ")";
     }
 }

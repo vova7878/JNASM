@@ -45,39 +45,39 @@ public class X86ManagedRegister extends ManagedRegister {
     }
 
     public static X86ManagedRegister fromCpuRegister(CpuRegister r) {
-        return new X86ManagedRegister(r.ordinal());
+        return new X86ManagedRegister(r.index());
     }
 
     public static X86ManagedRegister fromXmmRegister(XmmRegister r) {
-        return new X86ManagedRegister(r.ordinal() + kNumberOfCpuRegIds);
+        return new X86ManagedRegister(r.index() + kNumberOfCpuRegIds);
     }
 
     public static X86ManagedRegister fromX87Register(X87Register r) {
-        return new X86ManagedRegister(r.ordinal() + kNumberOfCpuRegIds + kNumberOfXmmRegIds);
+        return new X86ManagedRegister(r.index() + kNumberOfCpuRegIds + kNumberOfXmmRegIds);
     }
 
     public boolean isCpuRegister() {
-        return 0 <= id_ && id_ < kNumberOfCpuRegIds;
+        return 0 <= id && id < kNumberOfCpuRegIds;
     }
 
     public boolean isXmmRegister() {
-        return 0 <= id_ - kNumberOfCpuRegIds && id_ - kNumberOfCpuRegIds < kNumberOfXmmRegIds;
+        return 0 <= id - kNumberOfCpuRegIds && id - kNumberOfCpuRegIds < kNumberOfXmmRegIds;
     }
 
     public boolean isX87Register() {
-        return 0 <= id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) && id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) < kNumberOfX87RegIds;
+        return 0 <= id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) && id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) < kNumberOfX87RegIds;
     }
 
     public CpuRegister asCpuRegister() {
-        return CpuRegister.values()[id_];
+        return CpuRegister.values()[id];
     }
 
     public XmmRegister asXmmRegister() {
-        return XmmRegister.values()[id_ - kNumberOfCpuRegIds];
+        return XmmRegister.values()[id - kNumberOfCpuRegIds];
     }
 
     public X87Register asX87Register() {
-        return X87Register.values()[id_ - (kNumberOfCpuRegIds + kNumberOfXmmRegIds)];
+        return X87Register.values()[id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds)];
     }
 
     @Override
@@ -91,6 +91,6 @@ public class X86ManagedRegister extends ManagedRegister {
         } else if (isX87Register()) {
             return "X87: " + asX87Register();
         }
-        return "???: " + id_;
+        return "???: " + id;
     }
 }

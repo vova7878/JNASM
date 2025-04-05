@@ -107,26 +107,26 @@ public class Address extends Operand {
                 var rm = rm();
                 if ((rm == ESP ? base() : rm) == EBP) {
                     if (rm == ESP) {
-                        yield "%d(,%%%s,%d)".formatted(disp32(), index(), 1 << scale().getValue());
+                        yield "%d(,%%%s,%d)".formatted(disp32(), index(), scale().value());
                     }
                     yield "%d".formatted(disp32());
                 }
                 if (rm != ESP || index() == ESP) {
                     yield "(%%%s)".formatted(rm);
                 }
-                yield "(%%%s,%%%s,%d)".formatted(base(), index(), 1 << scale().getValue());
+                yield "(%%%s,%%%s,%d)".formatted(base(), index(), scale().value());
             }
             case 1 -> {
                 if (rm() != ESP || index() == ESP) {
                     yield "%s(%%%s)".formatted(disp8(), rm());
                 }
-                yield "%s(%%%s,%%%s,%d)".formatted(disp8(), base(), index(), 1 << scale().getValue());
+                yield "%s(%%%s,%%%s,%d)".formatted(disp8(), base(), index(), scale().value());
             }
             case 2 -> {
                 if (rm() != ESP || index() == ESP) {
                     yield "%d(%%%s)".formatted(disp32(), rm());
                 }
-                yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), 1 << scale().getValue());
+                yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), scale().value());
             }
             // TODO?
             default -> "<address?>";

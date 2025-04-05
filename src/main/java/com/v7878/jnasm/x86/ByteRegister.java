@@ -16,11 +16,11 @@ public enum ByteRegister {
         this.value = value;
     }
 
-    public int getValue() {
+    public int index() {
         return value;
     }
 
     public static String toString(ByteRegister reg) {
-        return "ByteRegister[" + reg.getValue() + "]";
+        return "ByteRegister[" + reg.index() + "]";
     }
 }

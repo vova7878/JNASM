@@ -91,8 +91,8 @@ public class Address extends Operand {
     // Note that it may require a new addressing mode if displacement size is changed.
     public static Address displace(Address addr, int disp) {
         int newDisp = addr.disp() + disp;
-        boolean sib = addr.low_rm() == RSP;
-        boolean rbp = RBP == (sib ? addr.low_base() : addr.low_rm());
+        boolean sib = addr.lowRM() == RSP;
+        boolean rbp = RBP == (sib ? addr.lowBase() : addr.lowRM());
 
         Address newAddr = new Address();
         if (addr.mod() == 0 && rbp) {
@@ -132,28 +132,28 @@ public class Address extends Operand {
     public String toString() {
         return switch (mod()) {
             case 0 -> {
-                if ((low_rm() == RSP ? low_base() : low_rm()) == RBP) {
-                    if (low_rm() == RSP) {
-                        yield "%d(,%%%s,%d)".formatted(disp32(), index(), 1 << scale().getValue());
+                if ((lowRM() == RSP ? lowBase() : lowRM()) == RBP) {
+                    if (lowRM() == RSP) {
+                        yield "%d(,%%%s,%d)".formatted(disp32(), index(), scale().value());
                     }
                     yield "%d".formatted(disp32());
                 }
-                if (low_rm() != RSP || index() == RSP) {
+                if (lowRM() != RSP || index() == RSP) {
                     yield "(%%%s)".formatted(rm());
                 }
-                yield "(%%%s,%%%s,%d)".formatted(base(), index(), 1 << scale().getValue());
+                yield "(%%%s,%%%s,%d)".formatted(base(), index(), scale().value());
             }
             case 1 -> {
-                if (low_rm() != RSP || index() == RSP) {
+                if (lowRM() != RSP || index() == RSP) {
                     yield "%s(%%%s)".formatted(disp8(), rm());
                 }
-                yield "%s(%%%s,%%%s,%d)".formatted(disp8(), base(), index(), 1 << scale().getValue());
+                yield "%s(%%%s,%%%s,%d)".formatted(disp8(), base(), index(), scale().value());
             }
             case 2 -> {
-                if (low_rm() != RSP || index() == RSP) {
+                if (lowRM() != RSP || index() == RSP) {
                     yield "%d(%%%s)".formatted(disp32(), rm());
                 }
-                yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), 1 << scale().getValue());
+                yield "%d(%%%s,%%%s,%d)".formatted(disp32(), base(), index(), scale().value());
             }
             // TODO?
             default -> "<address?>";

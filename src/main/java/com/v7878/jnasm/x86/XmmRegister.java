@@ -18,7 +18,7 @@ public enum XmmRegister {
         this.value = value;
     }
 
-    public int getValue() {
+    public int index() {
         return value;
     }
 }

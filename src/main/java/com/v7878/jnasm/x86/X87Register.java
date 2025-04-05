@@ -18,7 +18,7 @@ public enum X87Register {
         this.value = value;
     }
 
-    public int getValue() {
+    public int index() {
         return value;
     }
 }
