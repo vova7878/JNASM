@@ -55,11 +55,13 @@ public class X86ManagedRegister extends ManagedRegister {
     }
 
     public boolean isXmmRegister() {
-        return 0 <= id - kNumberOfCpuRegIds && id - kNumberOfCpuRegIds < kNumberOfXmmRegIds;
+        int test = id - kNumberOfCpuRegIds;
+        return 0 <= test && test < kNumberOfXmmRegIds;
     }
 
     public boolean isX87Register() {
-        return 0 <= id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) && id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds) < kNumberOfX87RegIds;
+        int test = id - (kNumberOfCpuRegIds + kNumberOfXmmRegIds);
+        return 0 <= test && test < kNumberOfX87RegIds;
     }
 
     public X86CpuRegister asCpuRegister() {
