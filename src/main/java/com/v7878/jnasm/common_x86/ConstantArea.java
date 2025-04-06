@@ -1,4 +1,4 @@
-package com.v7878.jnasm;
+package com.v7878.jnasm.common_x86;
 
 import java.util.ArrayList;
 import java.util.Arrays;
