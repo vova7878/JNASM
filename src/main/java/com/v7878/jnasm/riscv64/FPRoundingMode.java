@@ -20,7 +20,7 @@ public enum FPRoundingMode {
         this.value = value;
     }
 
-    public int index() {
+    public int value() {
         return value;
     }
 }
