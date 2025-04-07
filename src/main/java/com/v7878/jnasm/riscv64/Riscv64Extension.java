@@ -22,6 +22,8 @@ public enum Riscv64Extension {
     // Simple 16-bit operations not present in the original "C" extension.
     kZcb(13);
 
+    public static final int kRiscv64AllExtensionsMask = (1 << (kZcb.index() + 1)) - 1;
+
     private final int value;
 
     Riscv64Extension(int value) {
@@ -34,5 +36,9 @@ public enum Riscv64Extension {
 
     public int index() {
         return value;
+    }
+
+    public int extensionBit() {
+        return 1 << value;
     }
 }

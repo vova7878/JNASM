@@ -484,6 +484,7 @@ public interface RV64AssemblerI {
 
     void FMvDX(FRegister rd, XRegister rs1);
 
+    // TODO: FPClassMaskType enum
     // FP classify instructions (RV32F+RV32D): opcode = 0x53, funct3 = 0x1, funct7 = 0b111X00D
     void FClassS(XRegister rd, FRegister rs1);
 
@@ -2269,6 +2270,7 @@ public interface RV64AssemblerI {
 
     void RdInstret(XRegister rd);
 
+    // TODO: CSRAddress enum
     void Csrr(XRegister rd, int /* 12-bit */ csr);
 
     void Csrw(int /* 12-bit */ csr, XRegister rs);
