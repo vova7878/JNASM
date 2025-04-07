@@ -209,6 +209,18 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         return isUInt(12, value);
     }
 
+    private static boolean isInt13(int value) {
+        return isInt(13, value);
+    }
+
+    private static boolean isUInt20(int value) {
+        return isUInt(20, value);
+    }
+
+    private static boolean isInt21(int value) {
+        return isInt(21, value);
+    }
+
     private static boolean isAligned(int value, int alignment) {
         // TODO;
         throw new UnsupportedOperationException();
@@ -241,7 +253,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     // +-----------------+------------+
     // msb                           lsb
     private static int MaskLeastSignificant(int bits) {
-        // TODO: CHECK_GE(32, bits) << "Bits out of range for type T";
+        assert bits <= 32 : "Bits out of range for int";
         if (bits >= 32) {
             return -1;
         } else {
@@ -265,7 +277,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     // +--------+------------+--------+
     //                       lsb      0
     private static int BitFieldClear(int value, int lsb, int width) {
-        // TODO: CHECK_GE(32, lsb + width) << "Bit field out of range for value";
+        assert lsb + width <= 32 : "Bit field out of range for value";
         final int mask = MaskLeastSignificant(width);
 
         return value & ~(mask << lsb);
@@ -273,7 +285,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Inserts the contents of 'data' into bitfield of 'value'  starting
     // at the least significant bit "lsb" with a bitwidth of 'width'.
-    // Note: data must be within range of [MinInt(width), MaxInt(width)].
     // (Equivalent of ARM BFI instruction).
     //
     // Given (data):
@@ -289,13 +300,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     // +--------+------------+--------+
     //                       lsb      0
     private static int BitFieldInsert(int value, int data, int lsb, int width) {
-        // TODO: DCHECK_GE(32, lsb + width) << "Bit field out of range for value";
-        // TODO: if (width != 0u) {
-        // TODO:     DCHECK_GE(MaxInt<T2>(width), data) << "Data out of range [too large] for bitwidth";
-        // TODO:     DCHECK_LE(MinInt<T2>(width), data) << "Data out of range [too small] for bitwidth";
-        // TODO: } else {
-        // TODO:     DCHECK_EQ(0, data) << "Data out of range [nonzero] for bitwidth 0";
-        // TODO: }
+        assert lsb + width <= 32 : "Bit field out of range for value";
         final int data_mask = MaskLeastSignificant(width);
         final int value_cleared = BitFieldClear(value, lsb, width);
 
@@ -319,7 +324,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //                                0
     // where S is the highest bit in 'bitfield'.
     private static int BitFieldExtract(int value, int lsb, int width) {
-        // TODO: DCHECK_GE(32, lsb + width) << "Bit field out of range for value";
+        assert lsb + width <= 32 : "Bit field out of range for value";
         return (value >>> lsb) & MaskLeastSignificant(width);
     }
 
@@ -386,7 +391,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     // Rearrange given offset in the way {offset[0] | offset[1]}
-    abstract int EncodeOffset0_1(int offset);
+    private int EncodeOffset0_1(int offset) {
+        CHECK(isUInt2(offset));
+        return offset >>> 1 | (offset & 1) << 1;
+    }
 
     // Rearrange given offset, scaled by 4, in the way {offset[5:2] | offset[7:6]}
     abstract int ExtractOffset52_76(int offset);
@@ -411,7 +419,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . . . . . . . | . . . . | . . | . . . . | . . . . . . ]
     //   [        imm11:0            rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitI(int imm12, int rs1, int funct3, int rd, int opcode);
+    private void EmitI(int imm12, int rs1, int funct3, int rd, int opcode) {
+        CHECK(isInt12(imm12));
+        CHECK(isUInt5(rs1));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(rd));
+        CHECK(isUInt7(opcode));
+        int encoding = (imm12 << 20) | (rs1 << 15) |
+                (funct3 << 12) | (rd << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // R-type instruction:
     //
@@ -420,7 +437,17 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . . | . . . . | . . . . | . . | . . . . | . . . . . . ]
     //   [   funct7        rs2       rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitR(int funct7, int rs2, int rs1, int funct3, int rd, int opcode);
+    private void EmitR(int funct7, int rs2, int rs1, int funct3, int rd, int opcode) {
+        CHECK(isUInt7(funct7));
+        CHECK(isUInt5(rs2));
+        CHECK(isUInt5(rs1));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(rd));
+        CHECK(isUInt7(opcode));
+        int encoding = (funct7 << 25) | (rs2 << 20) | (rs1 << 15)
+                | (funct3 << 12) | (rd << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // R-type instruction variant for floating-point fused multiply-add/sub (F[N]MADD/ F[N]MSUB):
     //
@@ -429,7 +456,18 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . | . | . . . . | . . . . | . . | . . . . | . . . . . . ]
     //   [  rs3     fmt    rs2       rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitR4(int rs3, int fmt, int rs2, int rs1, int funct3, int rd, int opcode);
+    private void EmitR4(int rs3, int fmt, int rs2, int rs1, int funct3, int rd, int opcode) {
+        CHECK(isUInt5(rs3));
+        CHECK(isUInt2(fmt));
+        CHECK(isUInt5(rs2));
+        CHECK(isUInt5(rs1));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(rd));
+        CHECK(isUInt7(opcode));
+        int encoding = (rs3 << 27) | (fmt << 25) | (rs2 << 20)
+                | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // S-type instruction:
     //
@@ -438,7 +476,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . . | . . . . | . . . . | . . | . . . . | . . . . . . ]
     //   [   imm11:5       rs2       rs1   funct3   imm4:0      opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitS(int imm12, int rs2, int rs1, int funct3, int opcode);
+    private void EmitS(int imm12, int rs2, int rs1, int funct3, int opcode) {
+        CHECK(isInt12(imm12));
+        CHECK(isUInt5(rs2));
+        CHECK(isUInt5(rs1));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt7(opcode));
+        int encoding = ((imm12 & 0xFE0) << 20) | (rs2 << 20) | (rs1 << 15)
+                | (funct3 << 12) | ((imm12 & 0x1F) << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // I-type instruction variant for shifts (SLLI / SRLI / SRAI):
     //
@@ -447,7 +494,17 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . | . . . . . | . . . . | . . | . . . . | . . . . . . ]
     //   [  imm11:6  imm5:0(shamt)   rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitI6(int funct6, int imm6, XRegister rs1, int funct3, XRegister rd, int opcode);
+    private void EmitI6(int funct6, int imm6, XRegister rs1, int funct3, XRegister rd, int opcode) {
+        CHECK(isUInt6(funct6));
+        CHECK(isUInt6(imm6));
+        CHECK(isUInt5(rs1.index()));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(rd.index()));
+        CHECK(isUInt7(opcode));
+        int encoding = (funct6 << 26) | (imm6 << 20) | (rs1.index() << 15)
+                | (funct3 << 12) | (rd.index() << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // B-type instruction:
     //
@@ -456,7 +513,20 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ | . . . . . | . . . . | . . . . | . . | . . . | | . . . . . . ]
     //  imm12 imm11:5      rs2       rs1   funct3 imm4:1 imm11  opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitB(int offset, XRegister rs2, XRegister rs1, int funct3, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitB(int offset, XRegister rs2, XRegister rs1, int funct3, int opcode) {
+        CHECK_ALIGNED(offset, 2);
+        CHECK(isInt13(offset));
+        CHECK(isUInt5(rs2.index()));
+        CHECK(isUInt5(rs1.index()));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt7(opcode));
+        int imm12 = ((offset) >> 1) & 0xfff;
+        int encoding = ((imm12 & 0x800) << (31 - 11)) | ((imm12 & 0x03f0) << (25 - 4))
+                | (rs2.index() << 20) | (rs1.index() << 15) | (funct3 << 12)
+                | ((imm12 & 0xf) << 8) | ((imm12 & 0x400) >> (10 - 7)) | opcode;
+        Emit32(encoding);
+    }
 
     // U-type instruction:
     //
@@ -465,7 +535,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . . . . . . . . . . . . . . . | . . . . | . . . . . . ]
     //   [                imm31:12                    rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitU(int imm20, XRegister rd, int opcode);
+    private void EmitU(int imm20, XRegister rd, int opcode) {
+        CHECK(isUInt20(imm20));
+        CHECK(isUInt5(rd.index()));
+        CHECK(isUInt7(opcode));
+        int encoding = (imm20 << 12) | (rd.index() << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // J-type instruction:
     //
@@ -474,7 +550,18 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ | . . . . . . . . . | | . . . . . . . | . . . . | . . . . . . ]
     //  imm20    imm10:1      imm11   imm19:12        rd        opcode   ]
     //   -----------------------------------------------------------------
-    abstract void EmitJ(int offset, XRegister rd, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitJ(int offset, XRegister rd, int opcode) {
+        CHECK_ALIGNED(offset, 2);
+        CHECK(isInt21(offset));
+        CHECK(isUInt5(rd.index()));
+        CHECK(isUInt7(opcode));
+        int imm20 = (offset >> 1) & 0xfffff;
+        int encoding = ((imm20 & 0x80000) << (31 - 19)) | ((imm20 & 0x03ff) << 21)
+                | ((imm20 & 0x400) << (20 - 10)) | ((imm20 & 0x7f800) << (12 - 11))
+                | (rd.index() << 7) | opcode;
+        Emit32(encoding);
+    }
 
     // Compressed Instruction Encodings
 
@@ -485,8 +572,17 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . | . . . . | . . . . | . ]
     //   [ func4   rd/rs1      rs2    op ]
     //   ---------------------------------
-    //
-    abstract void EmitCR(int funct4, XRegister rd_rs1, XRegister rs2, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCR(int funct4, XRegister rd_rs1, XRegister rs2, int opcode) {
+        CHECK(isUInt4(funct4));
+        CHECK(isUInt5(rd_rs1.index()));
+        CHECK(isUInt5(rs2.index()));
+        CHECK(isUInt2(opcode));
+
+        int encoding = (funct4 << 12) | (rd_rs1.index() << 7)
+                | (rs2.index() << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // CI-type instruction:
     //
@@ -495,8 +591,19 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | | . . . . | . . . . | . ]
     //   [func3 imm rd/rs1     imm    op ]
     //   ---------------------------------
-    //
-    abstract void EmitCI(int funct3, int rd_rs1, int imm6, int opcode);
+    private void EmitCI(int funct3, int rd_rs1, int imm6, int opcode) {
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(rd_rs1));
+        CHECK(isUInt6(imm6));
+        CHECK(isUInt2(opcode));
+
+        int immH1 = BitFieldExtract(imm6, 5, 1);
+        int immL5 = BitFieldExtract(imm6, 0, 5);
+
+        int encoding = (funct3 << 13) | (immH1 << 12) |
+                (rd_rs1 << 7) | (immL5 << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // CSS-type instruction:
     //
@@ -505,8 +612,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | . . . . . | . . . . | . ]
     //   [func3     imm6      rs2     op ]
     //   ---------------------------------
-    //
-    abstract void EmitCSS(int funct3, int offset6, int rs2, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCSS(int funct3, int offset6, int rs2, int opcode) {
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt6(offset6));
+        CHECK(isUInt5(rs2));
+        CHECK(isUInt2(opcode));
+
+        int encoding = (funct3 << 13) | (offset6 << 7) | (rs2 << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // CIW-type instruction:
     //
@@ -515,8 +630,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | . . . . . . . | . . | . ]
     //   [func3     imm8         rd'  op ]
     //   ---------------------------------
-    //
-    abstract void EmitCIW(int funct3, int imm8, int rd_s, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCIW(int funct3, int imm8, int rd_s, int opcode) {
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt8(imm8));
+        CHECK(IsShortReg(rd_s));
+        CHECK(isUInt2(opcode));
+
+        int encoding = (funct3 << 13) | (imm8 << 5) | (EncodeShortReg(rd_s) << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // CL/S-type instruction:
     //
@@ -525,8 +648,21 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | . . | . . | . | . . | . ]
     //   [func3  imm   rs1' imm rds2' op ]
     //   ---------------------------------
-    //
-    abstract void EmitCM(int funct3, int imm5, XRegister rs1_s, int rd_rs2_s, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCM(int funct3, int imm5, XRegister rs1_s, int rd_rs2_s, int opcode) {
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt5(imm5));
+        CHECK(IsShortReg(rs1_s));
+        CHECK(IsShortReg(rd_rs2_s));
+        CHECK(isUInt2(opcode));
+
+        int immH3 = BitFieldExtract(imm5, 2, 3);
+        int immL2 = BitFieldExtract(imm5, 0, 2);
+
+        int encoding = (funct3 << 13) | (immH3 << 10) | (EncodeShortReg(rs1_s) << 7)
+                | (immL2 << 5) | (EncodeShortReg(rd_rs2_s) << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // CA-type instruction:
     //
@@ -535,15 +671,25 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . . . . | . . | . | . . | . ]
     //   [    funct6 rds1' funct2 rs2' op]
     //   ---------------------------------
-    //
-    abstract void EmitCA(int funct6, XRegister rd_rs1_s, int funct2, int rs2_v, int opcode);
+    private void EmitCA(int funct6, XRegister rd_rs1_s, int funct2, int rs2_v, int opcode) {
+        CHECK(isUInt6(funct6));
+        CHECK(IsShortReg(rd_rs1_s));
+        CHECK(isUInt2(funct2));
+        CHECK(isUInt3(rs2_v));
+        CHECK(isUInt2(opcode));
 
-    void EmitCAReg(int funct6, XRegister rd_rs1_s, int funct2, XRegister rs2_s, int opcode) {
+        int encoding = (funct6 << 10) | (EncodeShortReg(rd_rs1_s) << 7)
+                | (funct2 << 5) | (rs2_v << 2) | opcode;
+        Emit16(encoding);
+    }
+
+    private void EmitCAReg(int funct6, XRegister rd_rs1_s, int funct2, XRegister rs2_s, int opcode) {
         CHECK(IsShortReg(rs2_s));
         EmitCA(funct6, rd_rs1_s, funct2, EncodeShortReg(rs2_s), opcode);
     }
 
-    void EmitCAImm(int funct6, XRegister rd_rs1_s, int funct2, int funct3, int opcode) {
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCAImm(int funct6, XRegister rd_rs1_s, int funct2, int funct3, int opcode) {
         EmitCA(funct6, rd_rs1_s, funct2, funct3, opcode);
     }
 
@@ -554,14 +700,46 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | . . | . . | . . . . | . ]
     //   [func3 offset rs1'   offset  op ]
     //   ---------------------------------
-    //
-    abstract void EmitCB(int funct3, int offset8, XRegister rd_rs1_s, int opcode);
+    private void EmitCB(int funct3, int offset8, XRegister rd_rs1_s, int opcode) {
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt8(offset8));
+        CHECK(IsShortReg(rd_rs1_s));
+        CHECK(isUInt2(opcode));
+
+        int offsetH3 = BitFieldExtract(offset8, 5, 3);
+        int offsetL5 = BitFieldExtract(offset8, 0, 5);
+
+        int encoding = (funct3 << 13) | (offsetH3 << 10) |
+                (EncodeShortReg(rd_rs1_s) << 7) | (offsetL5 << 2) | opcode;
+        Emit16(encoding);
+    }
 
     // Wrappers for EmitCB with different imm bit permutation
 
-    abstract void EmitCBBranch(int funct3, int offset, XRegister rs1_s, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCBBranch(int funct3, int offset, XRegister rs1_s, int opcode) {
+        CHECK(isInt9(offset));
+        CHECK_ALIGNED(offset, 2);
 
-    abstract void EmitCBArithmetic(int funct3, int funct2, int imm, XRegister rd_s, int opcode);
+        // offset[8|4:3]
+        int offsetH3 = (BitFieldExtract(offset, 8, 1) << 2) |
+                BitFieldExtract(offset, 3, 2);
+        // offset[7:6|2:1|5]
+        int offsetL5 = (BitFieldExtract(offset, 6, 2) << 3) |
+                (BitFieldExtract(offset, 1, 2) << 1) |
+                BitFieldExtract(offset, 5, 1);
+
+        EmitCB(funct3, BitFieldInsert(offsetL5, offsetH3, 5, 3), rs1_s, opcode);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCBArithmetic(int funct3, int funct2, int imm, XRegister rd_s, int opcode) {
+        int imm_5 = BitFieldExtract(imm, 5, 1);
+        int immH3 = BitFieldInsert(funct2, imm_5, 2, 1);
+        int immL5 = BitFieldExtract(imm, 0, 5);
+
+        EmitCB(funct3, BitFieldInsert(immL5, immH3, 5, 3), rd_s, opcode);
+    }
 
     // CJ-type instruction:
     //
@@ -570,8 +748,28 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [ . . | . . . . . . . . . . | . ]
     //   [func3    jump target 11     op ]
     //   ---------------------------------
-    //
-    abstract void EmitCJ(int funct3, int offset, int opcode);
+    @SuppressWarnings("SameParameterValue")
+    private void EmitCJ(int funct3, int offset, int opcode) {
+        CHECK_ALIGNED(offset, 2);
+        CHECK(isInt12(offset));
+        CHECK(isUInt3(funct3));
+        CHECK(isUInt2(opcode));
+
+        // offset[11|4|9:8|10|6|7|3:1|5]
+        int jumpt = (BitFieldExtract(offset, 11, 1) << 10) |
+                (BitFieldExtract(offset, 4, 1) << 9) |
+                (BitFieldExtract(offset, 8, 2) << 7) |
+                (BitFieldExtract(offset, 10, 1) << 6) |
+                (BitFieldExtract(offset, 6, 1) << 5) |
+                (BitFieldExtract(offset, 7, 1) << 4) |
+                (BitFieldExtract(offset, 1, 3) << 1) |
+                BitFieldExtract(offset, 5, 1);
+
+        CHECK(isUInt11(jumpt));
+
+        int encoding = funct3 << 13 | jumpt << 2 | opcode;
+        Emit16(encoding);
+    }
 
     //_____________________________ RV64 VARIANTS extension _____________________________//
 
