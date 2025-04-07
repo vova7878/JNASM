@@ -139,72 +139,107 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(a >= b);
     }
 
-    abstract boolean isInt1(int value);
+    private static boolean isUInt(int width, int value) {
+        // TODO;
+        throw new UnsupportedOperationException();
+    }
 
-    abstract boolean isUInt1(int value);
+    private static boolean isInt(int width, int value) {
+        // TODO;
+        throw new UnsupportedOperationException();
+    }
 
-    abstract boolean isInt2(int value);
+    private static boolean isUInt2(int value) {
+        return isUInt(2, value);
+    }
 
-    abstract boolean isUInt2(int value);
+    private static boolean isUInt3(int value) {
+        return isUInt(3, value);
+    }
 
-    abstract boolean isInt3(int value);
+    private static boolean isUInt4(int value) {
+        return isUInt(4, value);
+    }
 
-    abstract boolean isUInt3(int value);
+    private static boolean isUInt5(int value) {
+        return isUInt(5, value);
+    }
 
-    abstract boolean isInt4(int value);
+    private static boolean isInt6(int value) {
+        return isInt(6, value);
+    }
 
-    abstract boolean isUInt4(int value);
+    private static boolean isUInt6(int value) {
+        return isUInt(6, value);
+    }
 
-    abstract boolean isInt5(int value);
+    private static boolean isUInt7(int value) {
+        return isUInt(7, value);
+    }
 
-    abstract boolean isUInt5(int value);
+    private static boolean isUInt8(int value) {
+        return isUInt(8, value);
+    }
 
-    abstract boolean isInt6(int value);
+    private static boolean isInt9(int value) {
+        return isInt(9, value);
+    }
 
-    abstract boolean isUInt6(int value);
+    private static boolean isUInt9(int value) {
+        return isUInt(9, value);
+    }
 
-    abstract boolean isInt7(int value);
+    private static boolean isInt10(int value) {
+        return isInt(10, value);
+    }
 
-    abstract boolean isUInt7(int value);
+    private static boolean isUInt10(int value) {
+        return isUInt(10, value);
+    }
 
-    abstract boolean isInt8(int value);
+    private static boolean isUInt11(int value) {
+        return isUInt(11, value);
+    }
 
-    abstract boolean isUInt8(int value);
+    private static boolean isInt12(int value) {
+        return isInt(12, value);
+    }
 
-    abstract boolean isInt9(int value);
+    private static boolean isUInt12(int value) {
+        return isUInt(12, value);
+    }
 
-    abstract boolean isUInt9(int value);
+    private static boolean isAligned(int value, int alignment) {
+        // TODO;
+        throw new UnsupportedOperationException();
+    }
 
-    abstract boolean isInt10(int value);
+    private static boolean isAligned2(int value) {
+        return isAligned(value, 2);
+    }
 
-    abstract boolean isUInt10(int value);
+    private static boolean isAligned4(int value) {
+        return isAligned(value, 4);
+    }
 
-    abstract boolean isInt11(int value);
+    private static boolean isAligned8(int value) {
+        return isAligned(value, 8);
+    }
 
-    abstract boolean isUInt11(int value);
-
-    abstract boolean isInt12(int value);
-
-    abstract boolean isUInt12(int value);
-
-    abstract boolean isAligned2(int value);
-
-    abstract boolean isAligned4(int value);
-
-    abstract boolean isAligned8(int value);
-
-    abstract boolean isAligned16(int value);
+    private static boolean isAligned16(int value) {
+        return isAligned(value, 16);
+    }
 
     // Create a mask for the least significant "bits"
-// The returned value is always unsigned to prevent undefined behavior for bitwise ops.
-//
-// Given 'bits',
-// Returns:
-//                   <--- bits --->
-// +-----------------+------------+
-// | 0 ............0 |   1.....1  |
-// +-----------------+------------+
-// msb                           lsb
+    // The returned value is always unsigned to prevent undefined behavior for bitwise ops.
+    //
+    // Given 'bits',
+    // Returns:
+    //                   <--- bits --->
+    // +-----------------+------------+
+    // | 0 ............0 |   1.....1  |
+    // +-----------------+------------+
+    // msb                           lsb
     private static int MaskLeastSignificant(int bits) {
         // TODO: CHECK_GE(32, bits) << "Bits out of range for type T";
         if (bits >= 32) {
@@ -215,20 +250,20 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     // Clears the bitfield starting at the least significant bit "lsb" with a bitwidth of 'width'.
-// (Equivalent of ARM BFC instruction).
-//
-// Given:
-//           <-- width  -->
-// +--------+------------+--------+
-// | ABC... |  bitfield  | XYZ... +
-// +--------+------------+--------+
-//                       lsb      0
-// Returns:
-//           <-- width  -->
-// +--------+------------+--------+
-// | ABC... | 0........0 | XYZ... +
-// +--------+------------+--------+
-//                       lsb      0
+    // (Equivalent of ARM BFC instruction).
+    //
+    // Given:
+    //           <-- width  -->
+    // +--------+------------+--------+
+    // | ABC... |  bitfield  | XYZ... +
+    // +--------+------------+--------+
+    //                       lsb      0
+    // Returns:
+    //           <-- width  -->
+    // +--------+------------+--------+
+    // | ABC... | 0........0 | XYZ... +
+    // +--------+------------+--------+
+    //                       lsb      0
     private static int BitFieldClear(int value, int lsb, int width) {
         // TODO: CHECK_GE(32, lsb + width) << "Bit field out of range for value";
         final int mask = MaskLeastSignificant(width);
@@ -237,22 +272,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     // Inserts the contents of 'data' into bitfield of 'value'  starting
-// at the least significant bit "lsb" with a bitwidth of 'width'.
-// Note: data must be within range of [MinInt(width), MaxInt(width)].
-// (Equivalent of ARM BFI instruction).
-//
-// Given (data):
-//           <-- width  -->
-// +--------+------------+--------+
-// | ABC... |  bitfield  | XYZ... +
-// +--------+------------+--------+
-//                       lsb      0
-// Returns:
-//           <-- width  -->
-// +--------+------------+--------+
-// | ABC... | 0...data   | XYZ... +
-// +--------+------------+--------+
-//                       lsb      0
+    // at the least significant bit "lsb" with a bitwidth of 'width'.
+    // Note: data must be within range of [MinInt(width), MaxInt(width)].
+    // (Equivalent of ARM BFI instruction).
+    //
+    // Given (data):
+    //           <-- width  -->
+    // +--------+------------+--------+
+    // | ABC... |  bitfield  | XYZ... +
+    // +--------+------------+--------+
+    //                       lsb      0
+    // Returns:
+    //           <-- width  -->
+    // +--------+------------+--------+
+    // | ABC... | 0...data   | XYZ... +
+    // +--------+------------+--------+
+    //                       lsb      0
     private static int BitFieldInsert(int value, int data, int lsb, int width) {
         // TODO: DCHECK_GE(32, lsb + width) << "Bit field out of range for value";
         // TODO: if (width != 0u) {
@@ -268,21 +303,21 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     // Extracts the bitfield starting at the least significant bit "lsb" with a bitwidth of 'width'.
-// Signed types are sign-extended during extraction. (Equivalent of ARM UBFX/SBFX instruction).
-//
-// Given:
-//           <-- width   -->
-// +--------+-------------+-------+
-// |        |   bitfield  |       +
-// +--------+-------------+-------+
-//                       lsb      0
-// Returns:
-//                  <-- width   -->
-// +----------------+-------------+
-// | 0...        0  |   bitfield  |
-// +----------------+-------------+
-//                                0
-// where S is the highest bit in 'bitfield'.
+    // Signed types are sign-extended during extraction. (Equivalent of ARM UBFX/SBFX instruction).
+    //
+    // Given:
+    //           <-- width   -->
+    // +--------+-------------+-------+
+    // |        |   bitfield  |       +
+    // +--------+-------------+-------+
+    //                       lsb      0
+    // Returns:
+    //                  <-- width   -->
+    // +----------------+-------------+
+    // | 0...        0  |   bitfield  |
+    // +----------------+-------------+
+    //                                0
+    // where S is the highest bit in 'bitfield'.
     private static int BitFieldExtract(int value, int lsb, int width) {
         // TODO: DCHECK_GE(32, lsb + width) << "Bit field out of range for value";
         return (value >>> lsb) & MaskLeastSignificant(width);
@@ -378,12 +413,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   -----------------------------------------------------------------
     abstract void EmitI(int imm12, int rs1, int funct3, int rd, int opcode);
 
-    abstract void EmitI(int offset, XRegister rs1, int funct3, XRegister rd, int opcode);
-
-    abstract void EmitI(int offset, XRegister rs1, int i, FRegister rd, int i1);
-
-    abstract void EmitI(int i, int uimm, int value, XRegister rd, int i1);
-
     // R-type instruction:
     //
     //    31         25 24     20 19     15 14 12 11      7 6           0
@@ -392,38 +421,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [   funct7        rs2       rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
     abstract void EmitR(int funct7, int rs2, int rs1, int funct3, int rd, int opcode);
-
-    abstract void EmitR(int funct7, XRegister rs2, XRegister rs1, int funct3, XRegister rd, int opcode);
-
-    abstract void EmitR(int i, int shamt, XRegister rs1, int i1, XRegister rd, int i2);
-
-    abstract void EmitR(int i, FRegister rs2, FRegister rs1, int i1, FRegister rd, int i2);
-
-    abstract void EmitR(int i, int i1, FRegister rs1, int value, XRegister rd, int i2);
-
-    abstract void EmitR(int i, int i1, XRegister rs1, int value, FRegister rd, int i2);
-
-    abstract void EmitR(int funct7, int i, XRegister rs1, int value, VRegister vs3, int i1);
-
-    abstract void EmitR(int funct7, XRegister rs2, XRegister rs1, int value, VRegister vs3, int i);
-
-    abstract void EmitR(int funct7, VRegister vs2, XRegister rs1, int value, VRegister vd, int i);
-
-    abstract void EmitR(int funct7, VRegister vs2, VRegister vs1, int value, VRegister vd, int i);
-
-    abstract void EmitR(int funct7, VRegister vs2, int uimm5, int value, VRegister vd, int i);
-
-    abstract void EmitR(int funct7, VRegister vs2, FRegister fs1, int value, VRegister vd, int i);
-
-    abstract void EmitR(int funct7, int i, FRegister fs1, int value, VRegister vd, int i1);
-
-    abstract void EmitR(int funct7, VRegister vs2, int i, int value, XRegister rd, int i1);
-
-    abstract void EmitR(int i, int i1, FRegister rs1, int value, FRegister rd, int i2);
-
-    abstract void EmitR(int i, FRegister rs2, FRegister rs1, int i1, XRegister rd, int i2);
-
-    abstract void EmitR(int funct7, VRegister vs2, int i, int value, FRegister fd, int i1);
 
     // R-type instruction variant for floating-point fused multiply-add/sub (F[N]MADD/ F[N]MSUB):
     //
@@ -434,12 +431,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   -----------------------------------------------------------------
     abstract void EmitR4(int rs3, int fmt, int rs2, int rs1, int funct3, int rd, int opcode);
 
-    abstract void EmitR4(int rs3, int value, XRegister rs2, XRegister rs1, int funct3, XRegister rd, int opcode);
-
-    abstract void EmitR4(int i, int value, int i1, XRegister rs1, int i2, XRegister rd, int i3);
-
-    abstract void EmitR4(FRegister rs3, int i, FRegister rs2, FRegister rs1, int value, FRegister rd, int i1);
-
     // S-type instruction:
     //
     //    31         25 24     20 19     15 14 12 11      7 6           0
@@ -448,10 +439,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [   imm11:5       rs2       rs1   funct3   imm4:0      opcode   ]
     //   -----------------------------------------------------------------
     abstract void EmitS(int imm12, int rs2, int rs1, int funct3, int opcode);
-
-    abstract void EmitS(int offset, XRegister rs2, XRegister rs1, int funct3, int opcode);
-
-    abstract void EmitS(int offset, FRegister rs2, XRegister rs1, int i, int i1);
 
     // I-type instruction variant for shifts (SLLI / SRLI / SRAI):
     //
@@ -511,10 +498,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //
     abstract void EmitCI(int funct3, int rd_rs1, int imm6, int opcode);
 
-    abstract void EmitCI(int i, XRegister rd, int i1, int i2);
-
-    abstract void EmitCI(int funct3, FRegister rd, int imm6, int opcode);
-
     // CSS-type instruction:
     //
     //   15  13 12        7 6       2 1 0
@@ -524,10 +507,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     //
     abstract void EmitCSS(int funct3, int offset6, int rs2, int opcode);
-
-    abstract void EmitCSS(int i, int i1, XRegister rs2, int i2);
-
-    abstract void EmitCSS(int funct3, int offset6, FRegister rs2, int opcode);
 
     // CIW-type instruction:
     //
@@ -539,8 +518,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //
     abstract void EmitCIW(int funct3, int imm8, int rd_s, int opcode);
 
-    abstract void EmitCIW(int funct3, int uimm, XRegister rdS, int opcode);
-
     // CL/S-type instruction:
     //
     //   15  13 12  10 9  7 6 5 4   2 1 0
@@ -550,10 +527,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     //
     abstract void EmitCM(int funct3, int imm5, XRegister rs1_s, int rd_rs2_s, int opcode);
-
-    abstract void EmitCM(int funct3, int imm5, XRegister rs1S, XRegister rdS, int opcode);
-
-    abstract void EmitCM(int i, int i1, XRegister rs1S, FRegister rs2S, int i2);
 
     // CA-type instruction:
     //
@@ -600,12 +573,12 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //
     abstract void EmitCJ(int funct3, int offset, int opcode);
 
+    //_____________________________ RV64 VARIANTS extension _____________________________//
 
-/////////////////////////////// RV64 VARIANTS extension ///////////////////////////////
+    //______________________________ RV64 "I" Instructions ______________________________//
 
-    /// ///////////////////////////// RV64 "I" Instructions ////////////////////////////////
+    // LUI/AUIPC (RV32I, with sign-extension on RV64I), opcode = 0x17, 0x37
 
-// LUI/AUIPC (RV32I, with sign-extension on RV64I), opcode = 0x17, 0x37
     public void Lui(XRegister rd, int imm20) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
             if (rd != Zero && rd != SP && IsImmCLuiEncodable(imm20)) {
@@ -621,7 +594,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitU(imm20, rd, 0x17);
     }
 
-// Jump instructions (RV32I), opcode = 0x67, 0x6f
+    // Jump instructions (RV32I), opcode = 0x67, 0x6f
 
     public void Jal(XRegister rd, int offset) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -646,10 +619,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x0, rd, 0x67);
+        EmitI(offset, rs1.index(), 0x0, rd.index(), 0x67);
     }
 
-// Branch instructions, opcode = 0x63 (subfunc from 0x0 ~ 0x7), 0x67, 0x6f
+    // Branch instructions, opcode = 0x63 (subfunc from 0x0 ~ 0x7), 0x67, 0x6f
 
     public void Beq(XRegister rs1, XRegister rs2, int offset) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -695,11 +668,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitB(offset, rs2, rs1, 0x7, 0x63);
     }
 
-// Load instructions (RV32I+RV64I): opcode = 0x03, funct3 from 0x0 ~ 0x6
+    // Load instructions (RV32I+RV64I): opcode = 0x03, funct3 from 0x0 ~ 0x6
 
     public void Lb(XRegister rd, XRegister rs1, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
-        EmitI(offset, rs1, 0x0, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x0, rd.index(), 0x03);
     }
 
     public void Lh(XRegister rd, XRegister rs1, int offset) {
@@ -712,7 +685,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x1, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x1, rd.index(), 0x03);
     }
 
     public void Lw(XRegister rd, XRegister rs1, int offset) {
@@ -728,7 +701,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x2, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x2, rd.index(), 0x03);
     }
 
     public void Ld(XRegister rd, XRegister rs1, int offset) {
@@ -744,7 +717,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x3, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x3, rd.index(), 0x03);
     }
 
     public void Lbu(XRegister rd, XRegister rs1, int offset) {
@@ -757,7 +730,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x4, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x4, rd.index(), 0x03);
     }
 
     public void Lhu(XRegister rd, XRegister rs1, int offset) {
@@ -770,15 +743,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x5, rd, 0x03);
+        EmitI(offset, rs1.index(), 0x5, rd.index(), 0x03);
     }
 
     public void Lwu(XRegister rd, XRegister rs1, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
-        EmitI(offset, rs1, 0x6, rd, 0x3);
+        EmitI(offset, rs1.index(), 0x6, rd.index(), 0x3);
     }
 
-// Store instructions (RV32I+RV64I): opcode = 0x23, funct3 from 0x0 ~ 0x3
+    // Store instructions (RV32I+RV64I): opcode = 0x23, funct3 from 0x0 ~ 0x3
 
     public void Sb(XRegister rs2, XRegister rs1, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
@@ -790,7 +763,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitS(offset, rs2, rs1, 0x0, 0x23);
+        EmitS(offset, rs2.index(), rs1.index(), 0x0, 0x23);
     }
 
     public void Sh(XRegister rs2, XRegister rs1, int offset) {
@@ -803,7 +776,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitS(offset, rs2, rs1, 0x1, 0x23);
+        EmitS(offset, rs2.index(), rs1.index(), 0x1, 0x23);
     }
 
     public void Sw(XRegister rs2, XRegister rs1, int offset) {
@@ -819,7 +792,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitS(offset, rs2, rs1, 0x2, 0x23);
+        EmitS(offset, rs2.index(), rs1.index(), 0x2, 0x23);
     }
 
     public void Sd(XRegister rs2, XRegister rs1, int offset) {
@@ -835,10 +808,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitS(offset, rs2, rs1, 0x3, 0x23);
+        EmitS(offset, rs2.index(), rs1.index(), 0x3, 0x23);
     }
 
-// IMM ALU instructions (RV32I): opcode = 0x13, funct3 from 0x0 ~ 0x7
+    // IMM ALU instructions (RV32I): opcode = 0x13, funct3 from 0x0 ~ 0x7
 
     public void Addi(XRegister rd, XRegister rs1, int imm12) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -871,15 +844,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(imm12, rs1, 0x0, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x0, rd.index(), 0x13);
     }
 
     public void Slti(XRegister rd, XRegister rs1, int imm12) {
-        EmitI(imm12, rs1, 0x2, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x2, rd.index(), 0x13);
     }
 
     public void Sltiu(XRegister rd, XRegister rs1, int imm12) {
-        EmitI(imm12, rs1, 0x3, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x3, rd.index(), 0x13);
     }
 
     public void Xori(XRegister rd, XRegister rs1, int imm12) {
@@ -890,11 +863,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(imm12, rs1, 0x4, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x4, rd.index(), 0x13);
     }
 
     public void Ori(XRegister rd, XRegister rs1, int imm12) {
-        EmitI(imm12, rs1, 0x6, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x6, rd.index(), 0x13);
     }
 
     public void Andi(XRegister rd, XRegister rs1, int imm12) {
@@ -905,7 +878,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(imm12, rs1, 0x7, rd, 0x13);
+        EmitI(imm12, rs1.index(), 0x7, rd.index(), 0x13);
     }
 
     // 0x1 Split: 0x0(6b) + imm12(6b)
@@ -950,7 +923,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitI6(0x10, shamt, rs1, 0x5, rd, 0x13);
     }
 
-// ALU instructions (RV32I): opcode = 0x33, funct3 from 0x0 ~ 0x7
+    // ALU instructions (RV32I): opcode = 0x33, funct3 from 0x0 ~ 0x7
 
     public void Add(XRegister rd, XRegister rs1, XRegister rs2) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -984,7 +957,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x0, rs2, rs1, 0x0, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x0, rd.index(), 0x33);
     }
 
     public void Sub(XRegister rd, XRegister rs1, XRegister rs2) {
@@ -995,15 +968,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x20, rs2, rs1, 0x0, rd, 0x33);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x0, rd.index(), 0x33);
     }
 
     public void Slt(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x02, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x02, rd.index(), 0x33);
     }
 
     public void Sltu(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x03, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x03, rd.index(), 0x33);
     }
 
     public void Xor(XRegister rd, XRegister rs1, XRegister rs2) {
@@ -1019,7 +992,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x0, rs2, rs1, 0x04, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x04, rd.index(), 0x33);
     }
 
     public void Or(XRegister rd, XRegister rs1, XRegister rs2) {
@@ -1035,7 +1008,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x0, rs2, rs1, 0x06, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x06, rd.index(), 0x33);
     }
 
     public void And(XRegister rd, XRegister rs1, XRegister rs2) {
@@ -1051,22 +1024,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x0, rs2, rs1, 0x07, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x07, rd.index(), 0x33);
     }
 
     public void Sll(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x01, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x01, rd.index(), 0x33);
     }
 
     public void Srl(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x05, rd, 0x33);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x05, rd.index(), 0x33);
     }
 
     public void Sra(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x20, rs2, rs1, 0x05, rd, 0x33);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x05, rd.index(), 0x33);
     }
 
-// 32bit Imm ALU instructions (RV64I): opcode = 0x1b, funct3 from 0x0, 0x1, 0x5
+    // 32bit Imm ALU instructions (RV64I): opcode = 0x1b, funct3 from 0x0, 0x1, 0x5
 
     public void Addiw(XRegister rd, XRegister rs1, int imm12) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -1081,25 +1054,25 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(imm12, rs1, 0x0, rd, 0x1b);
+        EmitI(imm12, rs1.index(), 0x0, rd.index(), 0x1b);
     }
 
     public void Slliw(XRegister rd, XRegister rs1, int shamt) {
         CHECK_LT(shamt, 32);
-        EmitR(0x0, shamt, rs1, 0x1, rd, 0x1b);
+        EmitR(0x0, shamt, rs1.index(), 0x1, rd.index(), 0x1b);
     }
 
     public void Srliw(XRegister rd, XRegister rs1, int shamt) {
         CHECK_LT(shamt, 32);
-        EmitR(0x0, shamt, rs1, 0x5, rd, 0x1b);
+        EmitR(0x0, shamt, rs1.index(), 0x5, rd.index(), 0x1b);
     }
 
     public void Sraiw(XRegister rd, XRegister rs1, int shamt) {
         CHECK_LT(shamt, 32);
-        EmitR(0x20, shamt, rs1, 0x5, rd, 0x1b);
+        EmitR(0x20, shamt, rs1.index(), 0x5, rd.index(), 0x1b);
     }
 
-// 32bit ALU instructions (RV64I): opcode = 0x3b, funct3 from 0x0 ~ 0x7
+    // 32bit ALU instructions (RV64I): opcode = 0x3b, funct3 from 0x0 ~ 0x7
 
     public void Addw(XRegister rd, XRegister rs1, XRegister rs2) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
@@ -1114,7 +1087,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x0, rs2, rs1, 0x0, rd, 0x3b);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x0, rd.index(), 0x3b);
     }
 
     public void Subw(XRegister rd, XRegister rs1, XRegister rs2) {
@@ -1125,22 +1098,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x20, rs2, rs1, 0x0, rd, 0x3b);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x0, rd.index(), 0x3b);
     }
 
     public void Sllw(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x1, rd, 0x3b);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x1, rd.index(), 0x3b);
     }
 
     public void Srlw(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x0, rs2, rs1, 0x5, rd, 0x3b);
+        EmitR(0x0, rs2.index(), rs1.index(), 0x5, rd.index(), 0x3b);
     }
 
     public void Sraw(XRegister rd, XRegister rs1, XRegister rs2) {
-        EmitR(0x20, rs2, rs1, 0x5, rd, 0x3b);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x5, rd.index(), 0x3b);
     }
 
-// Environment call and breakpoint (RV32I), opcode = 0x73
+    // Environment call and breakpoint (RV32I), opcode = 0x73
 
     public void Ecall() {
         EmitI(0x0, 0x0, 0x0, 0x0, 0x73);
@@ -1155,7 +1128,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitI(0x1, 0x0, 0x0, 0x0, 0x73);
     }
 
-// Fence instruction (RV32I): opcode = 0xf, funct3 = 0
+    // Fence instruction (RV32I): opcode = 0xf, funct3 = 0
 
     public void Fence(int pred, int succ) {
         CHECK(isUInt4(pred));
@@ -1169,21 +1142,23 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitI(ToInt12(/* TSO fence */ 0x8 << 8 | kPred << 4 | kSucc), 0x0, 0x0, 0x0, 0xf);
     }
 
-//////////////////////////////// RV64 "I" Instructions  END ////////////////////////////////
+    //______________________________ RV64 "I" Instructions  END ______________________________//
 
-    /// //////////////////////// RV64 "Zifencei" Instructions  START ////////////////////////////
+    //_________________________ RV64 "Zifencei" Instructions  START __________________________//
 
-// "Zifencei" Standard Extension, opcode = 0xf, funct3 = 1
+    // "Zifencei" Standard Extension, opcode = 0xf, funct3 = 1
+
     public void FenceI() {
         AssertExtensionsEnabled(Riscv64Extension.kZifencei);
         EmitI(0x0, 0x0, 0x1, 0x0, 0xf);
     }
 
-//////////////////////////// RV64 "Zifencei" Instructions  END /////////////////////////////
+    //__________________________ RV64 "Zifencei" Instructions  END ___________________________//
 
-    /// //////////////////////////// RV64 "M" Instructions  START ///////////////////////////////
+    //_____________________________ RV64 "M" Instructions  START _____________________________//
 
-// RV32M Standard Extension: opcode = 0x33, funct3 from 0x0 ~ 0x7
+    // RV32M Standard Extension: opcode = 0x33, funct3 from 0x0 ~ 0x7
+
     public void Mul(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
 
@@ -1199,232 +1174,240 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitR(0x1, rs2, rs1, 0x0, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x0, rd.index(), 0x33);
     }
 
     public void Mulh(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x1, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x1, rd.index(), 0x33);
     }
 
     public void Mulhsu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x2, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x2, rd.index(), 0x33);
     }
 
     public void Mulhu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x3, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x3, rd.index(), 0x33);
     }
 
     public void Div(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x4, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x4, rd.index(), 0x33);
     }
 
     public void Divu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x5, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x5, rd.index(), 0x33);
     }
 
     public void Rem(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x6, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x6, rd.index(), 0x33);
     }
 
     public void Remu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x7, rd, 0x33);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x7, rd.index(), 0x33);
     }
 
-// RV64M Standard Extension: opcode = 0x3b, funct3 0x0 and from 0x4 ~ 0x7
+    // RV64M Standard Extension: opcode = 0x3b, funct3 0x0 and from 0x4 ~ 0x7
 
     public void Mulw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x0, rd, 0x3b);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x0, rd.index(), 0x3b);
     }
 
     public void Divw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x4, rd, 0x3b);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x4, rd.index(), 0x3b);
     }
 
     public void Divuw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x5, rd, 0x3b);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x5, rd.index(), 0x3b);
     }
 
     public void Remw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x6, rd, 0x3b);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x6, rd.index(), 0x3b);
     }
 
     public void Remuw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kM);
-        EmitR(0x1, rs2, rs1, 0x7, rd, 0x3b);
+        EmitR(0x1, rs2.index(), rs1.index(), 0x7, rd.index(), 0x3b);
     }
 
-//////////////////////////////// RV64 "M" Instructions  END ////////////////////////////////
+    //______________________________ RV64 "M" Instructions  END ______________________________//
 
-    /// //////////////////////////// RV64 "A" Instructions  START ///////////////////////////////
+    //_____________________________ RV64 "A" Instructions  START _____________________________//
 
     public void LrW(XRegister rd, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
         CHECK(aqrl != AqRl.kRelease);
-        EmitR4(0x2, aqrl.value(), 0x0, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x2, aqrl.value(), 0x0, rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void LrD(XRegister rd, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
         CHECK(aqrl != AqRl.kRelease);
-        EmitR4(0x2, aqrl.value(), 0x0, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x2, aqrl.value(), 0x0, rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void ScW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
         CHECK(aqrl != AqRl.kAcquire);
-        EmitR4(0x3, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x3, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void ScD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
         CHECK(aqrl != AqRl.kAcquire);
-        EmitR4(0x3, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x3, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoSwapW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x1, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x1, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoSwapD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x1, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x1, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoAddW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x0, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x0, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoAddD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x0, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x0, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoXorW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x4, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x4, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoXorD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x4, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x4, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoAndW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0xc, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0xc, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoAndD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0xc, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0xc, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoOrW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x8, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x8, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoOrD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x8, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x8, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoMinW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x10, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x10, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoMinD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x10, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x10, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoMaxW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x14, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x14, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoMaxD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x14, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x14, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoMinuW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x18, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x18, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoMinuD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x18, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x18, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
     public void AmoMaxuW(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x1c, aqrl.value(), rs2, rs1, 0x2, rd, 0x2f);
+        EmitR4(0x1c, aqrl.value(), rs2.index(), rs1.index(), 0x2, rd.index(), 0x2f);
     }
 
     public void AmoMaxuD(XRegister rd, XRegister rs2, XRegister rs1, AqRl aqrl) {
         AssertExtensionsEnabled(Riscv64Extension.kA);
-        EmitR4(0x1c, aqrl.value(), rs2, rs1, 0x3, rd, 0x2f);
+        EmitR4(0x1c, aqrl.value(), rs2.index(), rs1.index(), 0x3, rd.index(), 0x2f);
     }
 
-/////////////////////////////// RV64 "A" Instructions  END ///////////////////////////////
+    //_____________________________ RV64 "A" Instructions  END _______________________________//
 
-    /// ////////////////////////// RV64 "Zicsr" Instructions  START /////////////////////////////
+    //___________________________ RV64 "Zicsr" Instructions  START ___________________________//
 
-// "Zicsr" Standard Extension, opcode = 0x73, funct3 from 0x1 ~ 0x3 and 0x5 ~ 0x7
+    // "Zicsr" Standard Extension, opcode = 0x73, funct3 from 0x1 ~ 0x3 and 0x5 ~ 0x7
+
     public void Csrrw(XRegister rd, int csr, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), rs1, 0x1, rd, 0x73);
+        int offset = ToInt12(csr);
+        EmitI(offset, rs1.index(), 0x1, rd.index(), 0x73);
     }
 
     public void Csrrs(XRegister rd, int csr, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), rs1, 0x2, rd, 0x73);
+        int offset = ToInt12(csr);
+        EmitI(offset, rs1.index(), 0x2, rd.index(), 0x73);
     }
 
     public void Csrrc(XRegister rd, int csr, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), rs1, 0x3, rd, 0x73);
+        int offset = ToInt12(csr);
+        EmitI(offset, rs1.index(), 0x3, rd.index(), 0x73);
     }
 
     public void Csrrwi(XRegister rd, int csr, int uimm5) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), uimm5, 0x5, rd, 0x73);
+        int i = ToInt12(csr);
+        EmitI(i, uimm5, 0x5, rd.index(), 0x73);
     }
 
     public void Csrrsi(XRegister rd, int csr, int uimm5) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), uimm5, 0x6, rd, 0x73);
+        int i = ToInt12(csr);
+        EmitI(i, uimm5, 0x6, rd.index(), 0x73);
     }
 
     public void Csrrci(XRegister rd, int csr, int uimm5) {
         AssertExtensionsEnabled(Riscv64Extension.kZicsr);
-        EmitI(ToInt12(csr), uimm5, 0x7, rd, 0x73);
+        int i = ToInt12(csr);
+        EmitI(i, uimm5, 0x7, rd.index(), 0x73);
     }
 
-////////////////////////////// RV64 "Zicsr" Instructions  END //////////////////////////////
+    //____________________________ RV64 "Zicsr" Instructions  END ____________________________//
 
-    /// //////////////////////////// RV64 "FD" Instructions  START ///////////////////////////////
+    //_____________________________ RV64 "FD" Instructions  START ____________________________//
 
-// FP load/store instructions (RV32F+RV32D): opcode = 0x07, 0x27
+    // FP load/store instructions (RV32F+RV32D): opcode = 0x07, 0x27
+
     public void FLw(FRegister rd, XRegister rs1, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kF);
-        EmitI(offset, rs1, 0x2, rd, 0x07);
+        EmitI(offset, rs1.index(), 0x2, rd.index(), 0x07);
     }
 
     public void FLd(FRegister rd, XRegister rs1, int offset) {
@@ -1440,12 +1423,12 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitI(offset, rs1, 0x3, rd, 0x07);
+        EmitI(offset, rs1.index(), 0x3, rd.index(), 0x07);
     }
 
     public void FSw(FRegister rs2, XRegister rs1, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kF);
-        EmitS(offset, rs2, rs1, 0x2, 0x27);
+        EmitS(offset, rs2.index(), rs1.index(), 0x2, 0x27);
     }
 
     public void FSd(FRegister rs2, XRegister rs1, int offset) {
@@ -1461,397 +1444,410 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        EmitS(offset, rs2, rs1, 0x3, 0x27);
+        EmitS(offset, rs2.index(), rs1.index(), 0x3, 0x27);
     }
 
-// FP FMA instructions (RV32F+RV32D): opcode = 0x43, 0x47, 0x4b, 0x4f
+    // FP FMA instructions (RV32F+RV32D): opcode = 0x43, 0x47, 0x4b, 0x4f
 
     public void FMAddS(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR4(rs3, 0x0, rs2, rs1, frm.value(), rd, 0x43);
+        EmitR4(rs3.index(), 0x0, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x43);
     }
 
     public void FMAddD(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR4(rs3, 0x1, rs2, rs1, frm.value(), rd, 0x43);
+        EmitR4(rs3.index(), 0x1, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x43);
     }
 
     public void FMSubS(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR4(rs3, 0x0, rs2, rs1, frm.value(), rd, 0x47);
+        EmitR4(rs3.index(), 0x0, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x47);
     }
 
     public void FMSubD(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR4(rs3, 0x1, rs2, rs1, frm.value(), rd, 0x47);
+        EmitR4(rs3.index(), 0x1, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x47);
     }
 
     public void FNMSubS(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR4(rs3, 0x0, rs2, rs1, frm.value(), rd, 0x4b);
+        EmitR4(rs3.index(), 0x0, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x4b);
     }
 
     public void FNMSubD(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR4(rs3, 0x1, rs2, rs1, frm.value(), rd, 0x4b);
+        EmitR4(rs3.index(), 0x1, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x4b);
     }
 
     public void FNMAddS(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR4(rs3, 0x0, rs2, rs1, frm.value(), rd, 0x4f);
+        EmitR4(rs3.index(), 0x0, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x4f);
     }
 
     public void FNMAddD(
             FRegister rd, FRegister rs1, FRegister rs2, FRegister rs3, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR4(rs3, 0x1, rs2, rs1, frm.value(), rd, 0x4f);
+        EmitR4(rs3.index(), 0x1, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x4f);
     }
 
-// Simple FP instructions (RV32F+RV32D): opcode = 0x53, funct7 = 0b0XXXX0D
+    // Simple FP instructions (RV32F+RV32D): opcode = 0x53, funct7 = 0b0XXXX0D
 
     public void FAddS(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x0, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x0, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FAddD(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x1, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x1, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FSubS(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x4, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x4, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FSubD(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x5, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x5, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FMulS(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x8, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x8, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FMulD(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x9, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x9, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FDivS(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0xc, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0xc, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FDivD(FRegister rd, FRegister rs1, FRegister rs2, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0xd, rs2, rs1, frm.value(), rd, 0x53);
+        EmitR(0xd, rs2.index(), rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FSqrtS(FRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x2c, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x2c, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FSqrtD(FRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x2d, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x2d, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FSgnjS(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x10, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FSgnjD(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x11, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x11, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FSgnjnS(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x10, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FSgnjnD(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x11, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x11, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FSgnjxS(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x10, rs2, rs1, 0x2, rd, 0x53);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x2, rd.index(), 0x53);
     }
 
     public void FSgnjxD(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x11, rs2, rs1, 0x2, rd, 0x53);
+        EmitR(0x11, rs2.index(), rs1.index(), 0x2, rd.index(), 0x53);
     }
 
     public void FMinS(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x14, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x14, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FMinD(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x15, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x15, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FMaxS(FRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x14, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x14, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FMaxD(FRegister rd, FRegister rs1, FRegister rs2) {
-        EmitR(0x15, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x15, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
         AssertExtensionsEnabled(Riscv64Extension.kD);
     }
 
     public void FCvtSD(FRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF, Riscv64Extension.kD);
-        EmitR(0x20, 0x1, rs1, frm.value(), rd, 0x53);
+        EmitR(0x20, 0x1, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtDS(FRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF, Riscv64Extension.kD);
         // Note: The `frm` is useless, the result can represent every value of the source exactly.
-        EmitR(0x21, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x21, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
-// FP compare instructions (RV32F+RV32D): opcode = 0x53, funct7 = 0b101000D
+    // FP compare instructions (RV32F+RV32D): opcode = 0x53, funct7 = 0b101000D
 
     public void FEqS(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x50, rs2, rs1, 0x2, rd, 0x53);
+        EmitR(0x50, rs2.index(), rs1.index(), 0x2, rd.index(), 0x53);
     }
 
     public void FEqD(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x51, rs2, rs1, 0x2, rd, 0x53);
+        EmitR(0x51, rs2.index(), rs1.index(), 0x2, rd.index(), 0x53);
     }
 
     public void FLtS(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x50, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x50, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FLtD(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x51, rs2, rs1, 0x1, rd, 0x53);
+        EmitR(0x51, rs2.index(), rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FLeS(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x50, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x50, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FLeD(XRegister rd, FRegister rs1, FRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x51, rs2, rs1, 0x0, rd, 0x53);
+        EmitR(0x51, rs2.index(), rs1.index(), 0x0, rd.index(), 0x53);
     }
 
-// FP conversion instructions (RV32F+RV32D+RV64F+RV64D): opcode = 0x53, funct7 = 0b110X00D
+    // FP conversion instructions (RV32F+RV32D+RV64F+RV64D): opcode = 0x53, funct7 = 0b110X00D
 
     public void FCvtWS(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x60, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x60, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtWD(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x61, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x61, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtWuS(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x60, 0x1, rs1, frm.value(), rd, 0x53);
+        EmitR(0x60, 0x1, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtWuD(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x61, 0x1, rs1, frm.value(), rd, 0x53);
+        EmitR(0x61, 0x1, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtLS(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x60, 0x2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x60, 0x2, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtLD(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x61, 0x2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x61, 0x2, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtLuS(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x60, 0x3, rs1, frm.value(), rd, 0x53);
+        EmitR(0x60, 0x3, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtLuD(XRegister rd, FRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x61, 0x3, rs1, frm.value(), rd, 0x53);
+        EmitR(0x61, 0x3, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtSW(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x68, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x68, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtDW(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
         // Note: The `frm` is useless, the result can represent every value of the source exactly.
-        EmitR(0x69, 0x0, rs1, frm.value(), rd, 0x53);
+        EmitR(0x69, 0x0, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtSWu(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x68, 0x1, rs1, frm.value(), rd, 0x53);
+        EmitR(0x68, 0x1, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtDWu(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
         // Note: The `frm` is useless, the result can represent every value of the source exactly.
-        EmitR(0x69, 0x1, rs1, frm.value(), rd, 0x53);
+        EmitR(0x69, 0x1, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtSL(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x68, 0x2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x68, 0x2, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtDL(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x69, 0x2, rs1, frm.value(), rd, 0x53);
+        EmitR(0x69, 0x2, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtSLu(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x68, 0x3, rs1, frm.value(), rd, 0x53);
+        EmitR(0x68, 0x3, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
     public void FCvtDLu(FRegister rd, XRegister rs1, FPRoundingMode frm) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x69, 0x3, rs1, frm.value(), rd, 0x53);
+        EmitR(0x69, 0x3, rs1.index(), frm.value(), rd.index(), 0x53);
     }
 
-// FP move instructions (RV32F+RV32D): opcode = 0x53, funct3 = 0x0, funct7 = 0b111X00D
+    // FP move instructions (RV32F+RV32D): opcode = 0x53, funct3 = 0x0, funct7 = 0b111X00D
 
     public void FMvXW(XRegister rd, FRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x70, 0x0, rs1, 0x0, rd, 0x53);
+        EmitR(0x70, 0x0, rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FMvXD(XRegister rd, FRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x71, 0x0, rs1, 0x0, rd, 0x53);
+        EmitR(0x71, 0x0, rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FMvWX(FRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x78, 0x0, rs1, 0x0, rd, 0x53);
+        EmitR(0x78, 0x0, rs1.index(), 0x0, rd.index(), 0x53);
     }
 
     public void FMvDX(FRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x79, 0x0, rs1, 0x0, rd, 0x53);
+        EmitR(0x79, 0x0, rs1.index(), 0x0, rd.index(), 0x53);
     }
 
-// FP classify instructions (RV32F+RV32D): opcode = 0x53, funct3 = 0x1, funct7 = 0b111X00D
+    // FP classify instructions (RV32F+RV32D): opcode = 0x53, funct3 = 0x1, funct7 = 0b111X00D
 
     public void FClassS(XRegister rd, FRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kF);
-        EmitR(0x70, 0x0, rs1, 0x1, rd, 0x53);
+        EmitR(0x70, 0x0, rs1.index(), 0x1, rd.index(), 0x53);
     }
 
     public void FClassD(XRegister rd, FRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kD);
-        EmitR(0x71, 0x0, rs1, 0x1, rd, 0x53);
+        EmitR(0x71, 0x0, rs1.index(), 0x1, rd.index(), 0x53);
     }
 
-/////////////////////////////// RV64 "FD" Instructions  END ///////////////////////////////
+    //_____________________________ RV64 "FD" Instructions  END ______________________________//
 
-    /// //////////////////////////// RV64 "C" Instructions  START /////////////////////////////
+    //______________________________ RV64 "C" Instructions  START ____________________________//
 
     public void CLwsp(XRegister rd, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
         CHECK_NE(rd, Zero);
-        EmitCI(0b010, rd, ExtractOffset52_76(offset), 0b10);
+        int imm6 = ExtractOffset52_76(offset);
+        EmitCI(0b010, rd.index(), imm6, 0b10);
     }
 
     public void CLdsp(XRegister rd, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
         CHECK_NE(rd, Zero);
-        EmitCI(0b011, rd, ExtractOffset53_86(offset), 0b10);
+        int imm6 = ExtractOffset53_86(offset);
+        EmitCI(0b011, rd.index(), imm6, 0b10);
     }
 
     public void CFLdsp(FRegister rd, int offset) {
         AssertExtensionsEnabled(
                 Riscv64Extension.kLoadStore, Riscv64Extension.kZcd, Riscv64Extension.kD);
-        EmitCI(0b001, rd, ExtractOffset53_86(offset), 0b10);
+        int imm6 = ExtractOffset53_86(offset);
+        EmitCI(0b001, rd.index(), imm6, 0b10);
     }
 
     public void CSwsp(XRegister rs2, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCSS(0b110, ExtractOffset52_76(offset), rs2, 0b10);
+        int offset6 = ExtractOffset52_76(offset);
+        EmitCSS(0b110, offset6, rs2.index(), 0b10);
     }
 
     public void CSdsp(XRegister rs2, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCSS(0b111, ExtractOffset53_86(offset), rs2, 0b10);
+        int offset6 = ExtractOffset53_86(offset);
+        EmitCSS(0b111, offset6, rs2.index(), 0b10);
     }
 
     public void CFSdsp(FRegister rs2, int offset) {
         AssertExtensionsEnabled(
                 Riscv64Extension.kLoadStore, Riscv64Extension.kZcd, Riscv64Extension.kD);
-        EmitCSS(0b101, ExtractOffset53_86(offset), rs2, 0b10);
+        int offset6 = ExtractOffset53_86(offset);
+        EmitCSS(0b101, offset6, rs2.index(), 0b10);
     }
 
     public void CLw(XRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCM(0b010, ExtractOffset52_6(offset), rs1_s, rd_s, 0b00);
+        int imm5 = ExtractOffset52_6(offset);
+        EmitCM(0b010, imm5, rs1_s, rd_s.index(), 0b00);
     }
 
     public void CLd(XRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCM(0b011, ExtractOffset53_76(offset), rs1_s, rd_s, 0b00);
+        int imm5 = ExtractOffset53_76(offset);
+        EmitCM(0b011, imm5, rs1_s, rd_s.index(), 0b00);
     }
 
     public void CFLd(FRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(
                 Riscv64Extension.kLoadStore, Riscv64Extension.kZcd, Riscv64Extension.kD);
-        EmitCM(0b001, ExtractOffset53_76(offset), rs1_s, rd_s, 0b00);
+        int imm5 = ExtractOffset53_76(offset);
+        EmitCM(0b001, imm5, rs1_s, rd_s.index(), 0b00);
     }
 
     public void CSw(XRegister rs2_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCM(0b110, ExtractOffset52_6(offset), rs1_s, rs2_s, 0b00);
+        int imm5 = ExtractOffset52_6(offset);
+        EmitCM(0b110, imm5, rs1_s, rs2_s.index(), 0b00);
     }
 
     public void CSd(XRegister rs2_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        EmitCM(0b111, ExtractOffset53_76(offset), rs1_s, rs2_s, 0b00);
+        int imm5 = ExtractOffset53_76(offset);
+        EmitCM(0b111, imm5, rs1_s, rs2_s.index(), 0b00);
     }
 
     public void CFSd(FRegister rs2_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(
                 Riscv64Extension.kLoadStore, Riscv64Extension.kZcd, Riscv64Extension.kD);
-        EmitCM(0b101, ExtractOffset53_76(offset), rs1_s, rs2_s, 0b00);
+        int imm5 = ExtractOffset53_76(offset);
+        EmitCM(0b101, imm5, rs1_s, rs2_s.index(), 0b00);
     }
 
     public void CLi(XRegister rd, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(rd, Zero);
         CHECK(isInt6(imm));
-        EmitCI(0b010, rd, EncodeInt6(imm), 0b01);
+        int imm6 = EncodeInt6(imm);
+        EmitCI(0b010, rd.index(), imm6, 0b01);
     }
 
     public void CLui(XRegister rd, int nzimm6) {
@@ -1859,20 +1855,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_NE(rd, Zero);
         CHECK_NE(rd, SP);
         CHECK(IsImmCLuiEncodable(nzimm6));
-        EmitCI(0b011, rd, nzimm6 & MaskLeastSignificant(6), 0b01);
+        EmitCI(0b011, rd.index(), nzimm6 & MaskLeastSignificant(6), 0b01);
     }
 
     public void CAddi(XRegister rd, int nzimm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(rd, Zero);
         CHECK_NE(nzimm, 0);
-        EmitCI(0b000, rd, EncodeInt6(nzimm), 0b01);
+        int imm6 = EncodeInt6(nzimm);
+        EmitCI(0b000, rd.index(), imm6, 0b01);
     }
 
     public void CAddiw(XRegister rd, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(rd, Zero);
-        EmitCI(0b001, rd, EncodeInt6(imm), 0b01);
+        int imm6 = EncodeInt6(imm);
+        EmitCI(0b001, rd.index(), imm6, 0b01);
     }
 
     public void CAddi16Sp(int nzimm) {
@@ -1889,7 +1887,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
                 (BitFieldExtract(nzimm, 7, 2) << 1) |
                 BitFieldExtract(nzimm, 5, 1);
 
-        EmitCI(0b011, SP, BitFieldInsert(imms0, imms1, 5, 1), 0b01);
+        int imm6 = BitFieldInsert(imms0, imms1, 5, 1);
+        EmitCI(0b011, SP.index(), imm6, 0b01);
     }
 
     public void CAddi4Spn(XRegister rd_s, int nzuimm) {
@@ -1904,14 +1903,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
                 (BitFieldExtract(nzuimm, 2, 1) << 1) |
                 BitFieldExtract(nzuimm, 3, 1);
 
-        EmitCIW(0b000, uimm, rd_s, 0b00);
+        EmitCIW(0b000, uimm, rd_s.index(), 0b00);
     }
 
     public void CSlli(XRegister rd, int shamt) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(shamt, 0);
         CHECK_NE(rd, Zero);
-        EmitCI(0b000, rd, shamt, 0b10);
+        EmitCI(0b000, rd.index(), shamt, 0b10);
     }
 
     public void CSrli(XRegister rd_s, int shamt) {
@@ -1978,7 +1977,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitCAReg(0b100111, rd_s, 0b00, rs2_s, 0b01);
     }
 
-// "Zcb" Standard Extension, part of "C", opcode = 0b00, 0b01, funct3 = 0b100.
+    // "Zcb" Standard Extension, part of "C", opcode = 0b00, 0b01, funct3 = 0b100.
 
     public void CLbu(XRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZcb);
@@ -2080,7 +2079,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CNop() {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        EmitCI(0b000, Zero, 0, 0b01);
+        EmitCI(0b000, Zero.index(), 0, 0b01);
     }
 
     public void CUnimp() {
@@ -2088,43 +2087,43 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         Emit16(0x0);
     }
 
-/////////////////////////////// RV64 "C" Instructions  END ///////////////////////////////
+    //_____________________________ RV64 "C" Instructions  END _______________________________//
 
-    /// /////////////////////////// RV64 "Zba" Instructions  START /////////////////////////////
+    //_____________________________ RV64 "Zba" Instructions  START ___________________________//
 
     public void AddUw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x4, rs2, rs1, 0x0, rd, 0x3b);
+        EmitR(0x4, rs2.index(), rs1.index(), 0x0, rd.index(), 0x3b);
     }
 
     public void Sh1Add(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x2, rd, 0x33);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x2, rd.index(), 0x33);
     }
 
     public void Sh1AddUw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x2, rd, 0x3b);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x2, rd.index(), 0x3b);
     }
 
     public void Sh2Add(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x4, rd, 0x33);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x4, rd.index(), 0x33);
     }
 
     public void Sh2AddUw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x4, rd, 0x3b);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x4, rd.index(), 0x3b);
     }
 
     public void Sh3Add(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x6, rd, 0x33);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x6, rd.index(), 0x33);
     }
 
     public void Sh3AddUw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZba);
-        EmitR(0x10, rs2, rs1, 0x6, rd, 0x3b);
+        EmitR(0x10, rs2.index(), rs1.index(), 0x6, rd.index(), 0x3b);
     }
 
     public void SlliUw(XRegister rd, XRegister rs1, int shamt) {
@@ -2132,93 +2131,93 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitI6(0x2, shamt, rs1, 0x1, rd, 0x1b);
     }
 
-/////////////////////////////// RV64 "Zba" Instructions  END //////////////////////////////
+    //_____________________________ RV64 "Zba" Instructions  END _____________________________//
 
-    /// /////////////////////////// RV64 "Zbb" Instructions  START /////////////////////////////
+    //_____________________________ RV64 "Zbb" Instructions  START ___________________________//
 
     public void Andn(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x20, rs2, rs1, 0x7, rd, 0x33);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x7, rd.index(), 0x33);
     }
 
     public void Orn(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x20, rs2, rs1, 0x6, rd, 0x33);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x6, rd.index(), 0x33);
     }
 
     public void Xnor(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x20, rs2, rs1, 0x4, rd, 0x33);
+        EmitR(0x20, rs2.index(), rs1.index(), 0x4, rd.index(), 0x33);
     }
 
     public void Clz(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x0, rs1, 0x1, rd, 0x13);
+        EmitR(0x30, 0x0, rs1.index(), 0x1, rd.index(), 0x13);
     }
 
     public void Clzw(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x0, rs1, 0x1, rd, 0x1b);
+        EmitR(0x30, 0x0, rs1.index(), 0x1, rd.index(), 0x1b);
     }
 
     public void Ctz(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x1, rs1, 0x1, rd, 0x13);
+        EmitR(0x30, 0x1, rs1.index(), 0x1, rd.index(), 0x13);
     }
 
     public void Ctzw(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x1, rs1, 0x1, rd, 0x1b);
+        EmitR(0x30, 0x1, rs1.index(), 0x1, rd.index(), 0x1b);
     }
 
     public void Cpop(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x2, rs1, 0x1, rd, 0x13);
+        EmitR(0x30, 0x2, rs1.index(), 0x1, rd.index(), 0x13);
     }
 
     public void Cpopw(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x2, rs1, 0x1, rd, 0x1b);
+        EmitR(0x30, 0x2, rs1.index(), 0x1, rd.index(), 0x1b);
     }
 
     public void Min(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x5, rs2, rs1, 0x4, rd, 0x33);
+        EmitR(0x5, rs2.index(), rs1.index(), 0x4, rd.index(), 0x33);
     }
 
     public void Minu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x5, rs2, rs1, 0x5, rd, 0x33);
+        EmitR(0x5, rs2.index(), rs1.index(), 0x5, rd.index(), 0x33);
     }
 
     public void Max(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x5, rs2, rs1, 0x6, rd, 0x33);
+        EmitR(0x5, rs2.index(), rs1.index(), 0x6, rd.index(), 0x33);
     }
 
     public void Maxu(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x5, rs2, rs1, 0x7, rd, 0x33);
+        EmitR(0x5, rs2.index(), rs1.index(), 0x7, rd.index(), 0x33);
     }
 
     public void Rol(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, rs2, rs1, 0x1, rd, 0x33);
+        EmitR(0x30, rs2.index(), rs1.index(), 0x1, rd.index(), 0x33);
     }
 
     public void Rolw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, rs2, rs1, 0x1, rd, 0x3b);
+        EmitR(0x30, rs2.index(), rs1.index(), 0x1, rd.index(), 0x3b);
     }
 
     public void Ror(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, rs2, rs1, 0x5, rd, 0x33);
+        EmitR(0x30, rs2.index(), rs1.index(), 0x5, rd.index(), 0x33);
     }
 
     public void Rorw(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, rs2, rs1, 0x5, rd, 0x3b);
+        EmitR(0x30, rs2.index(), rs1.index(), 0x5, rd.index(), 0x3b);
     }
 
     public void Rori(XRegister rd, XRegister rs1, int shamt) {
@@ -2235,36 +2234,36 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void OrcB(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x14, 0x7, rs1, 0x5, rd, 0x13);
+        EmitR(0x14, 0x7, rs1.index(), 0x5, rd.index(), 0x13);
     }
 
     public void Rev8(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x35, 0x18, rs1, 0x5, rd, 0x13);
+        EmitR(0x35, 0x18, rs1.index(), 0x5, rd.index(), 0x13);
     }
 
     public void ZbbSextB(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x4, rs1, 0x1, rd, 0x13);
+        EmitR(0x30, 0x4, rs1.index(), 0x1, rd.index(), 0x13);
     }
 
     public void ZbbSextH(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x30, 0x5, rs1, 0x1, rd, 0x13);
+        EmitR(0x30, 0x5, rs1.index(), 0x1, rd.index(), 0x13);
     }
 
     public void ZbbZextH(XRegister rd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZbb);
-        EmitR(0x4, 0x0, rs1, 0x4, rd, 0x3b);
+        EmitR(0x4, 0x0, rs1.index(), 0x4, rd.index(), 0x3b);
     }
 
-/////////////////////////////// RV64 "Zbb" Instructions  END //////////////////////////////
+    //_____________________________ RV64 "Zbb" Instructions  END ____________________________//
 
-    /// /////////////////////////// RV64 "Zbs" Instructions  START /////////////////////////////
+    //____________________________ RV64 "Zbs" Instructions  START ___________________________//
 
     public void Bclr(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbs);
-        EmitR(0x24, rs2, rs1, 0x1, rd, 0x33);
+        EmitR(0x24, rs2.index(), rs1.index(), 0x1, rd.index(), 0x33);
     }
 
     public void Bclri(XRegister rd, XRegister rs1, int shamt) {
@@ -2275,7 +2274,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Bext(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbs);
-        EmitR(0x24, rs2, rs1, 0x5, rd, 0x33);
+        EmitR(0x24, rs2.index(), rs1.index(), 0x5, rd.index(), 0x33);
     }
 
     public void Bexti(XRegister rd, XRegister rs1, int shamt) {
@@ -2286,7 +2285,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Binv(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbs);
-        EmitR(0x34, rs2, rs1, 0x1, rd, 0x33);
+        EmitR(0x34, rs2.index(), rs1.index(), 0x1, rd.index(), 0x33);
     }
 
     public void Binvi(XRegister rd, XRegister rs1, int shamt) {
@@ -2297,7 +2296,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Bset(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZbs);
-        EmitR(0x14, rs2, rs1, 0x1, rd, 0x33);
+        EmitR(0x14, rs2.index(), rs1.index(), 0x1, rd.index(), 0x33);
     }
 
     public void Bseti(XRegister rd, XRegister rs1, int shamt) {
@@ -2306,2034 +2305,2034 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         EmitI6(0xA, shamt, rs1, 0x1, rd, 0x13);
     }
 
-/////////////////////////////// RV64 "Zbs" Instructions  END //////////////////////////////
+    //_____________________________ RV64 "Zbs" Instructions  END _____________________________//
 
-    /// //////////////////////////// RVV "VSet" Instructions  START ////////////////////////////
+    //______________________________ RVV "VSet" Instructions  START __________________________//
 
     public void VSetvli(XRegister rd, XRegister rs1, int vtypei) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(isUInt11(vtypei));
-        EmitI(vtypei, rs1, VAIEncoding.kOPCFG.value(), rd, 0x57);
+        EmitI(vtypei, rs1.index(), VAIEncoding.kOPCFG.value(), rd.index(), 0x57);
     }
 
     public void VSetivli(XRegister rd, int uimm, int vtypei) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(isUInt10(vtypei));
         CHECK(isUInt5(uimm));
-        EmitI((~0 << 10 | vtypei), uimm, VAIEncoding.kOPCFG.value(), rd, 0x57);
+        EmitI((~0 << 10 | vtypei), uimm, VAIEncoding.kOPCFG.value(), rd.index(), 0x57);
     }
 
     public void VSetvl(XRegister rd, XRegister rs1, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
-        EmitR(0x40, rs2, rs1, VAIEncoding.kOPCFG.value(), rd, 0x57);
+        EmitR(0x40, rs2.index(), rs1.index(), VAIEncoding.kOPCFG.value(), rd.index(), 0x57);
     }
 
-/////////////////////////////// RVV "VSet" Instructions  END //////////////////////////////
+    //_____________________________ RVV "VSet" Instructions  END _____________________________//
 
-    /// //////////////////////////// RVV Load/Store Instructions  START ////////////////////////////
+    //__________________________ RVV Load/Store Instructions  START __________________________//
 
     public void VLe8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLe16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLe32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLe64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSe8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSe16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSe32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSe64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLm(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01011, rs1, VectorWidth.kMask.value(), vd, 0x7);
+        EmitR(funct7, 0b01011, rs1.index(), VectorWidth.kMask.value(), vd.index(), 0x7);
     }
 
     public void VSm(VRegister vs3, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01011, rs1, VectorWidth.kMask.value(), vs3, 0x27);
+        EmitR(funct7, 0b01011, rs1.index(), VectorWidth.kMask.value(), vs3.index(), 0x27);
     }
 
     public void VLe8ff(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLe16ff(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLe32ff(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLe64ff(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLse8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLse16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLse32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLse64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSse8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSse16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSse32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSse64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLoxei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSoxei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLseg2e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e8(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e16(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e32(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e64(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSseg2e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg2e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg2e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg2e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg3e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg3e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg3e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg3e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg4e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg4e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg4e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg4e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg5e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg5e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg5e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg5e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg6e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg6e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg6e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg6e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg7e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg7e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg7e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg7e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSseg8e8(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSseg8e16(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSseg8e32(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSseg8e64(VRegister vs3, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b00000, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, 0b00000, rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLseg2e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg2e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg3e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg4e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg5e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg6e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg7e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e8ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e16ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e32ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLseg8e64ff(VRegister vd, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, vm);
-        EmitR(funct7, 0b10000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b10000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg2e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg2e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg2e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg2e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg3e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg3e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg3e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg3e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg4e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg4e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg4e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg4e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg5e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg5e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg5e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg5e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg6e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg6e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg6e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg6e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg7e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg7e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg7e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg7e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLsseg8e8(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLsseg8e16(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLsseg8e32(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLsseg8e64(VRegister vd, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSsseg2e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg2e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg2e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg2e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg3e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg3e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg3e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg3e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg4e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg4e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg4e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg4e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg5e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg5e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg5e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg5e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg6e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg6e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg6e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg6e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg7e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg7e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg7e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg7e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg8e8(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg8e16(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg8e32(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSsseg8e64(VRegister vs3, XRegister rs1, XRegister rs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kStrided, vm);
-        EmitR(funct7, rs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, rs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLuxseg2ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg2ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg2ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg2ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg3ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg3ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg3ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg3ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg4ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg4ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg4ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg4ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg5ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg5ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg5ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg5ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg6ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg6ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg6ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg6ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg7ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg7ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg7ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg7ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg8ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg8ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg8ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLuxseg8ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSuxseg2ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg2ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg2ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg2ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg3ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg3ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg3ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg3ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg4ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg4ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg4ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg4ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg5ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg5ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg5ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg5ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg6ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg6ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg6ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg6ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg7ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg7ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg7ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg7ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg8ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg8ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg8ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSuxseg8ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedUnordered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VLoxseg2ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg2ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg2ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg2ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg3ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg3ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg3ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg3ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg4ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg4ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg4ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg4ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg5ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg5ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg5ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg5ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg6ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg6ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg6ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg6ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg7ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg7ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg7ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg7ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg8ei8(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg8ei16(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg8ei32(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VLoxseg8ei64(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VSoxseg2ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg2ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg2ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg2ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg3ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg3ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg3ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg3ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k3, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg4ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg4ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg4ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg4ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg5ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg5ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg5ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg5ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k5, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg6ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg6ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg6ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg6ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k6, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg7ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg7ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg7ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg7ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k7, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg8ei8(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k8.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k8.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg8ei16(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k16.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k16.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg8ei32(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k32.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k32.value(), vs3.index(), 0x27);
     }
 
     public void VSoxseg8ei64(VRegister vs3, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kIndexedOrdered, vm);
-        EmitR(funct7, vs2, rs1, VectorWidth.k64.value(), vs3, 0x27);
+        EmitR(funct7, vs2.index(), rs1.index(), VectorWidth.k64.value(), vs3.index(), 0x27);
     }
 
     public void VL1re8(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VL1re16(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VL1re32(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VL1re64(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VL2re8(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 2), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VL2re16(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 2), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VL2re32(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 2), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VL2re64(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 2), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VL4re8(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 4), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VL4re16(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 4), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VL4re32(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 4), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VL4re64(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 4), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VL8re8(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 8), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k8.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k8.value(), vd.index(), 0x7);
     }
 
     public void VL8re16(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 8), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k16.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k16.value(), vd.index(), 0x7);
     }
 
     public void VL8re32(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 8), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k32.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k32.value(), vd.index(), 0x7);
     }
 
     public void VL8re64(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         CHECK_EQ((vd.index() % 8), 0);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.k64.value(), vd, 0x7);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.k64.value(), vd.index(), 0x7);
     }
 
     public void VL1r(VRegister vd, XRegister rs1) {
@@ -4355,78 +4354,80 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void VS1r(VRegister vs3, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k1, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.kWholeR.value(), vs3, 0x27);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.kWholeR.value(), vs3.index(), 0x27);
     }
 
     public void VS2r(VRegister vs3, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k2, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.kWholeR.value(), vs3, 0x27);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.kWholeR.value(), vs3.index(), 0x27);
     }
 
     public void VS4r(VRegister vs3, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k4, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.kWholeR.value(), vs3, 0x27);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.kWholeR.value(), vs3.index(), 0x27);
     }
 
     public void VS8r(VRegister vs3, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kV);
         final int funct7 = EncodeRVVMemF7(Nf.k8, 0x0, MemAddressMode.kUnitStride, VM.kUnmasked);
-        EmitR(funct7, 0b01000, rs1, VectorWidth.kWholeR.value(), vs3, 0x27);
+        EmitR(funct7, 0b01000, rs1.index(), VectorWidth.kWholeR.value(), vs3.index(), 0x27);
     }
 
-/////////////////////////////// RVV Load/Store Instructions  END //////////////////////////////
+    //___________________________ RVV Load/Store Instructions  END ___________________________//
 
-    /// //////////////////////////// RVV Arithmetic Instructions  START ////////////////////////////
+    //___________________________ RVV Arithmetic Instructions  START _________________________//
 
     public void VAdd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VAdd_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VAdd_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSub_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VRsub_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VRsub_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000011, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNeg_v(VRegister vd, VRegister vs2) {
@@ -4437,118 +4438,121 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMinu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMin_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMin_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMaxu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMaxu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMax_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMax_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VAnd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VAnd_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VAnd_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VOr_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VOr_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VOr_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VXor_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VXor_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VXor_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001011, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNot_v(VRegister vd, VRegister vs2, VM vm) {
@@ -4561,7 +4565,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VRgather_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -4569,7 +4573,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VRgather_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
@@ -4577,7 +4581,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001100, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSlideup_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -4585,7 +4589,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSlideup_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
@@ -4593,7 +4597,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001110, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VRgatherei16_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -4602,7 +4606,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSlidedown_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -4610,204 +4614,211 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSlidedown_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001111, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VAdc_vvm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010000, VM.kV0_t);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VAdc_vxm(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010000, VM.kV0_t);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VAdc_vim(VRegister vd, VRegister vs2, int imm5) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010000, VM.kV0_t);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vvm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kV0_t);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vxm(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kV0_t);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vim(VRegister vd, VRegister vs2, int imm5) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kV0_t);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vv(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vx(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kUnmasked);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMadc_vi(VRegister vd, VRegister vs2, int imm5) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010001, VM.kUnmasked);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSbc_vvm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, VM.kV0_t);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSbc_vxm(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, VM.kV0_t);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsbc_vvm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010011, VM.kV0_t);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsbc_vxm(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010011, VM.kV0_t);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsbc_vv(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010011, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsbc_vx(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010011, VM.kUnmasked);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMerge_vvm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010111, VM.kV0_t);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMerge_vxm(VRegister vd, VRegister vs2, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010111, VM.kV0_t);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMerge_vim(VRegister vd, VRegister vs2, int imm5) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010111, VM.kV0_t);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMv_vv(VRegister vd, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010111, VM.kUnmasked);
-        EmitR(funct7, V0, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, V0.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMv_vx(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010111, VM.kUnmasked);
-        EmitR(funct7, V0, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, V0.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMv_vi(VRegister vd, int imm5) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010111, VM.kUnmasked);
-        EmitR(funct7, V0, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, V0.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMseq_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMseq_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMseq_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011000, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsne_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsne_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsne_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011001, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsltu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsltu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsgtu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -4819,14 +4830,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMslt_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsgt_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -4837,21 +4848,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsleu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsleu_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011100, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsgeu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -4860,7 +4872,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void VMsltu_vi(VRegister vd, VRegister vs2, int aimm5, VM vm) {
         if (aimm5 < 1 || aimm5 > 6) {
-            throw new IllegalArgumentException("Immediate should be between [1, 16]:" + aimm5);
+            throw new IllegalArgumentException("Immediate should be between [1, 16]: " + aimm5);
         }
         CHECK(isUInt4(aimm5 - 1));
         VMsleu_vi(vd, vs2, aimm5 - 1, vm);
@@ -4870,21 +4882,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VMsle_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsle_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011101, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsge_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -4899,20 +4912,21 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsgtu_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011110, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsgeu_vi(VRegister vd, VRegister vs2, int aimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         if (aimm5 < 1 || aimm5 > 6) {
-            throw new IllegalArgumentException("Immediate should be between [1, 16]:" + aimm5);
+            throw new IllegalArgumentException("Immediate should be between [1, 16]: " + aimm5);
         }
         CHECK(isUInt4(aimm5 - 1));
         VMsgtu_vi(vd, vs2, aimm5 - 1, vm);
@@ -4922,14 +4936,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VMsgt_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011111, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VMsge_vi(VRegister vd, VRegister vs2, int aimm5, VM vm) {
@@ -4940,112 +4955,113 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSaddu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSaddu_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSadd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSadd_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSadd_vi(VRegister vd, VRegister vs2, int imm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, EncodeInt5(imm5), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        int vs1 = EncodeInt5(imm5);
+        EmitR(funct7, vs2.index(), vs1, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSsubu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSsubu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSsub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSsub_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSll_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSll_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSll_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100101, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSmul_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSmul_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void Vmv1r_v(VRegister vd, VRegister vs2) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b100111, VM.kUnmasked);
-        EmitR(
-                funct7, vs2, Nf.k1.value(), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), Nf.k1.value(), VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void Vmv2r_v(VRegister vd, VRegister vs2) {
@@ -5053,8 +5069,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_EQ(vd.index() % 2, 0);
         CHECK_EQ(vs2.index() % 2, 0);
         final int funct7 = EncodeRVVF7(0b100111, VM.kUnmasked);
-        EmitR(
-                funct7, vs2, Nf.k2.value(), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), Nf.k2.value(), VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void Vmv4r_v(VRegister vd, VRegister vs2) {
@@ -5062,8 +5077,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_EQ(vd.index() % 4, 0);
         CHECK_EQ(vs2.index() % 4, 0);
         final int funct7 = EncodeRVVF7(0b100111, VM.kUnmasked);
-        EmitR(
-                funct7, vs2, Nf.k4.value(), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), Nf.k4.value(), VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void Vmv8r_v(VRegister vd, VRegister vs2) {
@@ -5071,113 +5085,112 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_EQ(vd.index() % 8, 0);
         CHECK_EQ(vs2.index() % 8, 0);
         final int funct7 = EncodeRVVF7(0b100111, VM.kUnmasked);
-        EmitR(
-                funct7, vs2, Nf.k8.value(), VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), Nf.k8.value(), VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSrl_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSrl_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSrl_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101000, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSra_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSra_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSra_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSsrl_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSsrl_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSsrl_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101010, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VSsra_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VSsra_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VSsra_vi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNsrl_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VNsrl_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VNsrl_wi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101100, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNcvt_x_x_w(VRegister vd, VRegister vs2, VM vm) {
@@ -5189,179 +5202,179 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VNsra_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VNsra_wi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNclipu_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VNclipu_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VNclipu_wi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101110, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VNclip_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VNclip_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPIVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPIVX.value(), vd.index(), 0x57);
     }
 
     public void VNclip_wi(VRegister vd, VRegister vs2, int uimm5, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, uimm5, VAIEncoding.kOPIVI.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), uimm5, VAIEncoding.kOPIVI.value(), vd.index(), 0x57);
     }
 
     public void VWredsumu_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b110000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VWredsum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b110001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPIVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPIVV.value(), vd.index(), 0x57);
     }
 
     public void VRedsum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedand_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedor_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedxor_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedminu_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedmin_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedmaxu_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRedmax_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VAaddu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VAaddu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VAadd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VAadd_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VAsubu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VAsubu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VAsub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VAsub_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VSlide1up_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5369,14 +5382,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VSlide1down_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VCompress_vm(VRegister vd, VRegister vs2, VRegister vs1) {
@@ -5384,19 +5397,19 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010111, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMandn_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011000, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMand_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011001, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMmv_m(VRegister vd, VRegister vs2) {
@@ -5406,13 +5419,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void VMor_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011010, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMxor_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011011, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMclr_m(VRegister vd) {
@@ -5422,13 +5435,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void VMorn_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011100, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMnand_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011101, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMnot_m(VRegister vd, VRegister vs2) {
@@ -5438,13 +5451,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void VMnor_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011110, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMxnor_mm(VRegister vd, VRegister vs2, VRegister vs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b011111, VM.kUnmasked);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMset_m(VRegister vd) {
@@ -5455,154 +5468,154 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VDivu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VDiv_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VDiv_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VRemu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRemu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VRem_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VRem_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMulhu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMulhu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMul_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMul_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMulhsu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMulhsu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMulh_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMulh_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMadd_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMadd_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VNmsub_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VNmsub_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMacc_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VNmsac_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -5611,14 +5624,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VNmsac_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWaddu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5627,7 +5640,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWaddu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5635,7 +5648,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWcvtu_x_x_v(VRegister vd, VRegister vs, VM vm) {
@@ -5648,7 +5661,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWadd_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5656,7 +5669,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110001, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWcvt_x_x_v(VRegister vd, VRegister vs, VM vm) {
@@ -5669,7 +5682,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWsubu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5677,7 +5690,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWsub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5686,7 +5699,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWsub_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5694,7 +5707,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWaddu_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5702,14 +5715,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWaddu_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWadd_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5717,14 +5730,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWadd_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWsubu_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5732,14 +5745,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWsubu_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWsub_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5747,14 +5760,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWsub_wx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmulu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5763,7 +5776,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmulu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5771,7 +5784,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111000, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmulsu_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5780,7 +5793,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmulsu_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5788,7 +5801,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111010, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmul_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -5797,7 +5810,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmul_vx(VRegister vd, VRegister vs2, XRegister rs1, VM vm) {
@@ -5805,7 +5818,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111011, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmaccu_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -5814,7 +5827,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmaccu_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
@@ -5822,7 +5835,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111100, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -5831,7 +5844,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmacc_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
@@ -5839,7 +5852,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111101, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmaccus_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
@@ -5847,7 +5860,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111110, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VWmaccsu_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -5856,7 +5869,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VWmaccsu_vx(VRegister vd, XRegister rs1, VRegister vs2, VM vm) {
@@ -5864,115 +5877,115 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111111, vm);
-        EmitR(funct7, vs2, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VFadd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFadd_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFredusum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsub_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000010, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFredosum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmin_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmin_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFredmin_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmax_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmax_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b000110, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFredmax_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b000111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsgnj_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsgnj_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFsgnjn_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsgnjn_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001001, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFneg_v(VRegister vd, VRegister vs) {
@@ -5983,14 +5996,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsgnjx_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001010, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFabs_v(VRegister vd, VRegister vs) {
@@ -6002,55 +6015,55 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b001110, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFslide1down_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b001111, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmerge_vfm(VRegister vd, VRegister vs2, FRegister fs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK(vd != V0);
         final int funct7 = EncodeRVVF7(0b010111, VM.kV0_t);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmv_v_f(VRegister vd, FRegister fs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010111, VM.kUnmasked);
-        EmitR(funct7, V0, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, V0.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfeq_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VMfeq_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfle_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VMfle_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011001, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfge_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6061,14 +6074,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VMflt_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011011, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfgt_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6079,181 +6092,181 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VMfne_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfgt_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011101, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMfge_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b011111, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFdiv_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFdiv_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFrdiv_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100001, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmul_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmul_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFrsub_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b100111, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmadd_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmadd_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFnmadd_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFnmadd_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101001, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmsub_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmsub_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101010, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFnmsub_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFnmsub_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101011, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmacc_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFnmacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFnmacc_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101101, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmsac_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFmsac_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101110, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFnmsac_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFnmsac_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b101111, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwadd_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6262,7 +6275,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwadd_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
@@ -6270,14 +6283,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwredusum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110001, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwsub_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6286,7 +6299,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110010, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwsub_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
@@ -6294,13 +6307,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b110010, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwredosum_vs(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b110011, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwadd_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6308,14 +6321,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwadd_wf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwsub_wv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6323,14 +6336,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs1);
         final int funct7 = EncodeRVVF7(0b110110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwsub_wf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b110110, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwmul_vv(VRegister vd, VRegister vs2, VRegister vs1, VM vm) {
@@ -6339,7 +6352,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111000, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwmul_vf(VRegister vd, VRegister vs2, FRegister fs1, VM vm) {
@@ -6347,7 +6360,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111000, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwmacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -6356,7 +6369,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111100, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwmacc_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
@@ -6364,7 +6377,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111100, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwnmacc_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -6373,7 +6386,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111101, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwnmacc_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
@@ -6381,7 +6394,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111101, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwmsac_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -6390,7 +6403,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111110, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwmsac_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
@@ -6398,7 +6411,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111110, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFwnmsac_vv(VRegister vd, VRegister vs1, VRegister vs2, VM vm) {
@@ -6407,7 +6420,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(vd != vs1);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111111, vm);
-        EmitR(funct7, vs2, vs1, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), vs1.index(), VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwnmsac_vf(VRegister vd, FRegister fs1, VRegister vs2, VM vm) {
@@ -6415,127 +6428,127 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b111111, vm);
-        EmitR(funct7, vs2, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VMv_s_x(VRegister vd, XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, VM.kUnmasked);
-        EmitR(funct7, 0b00000, rs1, VAIEncoding.kOPMVX.value(), vd, 0x57);
+        EmitR(funct7, 0b00000, rs1.index(), VAIEncoding.kOPMVX.value(), vd.index(), 0x57);
     }
 
     public void VMv_x_s(XRegister rd, VRegister vs2) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, VM.kUnmasked);
-        EmitR(funct7, vs2, 0b00000, VAIEncoding.kOPMVV.value(), rd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00000, VAIEncoding.kOPMVV.value(), rd.index(), 0x57);
     }
 
     public void VCpop_m(XRegister rd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, vm);
-        EmitR(funct7, vs2, 0b10000, VAIEncoding.kOPMVV.value(), rd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10000, VAIEncoding.kOPMVV.value(), rd.index(), 0x57);
     }
 
     public void VFirst_m(XRegister rd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, vm);
-        EmitR(funct7, vs2, 0b10001, VAIEncoding.kOPMVV.value(), rd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10001, VAIEncoding.kOPMVV.value(), rd.index(), 0x57);
     }
 
     public void VZext_vf8(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00010, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00010, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VSext_vf8(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00011, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00011, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VZext_vf4(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00100, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00100, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VSext_vf4(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00101, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00101, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VZext_vf2(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00110, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00110, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VSext_vf2(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00111, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00111, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VFmv_s_f(VRegister vd, FRegister fs1) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, VM.kUnmasked);
-        EmitR(funct7, 0b00000, fs1, VAIEncoding.kOPFVF.value(), vd, 0x57);
+        EmitR(funct7, 0b00000, fs1.index(), VAIEncoding.kOPFVF.value(), vd.index(), 0x57);
     }
 
     public void VFmv_f_s(FRegister fd, VRegister vs2) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         final int funct7 = EncodeRVVF7(0b010000, VM.kUnmasked);
-        EmitR(funct7, vs2, 0b00000, VAIEncoding.kOPFVV.value(), fd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00000, VAIEncoding.kOPFVV.value(), fd.index(), 0x57);
     }
 
     public void VFcvt_xu_f_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00000, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00000, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFcvt_x_f_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00001, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00001, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFcvt_f_xu_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00010, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00010, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFcvt_f_x_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00011, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00011, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFcvt_rtz_xu_f_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00110, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00110, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFcvt_rtz_x_f_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b00111, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00111, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_xu_f_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6543,7 +6556,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01000, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01000, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_x_f_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6551,7 +6564,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01001, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01001, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_f_xu_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6559,7 +6572,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01010, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01010, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_f_x_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6567,7 +6580,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01011, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01011, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_f_f_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6575,7 +6588,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01100, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01100, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_rtz_xu_f_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6583,7 +6596,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01110, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01110, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFwcvt_rtz_x_f_v(VRegister vd, VRegister vs2, VM vm) {
@@ -6591,91 +6604,91 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b01111, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b01111, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_xu_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10000, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10000, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_x_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10001, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10001, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_f_xu_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10010, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10010, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_f_x_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10011, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10011, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_f_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10100, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10100, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_rod_f_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10101, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10101, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_rtz_xu_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10110, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10110, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFncvt_rtz_x_f_w(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010010, vm);
-        EmitR(funct7, vs2, 0b10111, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10111, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFsqrt_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010011, vm);
-        EmitR(funct7, vs2, 0b00000, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00000, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFrsqrt7_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010011, vm);
-        EmitR(funct7, vs2, 0b00100, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00100, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFrec7_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010011, vm);
-        EmitR(funct7, vs2, 0b00101, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00101, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VFclass_v(VRegister vd, VRegister vs2, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010011, vm);
-        EmitR(funct7, vs2, 0b10000, VAIEncoding.kOPFVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10000, VAIEncoding.kOPFVV.value(), vd.index(), 0x57);
     }
 
     public void VMsbf_m(VRegister vd, VRegister vs2, VM vm) {
@@ -6683,7 +6696,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010100, vm);
-        EmitR(funct7, vs2, 0b00001, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00001, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMsof_m(VRegister vd, VRegister vs2, VM vm) {
@@ -6691,7 +6704,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010100, vm);
-        EmitR(funct7, vs2, 0b00010, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00010, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VMsif_m(VRegister vd, VRegister vs2, VM vm) {
@@ -6699,7 +6712,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010100, vm);
-        EmitR(funct7, vs2, 0b00011, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b00011, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VIota_m(VRegister vd, VRegister vs2, VM vm) {
@@ -6707,21 +6720,22 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         CHECK(vd != vs2);
         final int funct7 = EncodeRVVF7(0b010100, vm);
-        EmitR(funct7, vs2, 0b10000, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, vs2.index(), 0b10000, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
     public void VId_v(VRegister vd, VM vm) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
         CHECK_IMPLIES(vm == VM.kV0_t, vd != V0);
         final int funct7 = EncodeRVVF7(0b010100, vm);
-        EmitR(funct7, V0, 0b10001, VAIEncoding.kOPMVV.value(), vd, 0x57);
+        EmitR(funct7, V0.index(), 0b10001, VAIEncoding.kOPMVV.value(), vd.index(), 0x57);
     }
 
-/////////////////////////////// RVV Arithmetic Instructions  END   /////////////////////////////
+    //_________________________ RVV Arithmetic Instructions  END   ___________________________//
 
-    /// /////////////////////////// RV64 MACRO Instructions  START ///////////////////////////////
+    //____________________________ RV64 MACRO Instructions  START ____________________________//
 
-// Pseudo instructions
+    // Pseudo instructions
+
     public void Nop() {
         Addi(Zero, Zero, 0);
     }
@@ -7204,5 +7218,5 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         }
     }
 
-/////////////////////////////// RV64 MACRO Instructions END ///////////////////////////////
+    //______________________________ RV64 MACRO Instructions END _____________________________//
 }
