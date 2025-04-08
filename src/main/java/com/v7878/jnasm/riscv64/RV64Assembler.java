@@ -11,6 +11,46 @@ import com.v7878.jnasm.Assembler;
 public abstract class RV64Assembler extends Assembler implements RV64AssemblerI {
     private static final int kXlen = 64;
 
+    private int enabled_extensions;
+    // Whether appending instructions at the end of the buffer or overwriting the existing ones.
+    private boolean overwriting;
+    // The current overwrite location.
+    private int overwrite_location;
+
+    public RV64Assembler(int enabled_extensions) {
+        this.enabled_extensions = enabled_extensions;
+    }
+
+    private boolean IsExtensionEnabled(Riscv64Extension ext) {
+        return (enabled_extensions & ext.extensionBit()) != 0;
+    }
+
+    private void AssertExtensionsEnabled(Riscv64Extension ext) {
+        if (!IsExtensionEnabled(ext)) {
+            throw new IllegalStateException(String.format(
+                    "Extension %s is not enabled", ext));
+        }
+    }
+
+    private void AssertExtensionsEnabled(Riscv64Extension ext, Riscv64Extension... other_exts) {
+        AssertExtensionsEnabled(ext);
+        for (var other_ext : other_exts) {
+            AssertExtensionsEnabled(other_ext);
+        }
+    }
+
+    /* TODO
+  ArenaVector<Branch> branches_;
+
+  // Use `std::deque<>` for literal labels to allow insertions at the end
+  // without invalidating pointers and references to existing elements.
+  ArenaDeque<Literal> literals_;
+  ArenaDeque<Literal> long_literals_;  // 64-bit literals separated for alignment reasons.
+
+  uint32_t available_scratch_core_registers_;
+  uint32_t available_scratch_fp_registers_;
+     */
+
     private enum BranchCondition {
         kCondEQ,
         kCondNE,
@@ -465,17 +505,29 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         return uimm != 0 && (isUInt5(uimm) || isUInt5(uimm - 0xfffe0));
     }
 
-    abstract boolean IsExtensionEnabled(Riscv64Extension ext);
-
-    abstract void AssertExtensionsEnabled(Riscv64Extension ext);
-
-    abstract void AssertExtensionsEnabled(Riscv64Extension ext, Riscv64Extension... other_ext);
-
     // Emit helpers.
 
-    abstract void Emit16(int value);
+    private void Emit16(int value) {
+        if (overwriting) {
+            // Branches to labels are emitted into their placeholders here.
+            store16(overwrite_location, value);
+            overwrite_location += 16;
+        } else {
+            // Other instructions are simply appended at the end here.
+            emit16(value);
+        }
+    }
 
-    abstract void Emit32(int value);
+    private void Emit32(int value) {
+        if (overwriting) {
+            // Branches to labels are emitted into their placeholders here.
+            store32(overwrite_location, value);
+            overwrite_location += 32;
+        } else {
+            // Other instructions are simply appended at the end here.
+            emit32(value);
+        }
+    }
 
     // I-type instruction:
     //
