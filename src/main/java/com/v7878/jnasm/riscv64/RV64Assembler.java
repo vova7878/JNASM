@@ -121,8 +121,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(a != b);
     }
 
-    protected abstract void CHECK_NE(XRegister rd, XRegister zero);
-
     private static void CHECK_LT(int a, int b) {
         CHECK(a < b);
     }
@@ -139,14 +137,29 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         CHECK(a >= b);
     }
 
+    private static void CHECK_IMPLIES(boolean a, boolean b) {
+        CHECK(!a || b);
+    }
+
+    private static void CHECK_ALIGNED(int value, int alignment) {
+        CHECK(isAligned(value, alignment));
+    }
+
     private static boolean isUInt(int width, int value) {
-        // TODO;
-        throw new UnsupportedOperationException();
+        assert width > 0 : "width must be > 0";
+        assert width <= 32 : "width must be <= max (32)";
+        return value >>> width == 0;
     }
 
     private static boolean isInt(int width, int value) {
-        // TODO;
-        throw new UnsupportedOperationException();
+        assert width > 0 : "width must be > 0";
+        assert width <= 32 : "width must be <= max (32)";
+        value = value >> width;
+        return value == 0 || value == -1;
+    }
+
+    private static boolean isUInt1(int value) {
+        return isUInt(1, value);
     }
 
     private static boolean isUInt2(int value) {
@@ -222,8 +235,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     private static boolean isAligned(int value, int alignment) {
-        // TODO;
-        throw new UnsupportedOperationException();
+        // TODO: assert isPowerOfTwo(alignment);
+        return (value & (alignment - 1)) == 0;
     }
 
     private static boolean isAligned2(int value) {
@@ -346,36 +359,35 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         return uint12 - ((uint12 & 0x800) << 1);
     }
 
-    abstract void Bcond(Riscv64Label label, boolean is_bare, BranchCondition condition, XRegister lhs, XRegister rhs);
-
-    abstract void Buncond(Riscv64Label label, XRegister rd, boolean is_bare);
-
-    abstract void Emit16(int value);
-
-    abstract void Emit32(int value);
-
-    // Implementation helper for `Li()`, `LoadConst32()` and `LoadConst64()`.
-    abstract void LoadImmediate(XRegister rd, long imm, boolean can_use_tmp);
-
-    abstract boolean IsExtensionEnabled(Riscv64Extension ext);
-
-    abstract void AssertExtensionsEnabled(Riscv64Extension ext);
-
-    abstract void AssertExtensionsEnabled(Riscv64Extension ext, Riscv64Extension... other_ext);
-
-    abstract void CHECK_IMPLIES(boolean a, boolean b);
-
-    abstract void CHECK_ALIGNED(int value, int alignment);
-
     // RVV constants and helpers
 
-    abstract int EncodeRVVMemF7(Nf nf, int mew, MemAddressMode mop, VM vm);
+    @SuppressWarnings("SameParameterValue")
+    private static int EncodeRVVMemF7(Nf nf, int mew, MemAddressMode mop, VM vm) {
+        CHECK(isUInt3(nf.value()));
+        CHECK(isUInt1(mew));
+        CHECK(isUInt2(mop.value()));
+        CHECK(isUInt1(vm.value()));
 
-    abstract int EncodeRVVF7(int funct6, VM vm);
+        return (nf.value() << 4) | (mew << 3) | (mop.value() << 1) | vm.value();
+    }
 
-    abstract int EncodeInt5(int imm);
+    private static int EncodeRVVF7(int funct6, VM vm) {
+        CHECK(isUInt6(funct6));
+        return (funct6 << 1) | vm.value();
+    }
 
-    abstract int EncodeInt6(int imm);
+    private static int EncodeIntWidth(int width, int imm) {
+        CHECK(isInt(width, imm));
+        return imm & MaskLeastSignificant(width);
+    }
+
+    private static int EncodeInt5(int imm) {
+        return EncodeIntWidth(5, imm);
+    }
+
+    private static int EncodeInt6(int imm) {
+        return EncodeIntWidth(6, imm);
+    }
 
     private static int EncodeShortReg(int reg) {
         CHECK(IsShortReg(reg));
@@ -391,26 +403,79 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     // Rearrange given offset in the way {offset[0] | offset[1]}
-    private int EncodeOffset0_1(int offset) {
+    private static int EncodeOffset0_1(int offset) {
         CHECK(isUInt2(offset));
         return offset >>> 1 | (offset & 1) << 1;
     }
 
     // Rearrange given offset, scaled by 4, in the way {offset[5:2] | offset[7:6]}
-    abstract int ExtractOffset52_76(int offset);
+    private static int ExtractOffset52_76(int offset) {
+        assert isAligned4(offset) : "Offset should be scalable by 4";
+        CHECK(isUInt8(offset));
+
+        int imm_52 = BitFieldExtract(offset, 2, 4);
+        int imm_76 = BitFieldExtract(offset, 6, 2);
+
+        return BitFieldInsert(imm_76, imm_52, 2, 4);
+    }
 
     // Rearrange given offset, scaled by 8, in the way {offset[5:3] | offset[8:6]}
-    abstract int ExtractOffset53_86(int offset);
+    private static int ExtractOffset53_86(int offset) {
+        assert isAligned8(offset) : "Offset should be scalable by 8";
+        CHECK(isUInt9(offset));
+
+        int imm_53 = BitFieldExtract(offset, 3, 3);
+        int imm_86 = BitFieldExtract(offset, 6, 3);
+
+        return BitFieldInsert(imm_86, imm_53, 3, 3);
+    }
 
     // Rearrange given offset, scaled by 4, in the way {offset[5:2] | offset[6]}
-    abstract int ExtractOffset52_6(int offset);
+    private static int ExtractOffset52_6(int offset) {
+        assert isAligned4(offset) : "Offset should be scalable by 4";
+        CHECK(isUInt7(offset));
+
+        int imm_52 = BitFieldExtract(offset, 2, 4);
+        int imm_6 = BitFieldExtract(offset, 6, 1);
+
+        return BitFieldInsert(imm_6, imm_52, 1, 4);
+    }
 
     // Rearrange given offset, scaled by 8, in the way {offset[5:3], offset[7:6]}
-    abstract int ExtractOffset53_76(int offset);
+    private static int ExtractOffset53_76(int offset) {
+        assert isAligned8(offset) : "Offset should be scalable by 8";
+        CHECK(isUInt8(offset));
 
-    abstract boolean IsImmCLuiEncodable(int uimm);
+        int imm_53 = BitFieldExtract(offset, 3, 3);
+        int imm_76 = BitFieldExtract(offset, 6, 2);
+
+        return BitFieldInsert(imm_76, imm_53, 2, 3);
+    }
+
+    private static boolean IsImmCLuiEncodable(int uimm) {
+        // Instruction c.lui is odd and its immediate value is a bit tricky
+        // Its value is not a full 32 bits value, but its bits [31:12]
+        // (where the bit 17 marks the sign bit) shifted towards the bottom i.e. bits [19:0]
+        // are the meaningful ones. Since that we want a signed non-zero 6-bit immediate to
+        // keep values in the range [0, 0x1f], and the range [0xfffe0, 0xfffff] for negative values
+        // since the sign bit was bit 17 (which is now bit 5 and replicated in the higher bits too)
+        // Also encoding with immediate = 0 is reserved
+        // For more details please see 16.5 chapter is the specification
+
+        return uimm != 0 && (isUInt5(uimm) || isUInt5(uimm - 0xfffe0));
+    }
+
+    abstract boolean IsExtensionEnabled(Riscv64Extension ext);
+
+    abstract void AssertExtensionsEnabled(Riscv64Extension ext);
+
+    abstract void AssertExtensionsEnabled(Riscv64Extension ext, Riscv64Extension... other_ext);
 
     // Emit helpers.
+
+    abstract void Emit16(int value);
+
+    abstract void Emit32(int value);
 
     // I-type instruction:
     //
@@ -771,6 +836,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         Emit16(encoding);
     }
 
+    abstract void Bcond(Riscv64Label label, boolean is_bare, BranchCondition condition, XRegister lhs, XRegister rhs);
+
+    abstract void Buncond(Riscv64Label label, XRegister rd, boolean is_bare);
+
+    // Implementation helper for `Li()`, `LoadConst32()` and `LoadConst64()`.
+    abstract void LoadImmediate(XRegister rd, long imm, boolean can_use_tmp);
+
     //_____________________________ RV64 VARIANTS extension _____________________________//
 
     //______________________________ RV64 "I" Instructions ______________________________//
@@ -1128,19 +1200,19 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             if (rd != Zero) {
                 if (rs1 != Zero || rs2 != Zero) {
                     if (rs1 == Zero) {
-                        CHECK_NE(rs2, Zero);
+                        CHECK_NE(rs2.index(), Zero.index());
                         CMv(rd, rs2);
                         return;
                     } else if (rs2 == Zero) {
-                        CHECK_NE(rs1, Zero);
+                        CHECK_NE(rs1.index(), Zero.index());
                         CMv(rd, rs1);
                         return;
                     } else if (rd == rs1) {
-                        CHECK_NE(rs2, Zero);
+                        CHECK_NE(rs2.index(), Zero.index());
                         CAdd(rd, rs2);
                         return;
                     } else if (rd == rs2) {
-                        CHECK_NE(rs1, Zero);
+                        CHECK_NE(rs1.index(), Zero.index());
                         CAdd(rd, rs1);
                         return;
                     }
@@ -1331,7 +1403,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void Fence(int pred, int succ) {
         CHECK(isUInt4(pred));
         CHECK(isUInt4(succ));
-        EmitI(/* normal fence */ 0x0 << 8 | pred << 4 | succ, 0x0, 0x0, 0x0, 0xf);
+        EmitI(/* normal fence */ pred << 4 | succ, 0x0, 0x0, 0x0, 0xf);
     }
 
     public void FenceTso() {
@@ -1964,14 +2036,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CLwsp(XRegister rd, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         int imm6 = ExtractOffset52_76(offset);
         EmitCI(0b010, rd.index(), imm6, 0b10);
     }
 
     public void CLdsp(XRegister rd, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         int imm6 = ExtractOffset53_86(offset);
         EmitCI(0b011, rd.index(), imm6, 0b10);
     }
@@ -2042,7 +2114,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CLi(XRegister rd, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         CHECK(isInt6(imm));
         int imm6 = EncodeInt6(imm);
         EmitCI(0b010, rd.index(), imm6, 0b01);
@@ -2050,15 +2122,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CLui(XRegister rd, int nzimm6) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
-        CHECK_NE(rd, SP);
+        CHECK_NE(rd.index(), Zero.index());
+        CHECK_NE(rd.index(), SP.index());
         CHECK(IsImmCLuiEncodable(nzimm6));
         EmitCI(0b011, rd.index(), nzimm6 & MaskLeastSignificant(6), 0b01);
     }
 
     public void CAddi(XRegister rd, int nzimm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         CHECK_NE(nzimm, 0);
         int imm6 = EncodeInt6(nzimm);
         EmitCI(0b000, rd.index(), imm6, 0b01);
@@ -2066,7 +2138,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CAddiw(XRegister rd, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         int imm6 = EncodeInt6(imm);
         EmitCI(0b001, rd.index(), imm6, 0b01);
     }
@@ -2107,7 +2179,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void CSlli(XRegister rd, int shamt) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(shamt, 0);
-        CHECK_NE(rd, Zero);
+        CHECK_NE(rd.index(), Zero.index());
         EmitCI(0b000, rd.index(), shamt, 0b10);
     }
 
@@ -2133,15 +2205,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CMv(XRegister rd, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
-        CHECK_NE(rs2, Zero);
+        CHECK_NE(rd.index(), Zero.index());
+        CHECK_NE(rs2.index(), Zero.index());
         EmitCR(0b1000, rd, rs2, 0b10);
     }
 
     public void CAdd(XRegister rd, XRegister rs2) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rd, Zero);
-        CHECK_NE(rs2, Zero);
+        CHECK_NE(rd.index(), Zero.index());
+        CHECK_NE(rs2.index(), Zero.index());
         EmitCR(0b1001, rd, rs2, 0b10);
     }
 
@@ -2250,13 +2322,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CJr(XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rs1, Zero);
+        CHECK_NE(rs1.index(), Zero.index());
         EmitCR(0b1000, rs1, Zero, 0b10);
     }
 
     public void CJalr(XRegister rs1) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK_NE(rs1, Zero);
+        CHECK_NE(rs1.index(), Zero.index());
         EmitCR(0b1001, rs1, Zero, 0b10);
     }
 
