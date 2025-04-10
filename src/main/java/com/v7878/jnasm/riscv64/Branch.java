@@ -3,10 +3,6 @@ package com.v7878.jnasm.riscv64;
 import static com.v7878.jnasm.Utils.CHECK;
 import static com.v7878.jnasm.Utils.CHECK_LE;
 import static com.v7878.jnasm.Utils.CHECK_NE;
-import static com.v7878.jnasm.Utils.isInt12;
-import static com.v7878.jnasm.Utils.isInt13;
-import static com.v7878.jnasm.Utils.isInt21;
-import static com.v7878.jnasm.Utils.isInt9;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGE;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGEU;
@@ -41,6 +37,8 @@ import static com.v7878.jnasm.riscv64.Branch.Type.kUncondBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kUncondCBranch;
 import static com.v7878.jnasm.riscv64.RV64Assembler.IsShortReg;
 import static com.v7878.jnasm.riscv64.XRegister.Zero;
+
+import com.v7878.jnasm.Utils;
 
 // Note that PC-relative literal loads are handled as pseudo branches because they need
 // to be emitted after branch relocation to use correct offsets.
@@ -172,13 +170,13 @@ class Branch {
         }
         int distance = target - location;
 
-        if (isInt9(distance)) {
+        if (Utils.isInt(9, distance)) {
             return kOffset9;
-        } else if (isInt12(distance)) {
+        } else if (Utils.isInt(12, distance)) {
             return kOffset12;
-        } else if (isInt13(distance)) {
+        } else if (Utils.isInt(13, distance)) {
             return kOffset13;
-        } else if (isInt21(distance)) {
+        } else if (Utils.isInt(21, distance)) {
             return kOffset21;
         } else {
             return kOffset32;

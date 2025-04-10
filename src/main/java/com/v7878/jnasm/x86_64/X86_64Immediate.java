@@ -4,26 +4,26 @@ import com.v7878.jnasm.Utils;
 
 public record X86_64Immediate(long value) {
     public boolean isInt8() {
-        return Utils.isInt8(value);
+        return Utils.isLInt(8, value);
     }
 
     public boolean isUInt8() {
-        return Utils.isUInt8(value);
+        return Utils.isLUInt(8, value);
     }
 
     public boolean isInt16() {
-        return Utils.isInt16(value);
+        return Utils.isLInt(16, value);
     }
 
     public boolean isUInt16() {
-        return Utils.isUInt16(value);
+        return Utils.isLUInt(16, value);
     }
 
     public boolean isInt32() {
-        return Utils.isInt32(value);
+        return Utils.isLInt(32, value);
     }
 
     public boolean isUInt32() {
-        return Utils.isUInt32(value);
+        return Utils.isLUInt(32, value);
     }
 }

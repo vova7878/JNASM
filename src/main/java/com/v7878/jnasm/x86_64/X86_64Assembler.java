@@ -138,7 +138,7 @@ public class X86_64Assembler extends Assembler implements X86_64AssemblerI {
         if (label.isLinked()) {
             // Save the delta in the byte that we have to play with.
             int delta = position - label.getLinkPosition();
-            CHECK(Utils.isUInt8(delta));
+            CHECK(Utils.isUInt(8, delta));
             emit8(delta & 0xFF);
         } else {
             emit8(0);
@@ -3348,7 +3348,7 @@ Load Unaligned */
         EmitOptionalRex32(dst, src);
         // See whether imm can be represented as a sign-extended 8bit value.
         int v32 = (int) (imm.value());
-        if (Utils.isInt8(v32)) {
+        if (Utils.isInt(8, v32)) {
             // Sign-extension works.
             emit8(0x6B);
             EmitOperand(dst.lowBits(), new X86_64Operand(src));
@@ -3388,7 +3388,7 @@ Load Unaligned */
         EmitRex64(dst, reg);
         // See whether imm can be represented as a sign-extended 8bit value.
         long v64 = imm.value();
-        if (Utils.isInt8(v64)) {
+        if (Utils.isLInt(8, v64)) {
             // Sign-extension works.
             emit8(0x6B);
             EmitOperand(dst.lowBits(), new X86_64Operand(reg));
@@ -3583,7 +3583,7 @@ Load Unaligned */
             final int kLongSize = 6;
             int offset = label.getPosition() - size();
             CHECK_LE(offset, 0);
-            if (Utils.isInt8(offset - kShortSize)) {
+            if (Utils.isInt(8, offset - kShortSize)) {
                 emit8(0x70 + condition.index());
                 emit8((offset - kShortSize) & 0xFF);
             } else {
@@ -3603,7 +3603,7 @@ Load Unaligned */
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
             CHECK_LE(offset, 0);
-            CHECK(Utils.isInt8(offset - kShortSize));
+            CHECK(Utils.isInt(8, offset - kShortSize));
             emit8(0x70 + condition.index());
             emit8((offset - kShortSize) & 0xFF);
         } else {
@@ -3617,7 +3617,7 @@ Load Unaligned */
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
             CHECK_LE(offset, 0);
-            CHECK(Utils.isInt8(offset - kShortSize));
+            CHECK(Utils.isInt(8, offset - kShortSize));
             emit8(0xE3);
             emit8((offset - kShortSize) & 0xFF);
         } else {
@@ -3644,7 +3644,7 @@ Load Unaligned */
             final int kLongSize = 5;
             int offset = label.getPosition() - size();
             CHECK_LE(offset, 0);
-            if (Utils.isInt8(offset - kShortSize)) {
+            if (Utils.isInt(8, offset - kShortSize)) {
                 emit8(0xEB);
                 emit8((offset - kShortSize) & 0xFF);
             } else {
@@ -3662,7 +3662,7 @@ Load Unaligned */
             final int kShortSize = 2;
             int offset = label.getPosition() - size();
             CHECK_LE(offset, 0);
-            CHECK(Utils.isInt8(offset - kShortSize));
+            CHECK(Utils.isInt(8, offset - kShortSize));
             emit8(0xEB);
             emit8((offset - kShortSize) & 0xFF);
         } else {
@@ -3952,7 +3952,7 @@ Load Unaligned */
             int position = label.getLinkPosition();
             int delta = loadU8(position);
             int offset = bound - (position + 1);
-            CHECK(Utils.isInt8(offset));
+            CHECK(Utils.isInt(8, offset));
             store8(position, offset);
             label.position = delta != 0 ? label.position - delta : 0;
         }

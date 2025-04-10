@@ -8,31 +8,7 @@ import static com.v7878.jnasm.Utils.CHECK_LE;
 import static com.v7878.jnasm.Utils.CHECK_LT;
 import static com.v7878.jnasm.Utils.CHECK_NE;
 import static com.v7878.jnasm.Utils.isAligned;
-import static com.v7878.jnasm.Utils.isAligned16;
-import static com.v7878.jnasm.Utils.isAligned2;
-import static com.v7878.jnasm.Utils.isAligned4;
-import static com.v7878.jnasm.Utils.isAligned64;
-import static com.v7878.jnasm.Utils.isAligned8;
 import static com.v7878.jnasm.Utils.isInt;
-import static com.v7878.jnasm.Utils.isInt10;
-import static com.v7878.jnasm.Utils.isInt12;
-import static com.v7878.jnasm.Utils.isInt13;
-import static com.v7878.jnasm.Utils.isInt21;
-import static com.v7878.jnasm.Utils.isInt6;
-import static com.v7878.jnasm.Utils.isInt9;
-import static com.v7878.jnasm.Utils.isUInt1;
-import static com.v7878.jnasm.Utils.isUInt10;
-import static com.v7878.jnasm.Utils.isUInt11;
-import static com.v7878.jnasm.Utils.isUInt12;
-import static com.v7878.jnasm.Utils.isUInt2;
-import static com.v7878.jnasm.Utils.isUInt20;
-import static com.v7878.jnasm.Utils.isUInt3;
-import static com.v7878.jnasm.Utils.isUInt4;
-import static com.v7878.jnasm.Utils.isUInt5;
-import static com.v7878.jnasm.Utils.isUInt6;
-import static com.v7878.jnasm.Utils.isUInt7;
-import static com.v7878.jnasm.Utils.isUInt8;
-import static com.v7878.jnasm.Utils.isUInt9;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondNE;
@@ -46,6 +22,7 @@ import static com.v7878.jnasm.riscv64.XRegister.Zero;
 
 import com.v7878.jnasm.Assembler;
 import com.v7878.jnasm.Label;
+import com.v7878.jnasm.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,7 +257,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         int near_offset = (offset + 0x800) & ~0xfff;
         // Calculate the short offset.
         int short_offset = offset - near_offset;
-        assert (isInt12(short_offset));
+        assert (isInt(12, short_offset));
         // Extract the `imm20`.
         int imm20 = near_offset >>> 12;
         // Return the result as a pair.
@@ -288,7 +265,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     private static int ToInt12(int uint12) {
-        CHECK(isUInt12(uint12));
+        CHECK(Utils.isUInt(12, uint12));
         return uint12 - ((uint12 & 0x800) << 1);
     }
 
@@ -296,16 +273,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     @SuppressWarnings("SameParameterValue")
     private static int EncodeRVVMemF7(Nf nf, int mew, MemAddressMode mop, VM vm) {
-        CHECK(isUInt3(nf.value()));
-        CHECK(isUInt1(mew));
-        CHECK(isUInt2(mop.value()));
-        CHECK(isUInt1(vm.value()));
+        CHECK(Utils.isUInt(3, nf.value()));
+        CHECK(Utils.isUInt(1, mew));
+        CHECK(Utils.isUInt(2, mop.value()));
+        CHECK(Utils.isUInt(1, vm.value()));
 
         return (nf.value() << 4) | (mew << 3) | (mop.value() << 1) | vm.value();
     }
 
     private static int EncodeRVVF7(int funct6, VM vm) {
-        CHECK(isUInt6(funct6));
+        CHECK(Utils.isUInt(6, funct6));
         return (funct6 << 1) | vm.value();
     }
 
@@ -324,7 +301,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     private static boolean IsShortReg(int reg) {
         int uv = reg - 8;
-        return isUInt3(uv);
+        return Utils.isUInt(3, uv);
     }
 
     private static boolean IsShortReg(XRegister reg) {
@@ -350,14 +327,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Rearrange given offset in the way {offset[0] | offset[1]}
     private static int EncodeOffset0_1(int offset) {
-        CHECK(isUInt2(offset));
+        CHECK(Utils.isUInt(2, offset));
         return offset >>> 1 | (offset & 1) << 1;
     }
 
     // Rearrange given offset, scaled by 4, in the way {offset[5:2] | offset[7:6]}
     private static int ExtractOffset52_76(int offset) {
-        assert isAligned4(offset) : "Offset should be scalable by 4";
-        CHECK(isUInt8(offset));
+        assert isAligned(offset, 4) : "Offset should be scalable by 4";
+        CHECK(Utils.isUInt(8, offset));
 
         int imm_52 = BitFieldExtract(offset, 2, 4);
         int imm_76 = BitFieldExtract(offset, 6, 2);
@@ -367,8 +344,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Rearrange given offset, scaled by 8, in the way {offset[5:3] | offset[8:6]}
     private static int ExtractOffset53_86(int offset) {
-        assert isAligned8(offset) : "Offset should be scalable by 8";
-        CHECK(isUInt9(offset));
+        assert isAligned(offset, 8) : "Offset should be scalable by 8";
+        CHECK(Utils.isUInt(9, offset));
 
         int imm_53 = BitFieldExtract(offset, 3, 3);
         int imm_86 = BitFieldExtract(offset, 6, 3);
@@ -378,8 +355,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Rearrange given offset, scaled by 4, in the way {offset[5:2] | offset[6]}
     private static int ExtractOffset52_6(int offset) {
-        assert isAligned4(offset) : "Offset should be scalable by 4";
-        CHECK(isUInt7(offset));
+        assert isAligned(offset, 4) : "Offset should be scalable by 4";
+        CHECK(Utils.isUInt(7, offset));
 
         int imm_52 = BitFieldExtract(offset, 2, 4);
         int imm_6 = BitFieldExtract(offset, 6, 1);
@@ -389,8 +366,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Rearrange given offset, scaled by 8, in the way {offset[5:3], offset[7:6]}
     private static int ExtractOffset53_76(int offset) {
-        assert isAligned8(offset) : "Offset should be scalable by 8";
-        CHECK(isUInt8(offset));
+        assert isAligned(offset, 8) : "Offset should be scalable by 8";
+        CHECK(Utils.isUInt(8, offset));
 
         int imm_53 = BitFieldExtract(offset, 3, 3);
         int imm_76 = BitFieldExtract(offset, 6, 2);
@@ -408,7 +385,9 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         // Also encoding with immediate = 0 is reserved
         // For more details please see 16.5 chapter is the specification
 
-        return uimm != 0 && (isUInt5(uimm) || isUInt5(uimm - 0xfffe0));
+        if (uimm == 0) return false;
+        if (Utils.isUInt(5, uimm)) return true;
+        return Utils.isUInt(5, uimm - 0xfffe0);
     }
 
     private Branch GetBranch(int branch_id) {
@@ -489,11 +468,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [        imm11:0            rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
     private void EmitI(int imm12, int rs1, int funct3, int rd, int opcode) {
-        CHECK(isInt12(imm12));
-        CHECK(isUInt5(rs1));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(rd));
-        CHECK(isUInt7(opcode));
+        CHECK(isInt(12, imm12));
+        CHECK(Utils.isUInt(5, rs1));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, rd));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = (imm12 << 20) | (rs1 << 15) |
                 (funct3 << 12) | (rd << 7) | opcode;
         Emit32(encoding);
@@ -507,12 +486,12 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [   funct7        rs2       rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
     private void EmitR(int funct7, int rs2, int rs1, int funct3, int rd, int opcode) {
-        CHECK(isUInt7(funct7));
-        CHECK(isUInt5(rs2));
-        CHECK(isUInt5(rs1));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(rd));
-        CHECK(isUInt7(opcode));
+        CHECK(Utils.isUInt(7, funct7));
+        CHECK(Utils.isUInt(5, rs2));
+        CHECK(Utils.isUInt(5, rs1));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, rd));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = (funct7 << 25) | (rs2 << 20) | (rs1 << 15)
                 | (funct3 << 12) | (rd << 7) | opcode;
         Emit32(encoding);
@@ -526,13 +505,13 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [  rs3     fmt    rs2       rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
     private void EmitR4(int rs3, int fmt, int rs2, int rs1, int funct3, int rd, int opcode) {
-        CHECK(isUInt5(rs3));
-        CHECK(isUInt2(fmt));
-        CHECK(isUInt5(rs2));
-        CHECK(isUInt5(rs1));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(rd));
-        CHECK(isUInt7(opcode));
+        CHECK(Utils.isUInt(5, rs3));
+        CHECK(Utils.isUInt(2, fmt));
+        CHECK(Utils.isUInt(5, rs2));
+        CHECK(Utils.isUInt(5, rs1));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, rd));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = (rs3 << 27) | (fmt << 25) | (rs2 << 20)
                 | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode;
         Emit32(encoding);
@@ -546,11 +525,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [   imm11:5       rs2       rs1   funct3   imm4:0      opcode   ]
     //   -----------------------------------------------------------------
     private void EmitS(int imm12, int rs2, int rs1, int funct3, int opcode) {
-        CHECK(isInt12(imm12));
-        CHECK(isUInt5(rs2));
-        CHECK(isUInt5(rs1));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt7(opcode));
+        CHECK(isInt(12, imm12));
+        CHECK(Utils.isUInt(5, rs2));
+        CHECK(Utils.isUInt(5, rs1));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = ((imm12 & 0xFE0) << 20) | (rs2 << 20) | (rs1 << 15)
                 | (funct3 << 12) | ((imm12 & 0x1F) << 7) | opcode;
         Emit32(encoding);
@@ -564,12 +543,12 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [  imm11:6  imm5:0(shamt)   rs1   funct3     rd        opcode   ]
     //   -----------------------------------------------------------------
     private void EmitI6(int funct6, int imm6, XRegister rs1, int funct3, XRegister rd, int opcode) {
-        CHECK(isUInt6(funct6));
-        CHECK(isUInt6(imm6));
-        CHECK(isUInt5(rs1.index()));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(rd.index()));
-        CHECK(isUInt7(opcode));
+        CHECK(Utils.isUInt(6, funct6));
+        CHECK(Utils.isUInt(6, imm6));
+        CHECK(Utils.isUInt(5, rs1.index()));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, rd.index()));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = (funct6 << 26) | (imm6 << 20) | (rs1.index() << 15)
                 | (funct3 << 12) | (rd.index() << 7) | opcode;
         Emit32(encoding);
@@ -585,11 +564,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     @SuppressWarnings("SameParameterValue")
     private void EmitB(int offset, XRegister rs2, XRegister rs1, int funct3, int opcode) {
         CHECK_ALIGNED(offset, 2);
-        CHECK(isInt13(offset));
-        CHECK(isUInt5(rs2.index()));
-        CHECK(isUInt5(rs1.index()));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt7(opcode));
+        CHECK(isInt(13, offset));
+        CHECK(Utils.isUInt(5, rs2.index()));
+        CHECK(Utils.isUInt(5, rs1.index()));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(7, opcode));
         int imm12 = ((offset) >> 1) & 0xfff;
         int encoding = ((imm12 & 0x800) << (31 - 11)) | ((imm12 & 0x03f0) << (25 - 4))
                 | (rs2.index() << 20) | (rs1.index() << 15) | (funct3 << 12)
@@ -605,9 +584,9 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [                imm31:12                    rd        opcode   ]
     //   -----------------------------------------------------------------
     private void EmitU(int imm20, XRegister rd, int opcode) {
-        CHECK(isUInt20(imm20));
-        CHECK(isUInt5(rd.index()));
-        CHECK(isUInt7(opcode));
+        CHECK(Utils.isUInt(20, imm20));
+        CHECK(Utils.isUInt(5, rd.index()));
+        CHECK(Utils.isUInt(7, opcode));
         int encoding = (imm20 << 12) | (rd.index() << 7) | opcode;
         Emit32(encoding);
     }
@@ -622,9 +601,9 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     @SuppressWarnings("SameParameterValue")
     private void EmitJ(int offset, XRegister rd, int opcode) {
         CHECK_ALIGNED(offset, 2);
-        CHECK(isInt21(offset));
-        CHECK(isUInt5(rd.index()));
-        CHECK(isUInt7(opcode));
+        CHECK(isInt(21, offset));
+        CHECK(Utils.isUInt(5, rd.index()));
+        CHECK(Utils.isUInt(7, opcode));
         int imm20 = (offset >> 1) & 0xfffff;
         int encoding = ((imm20 & 0x80000) << (31 - 19)) | ((imm20 & 0x03ff) << 21)
                 | ((imm20 & 0x400) << (20 - 10)) | ((imm20 & 0x7f800) << (12 - 11))
@@ -643,10 +622,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     @SuppressWarnings("SameParameterValue")
     private void EmitCR(int funct4, XRegister rd_rs1, XRegister rs2, int opcode) {
-        CHECK(isUInt4(funct4));
-        CHECK(isUInt5(rd_rs1.index()));
-        CHECK(isUInt5(rs2.index()));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(4, funct4));
+        CHECK(Utils.isUInt(5, rd_rs1.index()));
+        CHECK(Utils.isUInt(5, rs2.index()));
+        CHECK(Utils.isUInt(2, opcode));
 
         int encoding = (funct4 << 12) | (rd_rs1.index() << 7)
                 | (rs2.index() << 2) | opcode;
@@ -661,10 +640,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [func3 imm rd/rs1     imm    op ]
     //   ---------------------------------
     private void EmitCI(int funct3, int rd_rs1, int imm6, int opcode) {
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(rd_rs1));
-        CHECK(isUInt6(imm6));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, rd_rs1));
+        CHECK(Utils.isUInt(6, imm6));
+        CHECK(Utils.isUInt(2, opcode));
 
         int immH1 = BitFieldExtract(imm6, 5, 1);
         int immL5 = BitFieldExtract(imm6, 0, 5);
@@ -683,10 +662,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     @SuppressWarnings("SameParameterValue")
     private void EmitCSS(int funct3, int offset6, int rs2, int opcode) {
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt6(offset6));
-        CHECK(isUInt5(rs2));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(6, offset6));
+        CHECK(Utils.isUInt(5, rs2));
+        CHECK(Utils.isUInt(2, opcode));
 
         int encoding = (funct3 << 13) | (offset6 << 7) | (rs2 << 2) | opcode;
         Emit16(encoding);
@@ -701,10 +680,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     @SuppressWarnings("SameParameterValue")
     private void EmitCIW(int funct3, int imm8, int rd_s, int opcode) {
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt8(imm8));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(8, imm8));
         CHECK(IsShortReg(rd_s));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(2, opcode));
 
         int encoding = (funct3 << 13) | (imm8 << 5) | (EncodeShortReg(rd_s) << 2) | opcode;
         Emit16(encoding);
@@ -719,11 +698,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   ---------------------------------
     @SuppressWarnings("SameParameterValue")
     private void EmitCM(int funct3, int imm5, XRegister rs1_s, int rd_rs2_s, int opcode) {
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt5(imm5));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(5, imm5));
         CHECK(IsShortReg(rs1_s));
         CHECK(IsShortReg(rd_rs2_s));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(2, opcode));
 
         int immH3 = BitFieldExtract(imm5, 2, 3);
         int immL2 = BitFieldExtract(imm5, 0, 2);
@@ -741,11 +720,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [    funct6 rds1' funct2 rs2' op]
     //   ---------------------------------
     private void EmitCA(int funct6, XRegister rd_rs1_s, int funct2, int rs2_v, int opcode) {
-        CHECK(isUInt6(funct6));
+        CHECK(Utils.isUInt(6, funct6));
         CHECK(IsShortReg(rd_rs1_s));
-        CHECK(isUInt2(funct2));
-        CHECK(isUInt3(rs2_v));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(2, funct2));
+        CHECK(Utils.isUInt(3, rs2_v));
+        CHECK(Utils.isUInt(2, opcode));
 
         int encoding = (funct6 << 10) | (EncodeShortReg(rd_rs1_s) << 7)
                 | (funct2 << 5) | (rs2_v << 2) | opcode;
@@ -770,10 +749,10 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     //   [func3 offset rs1'   offset  op ]
     //   ---------------------------------
     private void EmitCB(int funct3, int offset8, XRegister rd_rs1_s, int opcode) {
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt8(offset8));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(8, offset8));
         CHECK(IsShortReg(rd_rs1_s));
-        CHECK(isUInt2(opcode));
+        CHECK(Utils.isUInt(2, opcode));
 
         int offsetH3 = BitFieldExtract(offset8, 5, 3);
         int offsetL5 = BitFieldExtract(offset8, 0, 5);
@@ -787,7 +766,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     @SuppressWarnings("SameParameterValue")
     private void EmitCBBranch(int funct3, int offset, XRegister rs1_s, int opcode) {
-        CHECK(isInt9(offset));
+        CHECK(isInt(9, offset));
         CHECK_ALIGNED(offset, 2);
 
         // offset[8|4:3]
@@ -820,9 +799,9 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     @SuppressWarnings("SameParameterValue")
     private void EmitCJ(int funct3, int offset, int opcode) {
         CHECK_ALIGNED(offset, 2);
-        CHECK(isInt12(offset));
-        CHECK(isUInt3(funct3));
-        CHECK(isUInt2(opcode));
+        CHECK(isInt(12, offset));
+        CHECK(Utils.isUInt(3, funct3));
+        CHECK(Utils.isUInt(2, opcode));
 
         // offset[11|4|9:8|10|6|7|3:1|5]
         int jumpt = (BitFieldExtract(offset, 11, 1) << 10) |
@@ -834,7 +813,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
                 (BitFieldExtract(offset, 1, 3) << 1) |
                 BitFieldExtract(offset, 5, 1);
 
-        CHECK(isUInt11(jumpt));
+        CHECK(Utils.isUInt(11, jumpt));
 
         int encoding = funct3 << 13 | jumpt << 2 | opcode;
         Emit16(encoding);
@@ -913,7 +892,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             int buf_size = size();
             // 64-bit literals must be at the very end of the buffer.
             CHECK_EQ(first_literal_location + lit_size, buf_size);
-            if (!isAligned64(first_literal_location)) {
+            if (!isAligned(first_literal_location, 64)) {
                 // Insert the padding.
                 getBuffer().resize(buf_size + 4);
                 getBuffer().move(first_literal_location + 4, first_literal_location, lit_size);
@@ -1205,7 +1184,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Jal(XRegister rd, int offset) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rd == Zero && isInt12(offset)) {
+            if (rd == Zero && isInt(12, offset)) {
                 CJ(offset);
                 return;
             }
@@ -1233,12 +1212,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Beq(XRegister rs1, XRegister rs2, int offset) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rs2 == Zero && IsShortReg(rs1) && isInt9(offset)) {
+            if (rs2 == Zero && IsShortReg(rs1) && isInt(9, offset)) {
                 CBeqz(rs1, offset);
                 return;
-            } else if (rs1 == Zero && IsShortReg(rs2) && isInt9(offset)) {
-                CBeqz(rs2, offset);
-                return;
+            } else {
+                if (rs1 == Zero && IsShortReg(rs2) && isInt(9, offset)) {
+                    CBeqz(rs2, offset);
+                    return;
+                }
             }
         }
 
@@ -1247,12 +1228,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Bne(XRegister rs1, XRegister rs2, int offset) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rs2 == Zero && IsShortReg(rs1) && isInt9(offset)) {
+            if (rs2 == Zero && IsShortReg(rs1) && isInt(9, offset)) {
                 CBnez(rs1, offset);
                 return;
-            } else if (rs1 == Zero && IsShortReg(rs2) && isInt9(offset)) {
-                CBnez(rs2, offset);
-                return;
+            } else {
+                if (rs1 == Zero && IsShortReg(rs2) && isInt(9, offset)) {
+                    CBnez(rs2, offset);
+                    return;
+                }
             }
         }
 
@@ -1286,7 +1269,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcb)) {
-            if (IsShortReg(rd) && IsShortReg(rs1) && isUInt2(offset) && isAligned2(offset)) {
+            if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(2, offset) && isAligned(offset, 2)) {
                 CLh(rd, rs1, offset);
                 return;
             }
@@ -1299,12 +1282,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rd != Zero && rs1 == SP && isUInt8(offset) && isAligned4(offset)) {
+            if (rd != Zero && rs1 == SP && Utils.isUInt(8, offset) && isAligned(offset, 4)) {
                 CLwsp(rd, offset);
                 return;
-            } else if (IsShortReg(rd) && IsShortReg(rs1) && isUInt7(offset) && isAligned4(offset)) {
-                CLw(rd, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(7, offset) && isAligned(offset, 4)) {
+                    CLw(rd, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -1315,12 +1300,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rd != Zero && rs1 == SP && isUInt9(offset) && isAligned8(offset)) {
+            if (rd != Zero && rs1 == SP && Utils.isUInt(9, offset) && isAligned(offset, 8)) {
                 CLdsp(rd, offset);
                 return;
-            } else if (IsShortReg(rd) && IsShortReg(rs1) && isUInt8(offset) && isAligned8(offset)) {
-                CLd(rd, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(8, offset) && isAligned(offset, 8)) {
+                    CLd(rd, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -1331,7 +1318,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcb)) {
-            if (IsShortReg(rd) && IsShortReg(rs1) && isUInt2(offset)) {
+            if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(2, offset)) {
                 CLbu(rd, rs1, offset);
                 return;
             }
@@ -1344,7 +1331,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcb)) {
-            if (IsShortReg(rd) && IsShortReg(rs1) && isUInt2(offset) && isAligned2(offset)) {
+            if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(2, offset) && isAligned(offset, 2)) {
                 CLhu(rd, rs1, offset);
                 return;
             }
@@ -1364,7 +1351,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcb)) {
-            if (IsShortReg(rs2) && IsShortReg(rs1) && isUInt2(offset)) {
+            if (IsShortReg(rs2) && IsShortReg(rs1) && Utils.isUInt(2, offset)) {
                 CSb(rs2, rs1, offset);
                 return;
             }
@@ -1377,7 +1364,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcb)) {
-            if (IsShortReg(rs2) && IsShortReg(rs1) && isUInt2(offset) && isAligned2(offset)) {
+            if (IsShortReg(rs2) && IsShortReg(rs1) && Utils.isUInt(2, offset) && isAligned(offset, 2)) {
                 CSh(rs2, rs1, offset);
                 return;
             }
@@ -1390,12 +1377,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rs1 == SP && isUInt8(offset) && isAligned4(offset)) {
+            if (rs1 == SP && Utils.isUInt(8, offset) && isAligned(offset, 4)) {
                 CSwsp(rs2, offset);
                 return;
-            } else if (IsShortReg(rs2) && IsShortReg(rs1) && isUInt7(offset) && isAligned4(offset)) {
-                CSw(rs2, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rs2) && IsShortReg(rs1) && Utils.isUInt(7, offset) && isAligned(offset, 4)) {
+                    CSw(rs2, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -1406,12 +1395,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore);
 
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rs1 == SP && isUInt9(offset) && isAligned8(offset)) {
+            if (rs1 == SP && Utils.isUInt(9, offset) && isAligned(offset, 8)) {
                 CSdsp(rs2, offset);
                 return;
-            } else if (IsShortReg(rs2) && IsShortReg(rs1) && isUInt8(offset) && isAligned8(offset)) {
-                CSd(rs2, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rs2) && IsShortReg(rs1) && Utils.isUInt(8, offset) && isAligned(offset, 8)) {
+                    CSd(rs2, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -1423,23 +1414,27 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void Addi(XRegister rd, XRegister rs1, int imm12) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
             if (rd != Zero) {
-                if (rs1 == Zero && isInt6(imm12)) {
+                if (rs1 == Zero && isInt(6, imm12)) {
                     CLi(rd, imm12);
                     return;
                 } else if (imm12 != 0) {
                     if (rd == rs1) {
                         // We're testing against clang's assembler and therefore
                         // if both c.addi and c.addi16sp are viable, we use the c.addi just like clang.
-                        if (isInt6(imm12)) {
+                        if (isInt(6, imm12)) {
                             CAddi(rd, imm12);
                             return;
-                        } else if (rd == SP && isInt10(imm12) && isAligned16(imm12)) {
-                            CAddi16Sp(imm12);
+                        } else {
+                            if (rd == SP && isInt(10, imm12) && isAligned(imm12, 16)) {
+                                CAddi16Sp(imm12);
+                                return;
+                            }
+                        }
+                    } else {
+                        if (IsShortReg(rd) && rs1 == SP && Utils.isUInt(10, imm12) && isAligned(imm12, 4)) {
+                            CAddi4Spn(rd, imm12);
                             return;
                         }
-                    } else if (IsShortReg(rd) && rs1 == SP && isUInt10(imm12) && isAligned4(imm12)) {
-                        CAddi4Spn(rd, imm12);
-                        return;
                     }
                 } else if (rs1 != Zero) {
                     CMv(rd, rs1);
@@ -1479,7 +1474,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Andi(XRegister rd, XRegister rs1, int imm12) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rd == rs1 && IsShortReg(rd) && isInt6(imm12)) {
+            if (rd == rs1 && IsShortReg(rd) && isInt(6, imm12)) {
                 CAndi(rd, imm12);
                 return;
             }
@@ -1650,7 +1645,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void Addiw(XRegister rd, XRegister rs1, int imm12) {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
-            if (rd != Zero && isInt6(imm12)) {
+            if (rd != Zero && isInt(6, imm12)) {
                 if (rd == rs1) {
                     CAddiw(rd, imm12);
                     return;
@@ -1738,8 +1733,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     // Fence instruction (RV32I): opcode = 0xf, funct3 = 0
 
     public void Fence(int pred, int succ) {
-        CHECK(isUInt4(pred));
-        CHECK(isUInt4(succ));
+        CHECK(Utils.isUInt(4, pred));
+        CHECK(Utils.isUInt(4, succ));
         EmitI(/* normal fence */ pred << 4 | succ, 0x0, 0x0, 0x0, 0xf);
     }
 
@@ -2021,12 +2016,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kD);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcd)) {
-            if (rs1 == SP && isUInt9(offset) && isAligned8(offset)) {
+            if (rs1 == SP && Utils.isUInt(9, offset) && isAligned(offset, 8)) {
                 CFLdsp(rd, offset);
                 return;
-            } else if (IsShortReg(rd) && IsShortReg(rs1) && isUInt8(offset) && isAligned8(offset)) {
-                CFLd(rd, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rd) && IsShortReg(rs1) && Utils.isUInt(8, offset) && isAligned(offset, 8)) {
+                    CFLd(rd, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -2042,12 +2039,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kD);
 
         if (IsExtensionEnabled(Riscv64Extension.kZcd)) {
-            if (rs1 == SP && isUInt9(offset) && isAligned8(offset)) {
+            if (rs1 == SP && Utils.isUInt(9, offset) && isAligned(offset, 8)) {
                 CFSdsp(rs2, offset);
                 return;
-            } else if (IsShortReg(rs2) && IsShortReg(rs1) && isUInt8(offset) && isAligned8(offset)) {
-                CFSd(rs2, rs1, offset);
-                return;
+            } else {
+                if (IsShortReg(rs2) && IsShortReg(rs1) && Utils.isUInt(8, offset) && isAligned(offset, 8)) {
+                    CFSd(rs2, rs1, offset);
+                    return;
+                }
             }
         }
 
@@ -2452,7 +2451,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void CLi(XRegister rd, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(rd.index(), Zero.index());
-        CHECK(isInt6(imm));
+        CHECK(isInt(6, imm));
         int imm6 = EncodeInt6(imm);
         EmitCI(0b010, rd.index(), imm6, 0b01);
     }
@@ -2483,8 +2482,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void CAddi16Sp(int nzimm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(nzimm, 0);
-        CHECK(isAligned16(nzimm));
-        CHECK(isInt10(nzimm));
+        CHECK(isAligned(nzimm, 16));
+        CHECK(isInt(10, nzimm));
 
         // nzimm[9]
         int imms1 = BitFieldExtract(nzimm, 9, 1);
@@ -2501,8 +2500,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void CAddi4Spn(XRegister rd_s, int nzuimm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(nzuimm, 0);
-        CHECK(isAligned4(nzuimm));
-        CHECK(isUInt10(nzuimm));
+        CHECK(isAligned(nzuimm, 4));
+        CHECK(Utils.isUInt(10, nzuimm));
 
         // nzuimm[5:4|9:6|2|3]
         int uimm = (BitFieldExtract(nzuimm, 4, 2) << 6) |
@@ -2523,20 +2522,20 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void CSrli(XRegister rd_s, int shamt) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(shamt, 0);
-        CHECK(isUInt6(shamt));
+        CHECK(Utils.isUInt(6, shamt));
         EmitCBArithmetic(0b100, 0b00, shamt, rd_s, 0b01);
     }
 
     public void CSrai(XRegister rd_s, int shamt) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
         CHECK_NE(shamt, 0);
-        CHECK(isUInt6(shamt));
+        CHECK(Utils.isUInt(6, shamt));
         EmitCBArithmetic(0b100, 0b01, shamt, rd_s, 0b01);
     }
 
     public void CAndi(XRegister rd_s, int imm) {
         AssertExtensionsEnabled(Riscv64Extension.kZca);
-        CHECK(isInt6(imm));
+        CHECK(isInt(6, imm));
         EmitCBArithmetic(0b100, 0b10, imm, rd_s, 0b01);
     }
 
@@ -2593,14 +2592,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CLhu(XRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZcb);
-        CHECK(isUInt2(offset));
+        CHECK(Utils.isUInt(2, offset));
         CHECK_ALIGNED(offset, 2);
         EmitCAReg(0b100001, rs1_s, BitFieldExtract(offset, 1, 1), rd_s, 0b00);
     }
 
     public void CLh(XRegister rd_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZcb);
-        CHECK(isUInt2(offset));
+        CHECK(Utils.isUInt(2, offset));
         CHECK_ALIGNED(offset, 2);
         EmitCAReg(0b100001, rs1_s, 0b10 | BitFieldExtract(offset, 1, 1), rd_s, 0b00);
     }
@@ -2612,7 +2611,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void CSh(XRegister rs2_s, XRegister rs1_s, int offset) {
         AssertExtensionsEnabled(Riscv64Extension.kLoadStore, Riscv64Extension.kZcb);
-        CHECK(isUInt2(offset));
+        CHECK(Utils.isUInt(2, offset));
         CHECK_ALIGNED(offset, 2);
         EmitCAReg(0b100011, rs1_s, BitFieldExtract(offset, 1, 1), rs2_s, 0b00);
     }
@@ -2918,14 +2917,14 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     public void VSetvli(XRegister rd, XRegister rs1, int vtypei) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
-        CHECK(isUInt11(vtypei));
+        CHECK(Utils.isUInt(11, vtypei));
         EmitI(vtypei, rs1.index(), VAIEncoding.kOPCFG.value(), rd.index(), 0x57);
     }
 
     public void VSetivli(XRegister rd, int uimm, int vtypei) {
         AssertExtensionsEnabled(Riscv64Extension.kV);
-        CHECK(isUInt10(vtypei));
-        CHECK(isUInt5(uimm));
+        CHECK(Utils.isUInt(10, vtypei));
+        CHECK(Utils.isUInt(5, uimm));
         EmitI((~0 << 10 | vtypei), uimm, VAIEncoding.kOPCFG.value(), rd.index(), 0x57);
     }
 
@@ -5481,7 +5480,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         if (aimm5 < 1 || aimm5 > 6) {
             throw new IllegalArgumentException("Immediate should be between [1, 16]: " + aimm5);
         }
-        CHECK(isUInt4(aimm5 - 1));
+        CHECK(Utils.isUInt(4, aimm5 - 1));
         VMsleu_vi(vd, vs2, aimm5 - 1, vm);
     }
 
@@ -5535,7 +5534,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         if (aimm5 < 1 || aimm5 > 6) {
             throw new IllegalArgumentException("Immediate should be between [1, 16]: " + aimm5);
         }
-        CHECK(isUInt4(aimm5 - 1));
+        CHECK(Utils.isUInt(4, aimm5 - 1));
         VMsgtu_vi(vd, vs2, aimm5 - 1, vm);
     }
 

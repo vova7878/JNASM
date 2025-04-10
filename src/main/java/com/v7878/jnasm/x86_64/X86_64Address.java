@@ -18,7 +18,7 @@ public class X86_64Address extends X86_64Operand {
             if (base.lowReg() == RSP) {
                 setSIB(TIMES_1, RSP, base);
             }
-        } else if (Utils.isInt8(disp)) {
+        } else if (Utils.isInt(8, disp)) {
             setModRM(1, base);
             if (base.lowReg() == RSP) {
                 setSIB(TIMES_1, RSP, base);
@@ -49,7 +49,7 @@ public class X86_64Address extends X86_64Operand {
         if (disp == 0 && base.lowReg() != RBP) {
             setModRM(0, RSP);
             setSIB(scale, index, base);
-        } else if (Utils.isInt8(disp)) {
+        } else if (Utils.isInt(8, disp)) {
             setModRM(1, RSP);
             setSIB(scale, index, base);
             setDisp8((byte) disp);
@@ -113,7 +113,7 @@ public class X86_64Address extends X86_64Operand {
             if (sib) {
                 newAddr.setSIB(addr.scale(), addr.index(), addr.base());
             }
-        } else if (Utils.isInt8(newDisp)) {
+        } else if (Utils.isInt(8, newDisp)) {
             // Mod 01b => 8-bit displacement.
             newAddr.setModRM(1, addr.rm());
             if (sib) {
