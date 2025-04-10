@@ -23,6 +23,10 @@ public enum Riscv64Extension {
     kZcb(13);
 
     public static final int kRiscv64AllExtensionsMask = (1 << (kZcb.index() + 1)) - 1;
+    public static final int kRiscv64CompressedExtensionsMask =
+            Riscv64Extension.kZca.extensionBit()
+                    | Riscv64Extension.kZcd.extensionBit()
+                    | Riscv64Extension.kZcb.extensionBit();
 
     private final int value;
 

@@ -34,11 +34,11 @@ public abstract class Assembler {
     }
 
     protected void emit8(int value) {
-        buffer.emit8((byte) value);
+        buffer.emit8(value);
     }
 
     protected void emit16(int value) {
-        buffer.emit16((short) value);
+        buffer.emit16(value);
     }
 
     protected void emit32(int value) {

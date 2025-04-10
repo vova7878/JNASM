@@ -1,5 +1,11 @@
 package com.v7878.jnasm.x86_64;
 
+import static com.v7878.jnasm.Utils.CHECK;
+import static com.v7878.jnasm.Utils.CHECK_EQ;
+import static com.v7878.jnasm.Utils.CHECK_GE;
+import static com.v7878.jnasm.Utils.CHECK_GT;
+import static com.v7878.jnasm.Utils.CHECK_LE;
+import static com.v7878.jnasm.Utils.CHECK_LT;
 import static com.v7878.jnasm.common_x86.X86VEXConstants.GET_REX_B;
 import static com.v7878.jnasm.common_x86.X86VEXConstants.GET_REX_X;
 import static com.v7878.jnasm.common_x86.X86VEXConstants.SET_VEX_B;
@@ -32,42 +38,6 @@ public class X86_64Assembler extends Assembler implements X86_64AssemblerI {
 
     public X86_64Assembler(boolean has_AVX_or_AVX2) {
         this.has_AVX_or_AVX2 = has_AVX_or_AVX2;
-    }
-
-    private static void CHECK(boolean value) {
-        if (!value) {
-            // TODO: message
-            throw new AssertionError();
-        }
-    }
-
-    private static void CHECK_EQ(int a, int b) {
-        CHECK(a == b);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static void CHECK_LT(long a, long b) {
-        CHECK(a < b);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static void CHECK_LT(int a, int b) {
-        CHECK(a < b);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static void CHECK_LE(int a, int b) {
-        CHECK(a <= b);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static void CHECK_GT(int a, int b) {
-        CHECK(a > b);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static void CHECK_GE(int a, int b) {
-        CHECK(a >= b);
     }
 
     public boolean cpuHasAVXorAVX2FeatureFlag() {

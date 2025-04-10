@@ -1,24 +1,86 @@
 package com.v7878.jnasm.riscv64;
 
+import static com.v7878.jnasm.Utils.CHECK;
+import static com.v7878.jnasm.Utils.CHECK_ALIGNED;
+import static com.v7878.jnasm.Utils.CHECK_EQ;
+import static com.v7878.jnasm.Utils.CHECK_IMPLIES;
+import static com.v7878.jnasm.Utils.CHECK_LE;
+import static com.v7878.jnasm.Utils.CHECK_LT;
+import static com.v7878.jnasm.Utils.CHECK_NE;
+import static com.v7878.jnasm.Utils.isAligned;
+import static com.v7878.jnasm.Utils.isAligned16;
+import static com.v7878.jnasm.Utils.isAligned2;
+import static com.v7878.jnasm.Utils.isAligned4;
+import static com.v7878.jnasm.Utils.isAligned64;
+import static com.v7878.jnasm.Utils.isAligned8;
+import static com.v7878.jnasm.Utils.isInt;
+import static com.v7878.jnasm.Utils.isInt10;
+import static com.v7878.jnasm.Utils.isInt12;
+import static com.v7878.jnasm.Utils.isInt13;
+import static com.v7878.jnasm.Utils.isInt21;
+import static com.v7878.jnasm.Utils.isInt6;
+import static com.v7878.jnasm.Utils.isInt9;
+import static com.v7878.jnasm.Utils.isUInt1;
+import static com.v7878.jnasm.Utils.isUInt10;
+import static com.v7878.jnasm.Utils.isUInt11;
+import static com.v7878.jnasm.Utils.isUInt12;
+import static com.v7878.jnasm.Utils.isUInt2;
+import static com.v7878.jnasm.Utils.isUInt20;
+import static com.v7878.jnasm.Utils.isUInt3;
+import static com.v7878.jnasm.Utils.isUInt4;
+import static com.v7878.jnasm.Utils.isUInt5;
+import static com.v7878.jnasm.Utils.isUInt6;
+import static com.v7878.jnasm.Utils.isUInt7;
+import static com.v7878.jnasm.Utils.isUInt8;
+import static com.v7878.jnasm.Utils.isUInt9;
+import static com.v7878.jnasm.riscv64.Branch.BranchCondition;
+import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
+import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondNE;
 import static com.v7878.jnasm.riscv64.FenceType.kFenceNNRW;
+import static com.v7878.jnasm.riscv64.Riscv64Extension.kRiscv64CompressedExtensionsMask;
 import static com.v7878.jnasm.riscv64.VRegister.V0;
 import static com.v7878.jnasm.riscv64.XRegister.RA;
 import static com.v7878.jnasm.riscv64.XRegister.SP;
+import static com.v7878.jnasm.riscv64.XRegister.TMP;
 import static com.v7878.jnasm.riscv64.XRegister.Zero;
 
 import com.v7878.jnasm.Assembler;
+import com.v7878.jnasm.Label;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.IntConsumer;
 
 public abstract class RV64Assembler extends Assembler implements RV64AssemblerI {
     private static final int kXlen = 64;
 
+    private final List<Branch> branches_;
+
+    private final int no_override_enabled_extensions;
     private int enabled_extensions;
+
     // Whether appending instructions at the end of the buffer or overwriting the existing ones.
     private boolean overwriting;
     // The current overwrite location.
     private int overwrite_location;
 
+    private final List<Literal> literals_;
+    private final List<Literal> long_literals_;  // 64-bit literals separated for alignment reasons.
+
     public RV64Assembler(int enabled_extensions) {
-        this.enabled_extensions = enabled_extensions;
+        this.no_override_enabled_extensions =
+                this.enabled_extensions = enabled_extensions;
+        this.branches_ = new ArrayList<>();
+        this.literals_ = new ArrayList<>();
+        this.long_literals_ = new ArrayList<>();
+    }
+
+    public void finalizeCode() {
+        super.finalizeCode();
+        EmitLiterals();
+        PromoteBranches();
+        EmitBranches();
     }
 
     private boolean IsExtensionEnabled(Riscv64Extension ext) {
@@ -37,32 +99,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         for (var other_ext : other_exts) {
             AssertExtensionsEnabled(other_ext);
         }
-    }
-
-    /* TODO
-  ArenaVector<Branch> branches_;
-
-  // Use `std::deque<>` for literal labels to allow insertions at the end
-  // without invalidating pointers and references to existing elements.
-  ArenaDeque<Literal> literals_;
-  ArenaDeque<Literal> long_literals_;  // 64-bit literals separated for alignment reasons.
-
-  uint32_t available_scratch_core_registers_;
-  uint32_t available_scratch_fp_registers_;
-     */
-
-    private enum BranchCondition {
-        kCondEQ,
-        kCondNE,
-        kCondLT,
-        kCondGE,
-        kCondLE,
-        kCondGT,
-        kCondLTU,
-        kCondGEU,
-        kCondLEU,
-        kCondGTU,
-        kUncond
     }
 
     private enum Nf {
@@ -144,155 +180,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         public int value() {
             return value;
         }
-    }
-
-    private static void CHECK(boolean value) {
-        if (!value) {
-            // TODO: message
-            throw new AssertionError();
-        }
-    }
-
-    private static void CHECK_EQ(int a, int b) {
-        CHECK(a == b);
-    }
-
-    private static void CHECK_NE(int a, int b) {
-        CHECK(a != b);
-    }
-
-    private static void CHECK_LT(int a, int b) {
-        CHECK(a < b);
-    }
-
-    private static void CHECK_LE(int a, int b) {
-        CHECK(a <= b);
-    }
-
-    private static void CHECK_GT(int a, int b) {
-        CHECK(a > b);
-    }
-
-    private static void CHECK_GE(int a, int b) {
-        CHECK(a >= b);
-    }
-
-    private static void CHECK_IMPLIES(boolean a, boolean b) {
-        CHECK(!a || b);
-    }
-
-    private static void CHECK_ALIGNED(int value, int alignment) {
-        CHECK(isAligned(value, alignment));
-    }
-
-    private static boolean isUInt(int width, int value) {
-        assert width > 0 : "width must be > 0";
-        assert width <= 32 : "width must be <= max (32)";
-        return value >>> width == 0;
-    }
-
-    private static boolean isInt(int width, int value) {
-        assert width > 0 : "width must be > 0";
-        assert width <= 32 : "width must be <= max (32)";
-        value = value >> width;
-        return value == 0 || value == -1;
-    }
-
-    private static boolean isUInt1(int value) {
-        return isUInt(1, value);
-    }
-
-    private static boolean isUInt2(int value) {
-        return isUInt(2, value);
-    }
-
-    private static boolean isUInt3(int value) {
-        return isUInt(3, value);
-    }
-
-    private static boolean isUInt4(int value) {
-        return isUInt(4, value);
-    }
-
-    private static boolean isUInt5(int value) {
-        return isUInt(5, value);
-    }
-
-    private static boolean isInt6(int value) {
-        return isInt(6, value);
-    }
-
-    private static boolean isUInt6(int value) {
-        return isUInt(6, value);
-    }
-
-    private static boolean isUInt7(int value) {
-        return isUInt(7, value);
-    }
-
-    private static boolean isUInt8(int value) {
-        return isUInt(8, value);
-    }
-
-    private static boolean isInt9(int value) {
-        return isInt(9, value);
-    }
-
-    private static boolean isUInt9(int value) {
-        return isUInt(9, value);
-    }
-
-    private static boolean isInt10(int value) {
-        return isInt(10, value);
-    }
-
-    private static boolean isUInt10(int value) {
-        return isUInt(10, value);
-    }
-
-    private static boolean isUInt11(int value) {
-        return isUInt(11, value);
-    }
-
-    private static boolean isInt12(int value) {
-        return isInt(12, value);
-    }
-
-    private static boolean isUInt12(int value) {
-        return isUInt(12, value);
-    }
-
-    private static boolean isInt13(int value) {
-        return isInt(13, value);
-    }
-
-    private static boolean isUInt20(int value) {
-        return isUInt(20, value);
-    }
-
-    private static boolean isInt21(int value) {
-        return isInt(21, value);
-    }
-
-    private static boolean isAligned(int value, int alignment) {
-        // TODO: assert isPowerOfTwo(alignment);
-        return (value & (alignment - 1)) == 0;
-    }
-
-    private static boolean isAligned2(int value) {
-        return isAligned(value, 2);
-    }
-
-    private static boolean isAligned4(int value) {
-        return isAligned(value, 4);
-    }
-
-    private static boolean isAligned8(int value) {
-        return isAligned(value, 8);
-    }
-
-    private static boolean isAligned16(int value) {
-        return isAligned(value, 16);
     }
 
     // Create a mask for the least significant "bits"
@@ -381,17 +268,23 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         return (value >>> lsb) & MaskLeastSignificant(width);
     }
 
-    private static boolean IsShortReg(int reg) {
-        int uv = reg - 8;
-        return isUInt3(uv);
+    private record OffsetPair(int imm20, int short_offset) {
     }
 
-    private static boolean IsShortReg(XRegister reg) {
-        return IsShortReg(reg.index());
-    }
-
-    private static boolean IsShortReg(FRegister reg) {
-        return IsShortReg(reg.index());
+    // Split 32-bit offset into an `imm20` for LUI/AUIPC and
+    // a signed 12-bit short offset for ADDI/JALR/etc.
+    private static OffsetPair SplitOffset(int offset) {
+        // The highest 0x800 values are out of range.
+        CHECK_LT(offset, 0x7ffff800);
+        // Round `offset` to nearest 4KiB offset because short offset has range [-0x800, 0x800).
+        int near_offset = (offset + 0x800) & ~0xfff;
+        // Calculate the short offset.
+        int short_offset = offset - near_offset;
+        assert (isInt12(short_offset));
+        // Extract the `imm20`.
+        int imm20 = near_offset >>> 12;
+        // Return the result as a pair.
+        return new OffsetPair(imm20, short_offset);
     }
 
     private static int ToInt12(int uint12) {
@@ -427,6 +320,19 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     private static int EncodeInt6(int imm) {
         return EncodeIntWidth(6, imm);
+    }
+
+    private static boolean IsShortReg(int reg) {
+        int uv = reg - 8;
+        return isUInt3(uv);
+    }
+
+    private static boolean IsShortReg(XRegister reg) {
+        return IsShortReg(reg.index());
+    }
+
+    private static boolean IsShortReg(FRegister reg) {
+        return IsShortReg(reg.index());
     }
 
     private static int EncodeShortReg(int reg) {
@@ -503,6 +409,52 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         // For more details please see 16.5 chapter is the specification
 
         return uimm != 0 && (isUInt5(uimm) || isUInt5(uimm - 0xfffe0));
+    }
+
+    private Branch GetBranch(int branch_id) {
+        return branches_.get(branch_id);
+    }
+
+    @Override
+    public void bind(Label label) {
+        bind((Riscv64Label) label);
+    }
+
+    public void bind(Riscv64Label label) {
+        CHECK(!label.isBound());
+        int bound_pc = size();
+
+        // Walk the list of branches referring to and preceding this label.
+        // Store the previously unknown target addresses in them.
+        while (label.isLinked()) {
+            int branch_id = label.getLinkPosition();
+            Branch branch = GetBranch(branch_id);
+            branch.Resolve(bound_pc);
+            // On to the next branch in the list...
+            label.position = branch.NextBranchId();
+        }
+
+        // Now make the label object contain its own location (relative to the end of the preceding
+        // branch, if any; it will be used by the branches referring to and following this label).
+        int prev_branch_id = Riscv64Label.kNoPrevBranchId;
+        if (!branches_.isEmpty()) {
+            prev_branch_id = branches_.size() - 1;
+            Branch prev_branch = GetBranch(prev_branch_id);
+            bound_pc -= prev_branch.GetEndLocation();
+        }
+        label.prev_branch_id_ = prev_branch_id;
+        label.bindTo(bound_pc);
+    }
+
+    private int GetLabelLocation(Riscv64Label label) {
+        CHECK(label.isBound());
+        int target = label.getPosition();
+        if (label.prev_branch_id_ != Riscv64Label.kNoPrevBranchId) {
+            // Get label location based on the branch preceding it.
+            Branch prev_branch = GetBranch(label.prev_branch_id_);
+            target += prev_branch.GetEndLocation();
+        }
+        return target;
     }
 
     // Emit helpers.
@@ -888,9 +840,342 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         Emit16(encoding);
     }
 
-    abstract void Bcond(Riscv64Label label, boolean is_bare, BranchCondition condition, XRegister lhs, XRegister rhs);
+    private void EmitLiterals() {
+        if (!literals_.isEmpty()) {
+            for (var literal : literals_) {
+                bind(literal.getLabel());
+                CHECK_EQ(literal.getSize(), 4);
+                for (int i = 0, size = literal.getSize(); i != size; ++i) {
+                    emit8(literal.getData()[i]);
+                }
+            }
+        }
+        if (!long_literals_.isEmpty()) {
+            // These need to be 8-byte-aligned but we shall add the alignment padding after the branch
+            // promotion, if needed. Since all literals are accessed with AUIPC+Load(imm12) without branch
+            // promotion, this late adjustment cannot take long literals out of instruction range.
+            for (var literal : long_literals_) {
+                bind(literal.getLabel());
+                CHECK_EQ(literal.getSize(), 8);
+                for (int i = 0, size = literal.getSize(); i != size; ++i) {
+                    emit8(literal.getData()[i]);
+                }
+            }
+        }
+    }
 
-    abstract void Buncond(Riscv64Label label, XRegister rd, boolean is_bare);
+    private void PromoteBranches() {
+        // Promote short branches to long as necessary.
+        boolean changed;
+        // To avoid re-computing predicate on each iteration cache it in local
+        do {
+            changed = false;
+            for (var branch : branches_) {
+                CHECK(branch.IsResolved());
+                int delta = branch.PromoteIfNeeded();
+                // If this branch has been promoted and needs to expand in size,
+                // relocate all branches by the expansion size.
+                if (delta != 0) {
+                    changed = true;
+                    int expand_location = branch.GetLocation();
+                    for (var branch2 : branches_) {
+                        branch2.Relocate(expand_location, delta);
+                    }
+                }
+            }
+        } while (changed);
+
+        // Account for branch expansion by resizing the code buffer
+        // and moving the code in it to its final location.
+        int branch_count = branches_.size();
+        if (branch_count > 0) {
+            // Resize.
+            Branch last_branch = branches_.get(branch_count - 1);
+            int size_delta = last_branch.GetEndLocation() - last_branch.GetOldEndLocation();
+            int old_size = size();
+            getBuffer().resize(old_size + size_delta);
+            // Move the code residing between branch placeholders.
+            int end = old_size;
+            for (int i = branch_count; i > 0; ) {
+                Branch branch = branches_.get(--i);
+                int size = end - branch.GetOldEndLocation();
+                getBuffer().move(branch.GetEndLocation(), branch.GetOldEndLocation(), size);
+                end = branch.GetOldLocation();
+            }
+        }
+
+        // Align 64-bit literals by moving them up by 4 bytes if needed.
+        // This can increase the PC-relative distance but all literals are accessed with AUIPC+Load(imm12)
+        // without branch promotion, so this late adjustment cannot take them out of instruction range.
+        if (!long_literals_.isEmpty()) {
+            int first_literal_location = GetLabelLocation(long_literals_.getFirst().getLabel());
+            int lit_size = long_literals_.size() * 64;
+            int buf_size = size();
+            // 64-bit literals must be at the very end of the buffer.
+            CHECK_EQ(first_literal_location + lit_size, buf_size);
+            if (!isAligned64(first_literal_location)) {
+                // Insert the padding.
+                getBuffer().resize(buf_size + 4);
+                getBuffer().move(first_literal_location + 4, first_literal_location, lit_size);
+                assert (!overwriting);
+                overwriting = true;
+                overwrite_location = first_literal_location;
+                Emit32(0);  // Illegal instruction.
+                overwriting = false;
+                // Increase target addresses in literal and address loads by 4 bytes in order for correct
+                // offsets from PC to be generated.
+                for (var branch : branches_) {
+                    var target = branch.GetTarget();
+                    if (target >= first_literal_location) {
+                        branch.Resolve(target + 4);
+                    }
+                }
+                // If after this we ever call GetLabelLocation() to get the location of a 64-bit literal,
+                // we need to adjust the location of the literal's label as well.
+                for (var literal : long_literals_) {
+                    // Bound label's position is negative, hence decrementing it instead of incrementing.
+                    literal.getLabel().position -= 4;
+                }
+            }
+        }
+    }
+
+    private void EmitBcond(BranchCondition cond,
+                           XRegister rs,
+                           XRegister rt,
+                           int offset) {
+        switch (cond) {
+            case kCondEQ -> Beq(rs, rt, offset);
+            case kCondNE -> Bne(rs, rt, offset);
+            case kCondLT -> Blt(rs, rt, offset);
+            case kCondGE -> Bge(rs, rt, offset);
+            case kCondLE -> Ble(rs, rt, offset);
+            case kCondGT -> Bgt(rs, rt, offset);
+            case kCondLTU -> Bltu(rs, rt, offset);
+            case kCondGEU -> Bgeu(rs, rt, offset);
+            case kCondLEU -> Bleu(rs, rt, offset);
+            case kCondGTU -> Bgtu(rs, rt, offset);
+            default -> throw new IllegalStateException("Unexpected branch condition " + cond);
+        }
+    }
+
+    private class ScopedExtensionsOverride implements AutoCloseable {
+        private final int old_enabled_extensions_;
+
+        public ScopedExtensionsOverride(int enabled_extensions) {
+            old_enabled_extensions_ = RV64Assembler.this.enabled_extensions;
+            RV64Assembler.this.enabled_extensions = enabled_extensions;
+        }
+
+        @Override
+        public void close() {
+            RV64Assembler.this.enabled_extensions = old_enabled_extensions_;
+        }
+    }
+
+    private ScopedExtensionsOverride noCompression() {
+        return new ScopedExtensionsOverride(
+                no_override_enabled_extensions & ~kRiscv64CompressedExtensionsMask);
+    }
+
+    private ScopedExtensionsOverride useCompression() {
+        return new ScopedExtensionsOverride(no_override_enabled_extensions);
+    }
+
+    private void EmitBranch(Branch branch) {
+        CHECK(overwriting);
+        overwrite_location = branch.GetLocation();
+        final int offset = branch.GetOffset();
+        BranchCondition condition = branch.GetCondition();
+        XRegister lhs = branch.GetLeftRegister();
+        XRegister rhs = branch.GetRightRegister();
+
+        // Disable Compressed emitter explicitly and enable where it is needed
+        try (var ignored = noCompression()) {
+            BiConsumer<XRegister, IntConsumer> emit_auipc_and_next = (reg, next) -> {
+                CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                var pair = SplitOffset(offset);
+                Auipc(reg, pair.imm20);
+                next.accept(pair.short_offset);
+            };
+
+            Runnable emit_cbcondz_opposite = () -> {
+                assert (branch.IsCompressableCondition());
+                try (var ignored1 = useCompression()) {
+                    if (condition == kCondNE) {
+                        assert (Branch.OppositeCondition(condition) == kCondEQ);
+                        CBeqz(branch.GetNonZeroRegister(), branch.GetLength());
+                    } else {
+                        assert (Branch.OppositeCondition(condition) == kCondNE);
+                        CBnez(branch.GetNonZeroRegister(), branch.GetLength());
+                    }
+                }
+            };
+
+            switch (branch.GetType()) {
+                // Compressed branches
+                case kCondCBranch:
+                case kBareCondCBranch: {
+                    try (var ignored1 = useCompression()) {
+                        CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                        assert (branch.IsCompressableCondition());
+                        if (condition == kCondEQ) {
+                            CBeqz(branch.GetNonZeroRegister(), offset);
+                        } else {
+                            CBnez(branch.GetNonZeroRegister(), offset);
+                        }
+                    }
+                    break;
+                }
+                case kUncondCBranch:
+                case kBareUncondCBranch: {
+                    try (var ignored1 = useCompression()) {
+                        CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                        CJ(offset);
+                    }
+                    break;
+                }
+                // Short branches.
+                case kUncondBranch:
+                case kBareUncondBranch:
+                    CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                    J(offset);
+                    break;
+                case kCondBranch:
+                case kBareCondBranch:
+                    CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                    EmitBcond(condition, lhs, rhs, offset);
+                    break;
+                case kCall:
+                case kBareCall:
+                    CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                    CHECK(lhs != Zero);
+                    Jal(lhs, offset);
+                    break;
+
+                // Medium branch.
+                case kCondBranch21:
+                    EmitBcond(Branch.OppositeCondition(condition), lhs, rhs, branch.GetLength());
+                    CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                    J(offset);
+                    break;
+                case kCondCBranch21: {
+                    emit_cbcondz_opposite.run();
+                    CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
+                    J(offset);
+                    break;
+                }
+                // Long branches.
+                case kLongCondCBranch:
+                    emit_cbcondz_opposite.run();
+                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
+                            Jalr(Zero, TMP, short_offset));
+                    break;
+                case kLongCondBranch:
+                    EmitBcond(Branch.OppositeCondition(condition), lhs, rhs, branch.GetLength());
+                    // fall through
+                case kLongUncondBranch:
+                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
+                            Jalr(Zero, TMP, short_offset));
+                    break;
+                case kLongCall:
+                    CHECK(lhs != Zero);
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            Jalr(lhs, lhs, short_offset));
+                    break;
+
+                // label.
+                case kLabel:
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            Addi(lhs, lhs, short_offset));
+                    break;
+
+                // literals.
+                case kLiteral:
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            Lw(lhs, lhs, short_offset));
+                    break;
+                case kLiteralUnsigned:
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            Lwu(lhs, lhs, short_offset));
+                    break;
+                case kLiteralLong:
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            Ld(lhs, lhs, short_offset));
+                    break;
+                case kLiteralFloat:
+                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
+                            FLw(branch.GetFRegister(), TMP, short_offset));
+                    break;
+                case kLiteralDouble:
+                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
+                            FLd(branch.GetFRegister(), TMP, short_offset));
+                    break;
+            }
+        }
+        CHECK_EQ(overwrite_location, branch.GetEndLocation());
+        CHECK_LE(branch.GetLength(), (Branch.kMaxBranchLength));
+    }
+
+    private void EmitBranches() {
+        // Switch from appending instructions at the end of the buffer to overwriting
+        // existing instructions (branch placeholders) in the buffer.
+        overwriting = true;
+        for (var branch : branches_) {
+            EmitBranch(branch);
+        }
+        overwriting = false;
+    }
+
+    private void FinalizeLabeledBranch(Riscv64Label label) {
+        int alignment = IsExtensionEnabled(Riscv64Extension.kZca) ? 16 : 32;
+        Branch this_branch = branches_.getLast();
+        int branch_length = this_branch.GetLength();
+        assert (isAligned(branch_length, alignment));
+        int length = branch_length / alignment;
+        if (!label.isBound()) {
+            // Branch forward (to a following label), distance is unknown.
+            // The first branch forward will contain 0, serving as the terminator of
+            // the list of forward-reaching branches.
+            this_branch.LinkToList(label.position);
+            // Now make the label object point to this branch
+            // (this forms a linked list of branches preceding this label).
+            int branch_id = branches_.size() - 1;
+            label.linkTo(branch_id);
+        }
+        // Reserve space for the branch.
+        for (; length != 0; --length) {
+            if (alignment == 16) {
+                Emit16(0);
+            } else {
+                Emit32(0);
+            }
+        }
+    }
+
+    private void Bcond(Riscv64Label label, boolean is_bare, BranchCondition condition, XRegister lhs, XRegister rhs) {
+        // TODO(riscv64): Should an assembler perform these optimizations, or should we remove them?
+        // If lhs = rhs, this can be a NOP.
+        if (Branch.IsNop(condition, lhs, rhs)) {
+            return;
+        }
+        if (Branch.IsUncond(condition, lhs, rhs)) {
+            Buncond(label, Zero, is_bare);
+            return;
+        }
+
+        int target = label.isBound() ? GetLabelLocation(label) : Branch.kUnresolved;
+        branches_.add(new Branch(size(), target, condition, lhs, rhs,
+                is_bare, IsExtensionEnabled(Riscv64Extension.kZca)));
+        FinalizeLabeledBranch(label);
+    }
+
+    private void Buncond(Riscv64Label label, XRegister rd, boolean is_bare) {
+        int target = label.isBound() ? GetLabelLocation(label) : Branch.kUnresolved;
+        branches_.add(new Branch(size(), target, rd, is_bare,
+                IsExtensionEnabled(Riscv64Extension.kZca)));
+        FinalizeLabeledBranch(label);
+    }
 
     // Implementation helper for `Li()`, `LoadConst32()` and `LoadConst64()`.
     abstract void LoadImmediate(XRegister rd, long imm, boolean can_use_tmp);
@@ -7298,139 +7583,6 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         Csrrci(Zero, csr, uimm5);
     }
 
-//public void Loadb(XRegister rd, XRegister rs1, int offset) {
-//  LoadFromOffset(Riscv64Assembler::Lb, rd, rs1, offset);
-//}
-//
-//public void Loadh(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Lh, rd, rs1, offset);
-//}
-//
-//public void Loadw(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Lw, rd, rs1, offset);
-//}
-//
-//public void Loadd(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Ld,rd, rs1, offset);
-//}
-//
-//public void Loadbu(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Lbu,rd, rs1, offset);
-//}
-//
-//public void Loadhu(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Lhu,rd, rs1, offset);
-//}
-//
-//public void Loadwu(XRegister rd, XRegister rs1, int offset) {
-//    LoadFromOffset(Riscv64Assembler::Lwu,rd, rs1, offset);
-//}
-//
-//public void Storeb(XRegister rs2, XRegister rs1, int offset) {
-//  StoreToOffset(Riscv64Assembler::Sb, rs2, rs1, offset);
-//}
-//
-//public void Storeh(XRegister rs2, XRegister rs1, int offset) {
-//  StoreToOffset(Riscv64Assembler::Sh,rs2, rs1, offset);
-//}
-//
-//public void Storew(XRegister rs2, XRegister rs1, int offset) {
-//  StoreToOffset(Riscv64Assembler::Sw,rs2, rs1, offset);
-//}
-//
-//public void Stored(XRegister rs2, XRegister rs1, int offset) {
-//  StoreToOffset(Riscv64Assembler::Sd,rs2, rs1, offset);
-//}
-//
-//public void FLoadw(FRegister rd, XRegister rs1, int offset) {
-//  FLoadFromOffset(Riscv64Assembler::FLw,rd, rs1, offset);
-//}
-//
-//public void FLoadd(FRegister rd, XRegister rs1, int offset) {
-//  FLoadFromOffset(Riscv64Assembler::FLd,rd, rs1, offset);
-//}
-//
-//public void FStorew(FRegister rs2, XRegister rs1, int offset) {
-//  FStoreToOffset(Riscv64Assembler::FSw,rs2, rs1, offset);
-//}
-//
-//public void FStored(FRegister rs2, XRegister rs1, int offset) {
-//  FStoreToOffset(Riscv64Assembler::FSd,rs2, rs1, offset);
-//}
-//
-//public void LoadConst32(XRegister rd, int value) {
-//  // No need to use a temporary register for 32-bit values.
-//  LoadImmediate(rd, value, /*can_use_tmp=*/ false);
-//}
-//
-//public void LoadConst64(XRegister rd, int64_t value) {
-//  LoadImmediate(rd, value, /*can_use_tmp=*/ true);
-//}
-//
-//template <typename ValueType, typename Addi, typename AddLarge>
-//void AddConstImpl(Riscv64Assembler* assembler,
-//                  XRegister rd,
-//                  XRegister rs1,
-//                  ValueType value,
-//                  Addi&& addi,
-//                  AddLarge&& add_large) {
-//  ScratchRegisterScope srs(assembler);
-//  // A temporary must be available for adjustment even if it's not needed.
-//  // However, `rd` can be used as the temporary unless it's the same as `rs1` or SP.
-//  CHECK_IMPLIES(rd == rs1 || rd == SP, srs.AvailableXRegisters() != 0);
-//
-//  if (isInt12(value)) {
-//    addi(rd, rs1, value);
-//    return;
-//  }
-//
-//  constexpr int kPositiveValueSimpleAdjustment = 0x7ff;
-//  constexpr int kHighestValueForSimpleAdjustment = 2 * kPositiveValueSimpleAdjustment;
-//  constexpr int kNegativeValueSimpleAdjustment = -0x800;
-//  constexpr int kLowestValueForSimpleAdjustment = 2 * kNegativeValueSimpleAdjustment;
-//
-//  if (rd != rs1 && rd != SP) {
-//    srs.IncludeXRegister(rd);
-//  }
-//  XRegister tmp = srs.AllocateXRegister();
-//  if (value >= 0 && value <= kHighestValueForSimpleAdjustment) {
-//    addi(tmp, rs1, kPositiveValueSimpleAdjustment);
-//    addi(rd, tmp, value - kPositiveValueSimpleAdjustment);
-//  } else if (value < 0 && value >= kLowestValueForSimpleAdjustment) {
-//    addi(tmp, rs1, kNegativeValueSimpleAdjustment);
-//    addi(rd, tmp, value - kNegativeValueSimpleAdjustment);
-//  } else {
-//    add_large(rd, rs1, value, tmp);
-//  }
-//}
-
-//public void AddConst32(XRegister rd, XRegister rs1, int value) {
-//  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
-//  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
-//  auto addiw = [&](XRegister rd, XRegister rs1, int value) { Addiw(rd, rs1, value); };
-//  auto add_large = [&](XRegister rd, XRegister rs1, int value, XRegister tmp) {
-//    LoadConst32(tmp, value);
-//    Addw(rd, rs1, tmp);
-//  };
-//  AddConstImpl(this, rd, rs1, value, addiw, add_large);
-//}
-//
-//public void AddConst64(XRegister rd, XRegister rs1, int64_t value) {
-//  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
-//  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
-//  auto addi = [&](XRegister rd, XRegister rs1, int value) { Addi(rd, rs1, value); };
-//  auto add_large = [&](XRegister rd, XRegister rs1, int64_t value, XRegister tmp) {
-//    // We may not have another scratch register for `LoadConst64()`, so use `Li()`.
-//    // TODO(riscv64): Refactor `LoadImmediate()` so that we can reuse the code to detect
-//    // when the code path using the scratch reg is beneficial, and use that path with a
-//    // small modification - instead of adding the two parts togeter, add them individually
-//    // to the input `rs1`. (This works as long as `rd` is not the same as `tmp`.)
-//    Li(tmp, value);
-//    Add(rd, rs1, tmp);
-//  };
-//  AddConstImpl(this, rd, rs1, value, addi, add_large);
-//}
-
     public void Beqz(XRegister rs, Riscv64Label label, boolean is_bare) {
         Beq(rs, Zero, label, is_bare);
     }
@@ -7456,11 +7608,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     public void Beq(XRegister rs, XRegister rt, Riscv64Label label, boolean is_bare) {
-        Bcond(label, is_bare, BranchCondition.kCondEQ, rs, rt);
+        Bcond(label, is_bare, kCondEQ, rs, rt);
     }
 
     public void Bne(XRegister rs, XRegister rt, Riscv64Label label, boolean is_bare) {
-        Bcond(label, is_bare, BranchCondition.kCondNE, rs, rt);
+        Bcond(label, is_bare, kCondNE, rs, rt);
     }
 
     public void Ble(XRegister rs, XRegister rt, Riscv64Label label, boolean is_bare) {
@@ -7507,6 +7659,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         Jal(RA, label, is_bare);
     }
 
+    // TODO
 //public void Loadw(XRegister rd, Literal  literal) {
 //  CHECK_EQ(literal.getSize(), 4);
 //  LoadLiteral(literal, rd, Branch.kLiteral);

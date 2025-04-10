@@ -1,5 +1,7 @@
 package com.v7878.jnasm.riscv64;
 
+import static com.v7878.jnasm.Utils.isUInt3;
+
 public enum FRegister {
     F0(0),
     F1(1),
@@ -88,5 +90,9 @@ public enum FRegister {
 
     public int index() {
         return value;
+    }
+
+    public boolean isShortReg() {
+        return isUInt3(index() - 8);
     }
 }

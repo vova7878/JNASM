@@ -64,6 +64,11 @@ final class AssemblerBuffer implements CodeBuffer {
         fixup_ = new AssemblerFixupContainer(fixup_, fixup, size());
     }
 
+    public void resize(int new_size) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
     public void move(int new_position, int old_position, int size) {
         // TODO
         throw new UnsupportedOperationException();

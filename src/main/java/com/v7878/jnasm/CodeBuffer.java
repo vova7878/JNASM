@@ -4,6 +4,8 @@ public interface CodeBuffer {
     // Get the size of the emitted code.
     int size();
 
+    void resize(int new_size);
+
     void move(int new_position, int old_position, int size);
 
     void emit8(int value);
