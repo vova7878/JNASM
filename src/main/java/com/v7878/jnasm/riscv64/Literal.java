@@ -1,27 +1,22 @@
 package com.v7878.jnasm.riscv64;
 
 public class Literal {
-    private static final int kMaxSize = 8;
-
     private final Riscv64Label label;
-    private final byte[] data;
+    private final long value;
+    private final boolean is_32_bit;
 
-    public Literal(byte[] data) {
-        if (data.length > kMaxSize) {
-            throw new IllegalArgumentException("data exceeds maximum size");
-        }
-        this.data = data;
+    Literal(long value, boolean is_32_bit) {
+        this.value = value;
+        this.is_32_bit = is_32_bit;
         this.label = new Riscv64Label();
     }
 
-    // TODO: of(int), of(long), of(float), of(double)
-
     public int getSize() {
-        return data.length;
+        return is_32_bit ? 4 : 8;
     }
 
-    public byte[] getData() {
-        return data;
+    public long getValue() {
+        return value;
     }
 
     public Riscv64Label getLabel() {

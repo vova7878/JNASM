@@ -1,6 +1,7 @@
 package com.v7878.jnasm.riscv64;
 
-import com.v7878.jnasm.Utils;
+import static com.v7878.jnasm.riscv64.RV64Assembler.EncodeShortRegIndex;
+import static com.v7878.jnasm.riscv64.RV64Assembler.IsShortRegIndex;
 
 public enum FRegister {
     F0(0),
@@ -93,6 +94,10 @@ public enum FRegister {
     }
 
     public boolean isShortReg() {
-        return Utils.isUInt(3, index() - 8);
+        return IsShortRegIndex(index());
+    }
+
+    public int encodeShortReg() {
+        return EncodeShortRegIndex(index());
     }
 }

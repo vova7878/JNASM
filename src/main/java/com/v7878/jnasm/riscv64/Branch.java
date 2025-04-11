@@ -35,7 +35,6 @@ import static com.v7878.jnasm.riscv64.Branch.Type.kLongCondCBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kLongUncondBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kUncondBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kUncondCBranch;
-import static com.v7878.jnasm.riscv64.RV64Assembler.IsShortReg;
 import static com.v7878.jnasm.riscv64.XRegister.Zero;
 
 import com.v7878.jnasm.Utils;
@@ -454,7 +453,7 @@ class Branch {
     // Checks if condition meets compression requirements
     public boolean IsCompressableCondition() {
         return (condition_ == kCondEQ || condition_ == kCondNE) &&
-                ((lhs_reg_ == Zero && IsShortReg(rhs_reg_)) || (rhs_reg_ == Zero && IsShortReg(lhs_reg_)));
+                ((lhs_reg_ == Zero && rhs_reg_.isShortReg()) || (rhs_reg_ == Zero && lhs_reg_.isShortReg()));
     }
 
     // Returns the bit size of the signed offset that the branch instruction can handle.
