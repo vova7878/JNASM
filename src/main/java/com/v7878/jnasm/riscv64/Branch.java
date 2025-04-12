@@ -48,10 +48,10 @@ class Branch {
     // Bit sizes of offsets defined as enums to minimize chance of typos.
     enum OffsetBits {
         kOffset9(9),
-        kOffset12(2),
-        kOffset13(3),
-        kOffset21(1),
-        kOffset32(2);
+        kOffset12(12),
+        kOffset13(13),
+        kOffset21(21),
+        kOffset32(32);
 
         private final int value;
 
@@ -371,7 +371,7 @@ class Branch {
     private final boolean compression_allowed_;
 
     // Id of the next branch bound to the same label in singly-linked zero-terminated list
-    // NOTE: encoded the same way as a position in a linked Label (id + TODO?: sizeof(void*))
+    // NOTE: encoded the same way as a position in a linked Label (id + BIAS)
     // Label itself is used to hold the 'head' of this list
     private int next_branch_id_;
 

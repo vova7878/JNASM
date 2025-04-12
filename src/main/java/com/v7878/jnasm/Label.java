@@ -42,20 +42,24 @@ public class Label {
     }
 
     public void bindTo(int position) {
+        if (position < 0) {
+            throw new IllegalStateException("Negative position: " + position);
+        }
         if (isBound()) {
             throw new IllegalStateException("Label is already bound");
         }
         // position should be strictly negative
         this.position = -(position + BIAS);
-        assert isBound() : "Binding failed";
     }
 
     public void linkTo(int position) {
+        if (position < 0) {
+            throw new IllegalStateException("Negative position: " + position);
+        }
         if (isBound()) {
             throw new IllegalStateException("Label is already bound");
         }
         // position should be strictly positive
         this.position = position + BIAS;
-        assert isLinked() : "Linking failed";
     }
 }

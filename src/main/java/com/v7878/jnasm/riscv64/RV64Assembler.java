@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
 
-public abstract class RV64Assembler extends Assembler implements RV64AssemblerI {
+public class RV64Assembler extends Assembler implements RV64AssemblerI {
     private static final int kXlen = 64;
 
     private final List<Branch> branches_;
@@ -410,6 +410,15 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         label.bindTo(bound_pc);
     }
 
+    @Override
+    public void jump(Label label) {
+        jump((Riscv64Label) label);
+    }
+
+    public void jump(Riscv64Label label) {
+        J(label, false);
+    }
+
     private int GetLabelLocation(Riscv64Label label) {
         CHECK(label.isBound());
         int target = label.getPosition();
@@ -427,7 +436,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         if (overwriting) {
             // Branches to labels are emitted into their placeholders here.
             store16(overwrite_location, value);
-            overwrite_location += 16;
+            overwrite_location += 2;
         } else {
             // Other instructions are simply appended at the end here.
             emit16(value);
@@ -438,7 +447,7 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
         if (overwriting) {
             // Branches to labels are emitted into their placeholders here.
             store32(overwrite_location, value);
-            overwrite_location += 32;
+            overwrite_location += 4;
         } else {
             // Other instructions are simply appended at the end here.
             emit32(value);
@@ -805,22 +814,18 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     private void EmitLiterals() {
-        if (!literals_.isEmpty()) {
-            for (var literal : literals_) {
-                bind(literal.getLabel());
-                CHECK_EQ(literal.getSize(), 4);
-                emit32((int) literal.getValue());
-            }
+        for (var literal : literals_) {
+            bind(literal.getLabel());
+            CHECK_EQ(literal.getSize(), 4);
+            emit32((int) literal.getValue());
         }
-        if (!long_literals_.isEmpty()) {
-            // These need to be 8-byte-aligned but we shall add the alignment padding after the branch
-            // promotion, if needed. Since all literals are accessed with AUIPC+Load(imm12) without branch
-            // promotion, this late adjustment cannot take long literals out of instruction range.
-            for (var literal : long_literals_) {
-                bind(literal.getLabel());
-                CHECK_EQ(literal.getSize(), 8);
-                emit64(literal.getValue());
-            }
+        // These need to be 8-byte-aligned but we shall add the alignment padding after the branch
+        // promotion, if needed. Since all literals are accessed with AUIPC+Load(imm12) without branch
+        // promotion, this late adjustment cannot take long literals out of instruction range.
+        for (var literal : long_literals_) {
+            bind(literal.getLabel());
+            CHECK_EQ(literal.getSize(), 8);
+            emit64(literal.getValue());
         }
     }
 
@@ -864,16 +869,16 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             }
         }
 
-        // Align 64-bit literals by moving them up by 4 bytes if needed.
+        // Align 64-bit literals by moving them up by 6/4/2 bytes if needed.
         // This can increase the PC-relative distance but all literals are accessed with AUIPC+Load(imm12)
         // without branch promotion, so this late adjustment cannot take them out of instruction range.
         if (!long_literals_.isEmpty()) {
             int first_literal_location = GetLabelLocation(long_literals_.getFirst().getLabel());
-            int lit_size = long_literals_.size() * 64;
+            int lit_size = long_literals_.size() * 8;
             int buf_size = size();
             // 64-bit literals must be at the very end of the buffer.
             CHECK_EQ(first_literal_location + lit_size, buf_size);
-            if (!isAligned(first_literal_location, 64)) {
+            if (!isAligned(first_literal_location, 8)) {
                 // Insert the padding.
                 getBuffer().resize(buf_size + 4);
                 getBuffer().move(first_literal_location + 4, first_literal_location, lit_size);
@@ -1089,8 +1094,9 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     }
 
     private void FinalizeLabeledBranch(Riscv64Label label) {
-        int alignment = IsExtensionEnabled(Riscv64Extension.kZca) ? 16 : 32;
-        Branch this_branch = branches_.getLast();
+        int alignment = IsExtensionEnabled(Riscv64Extension.kZca) ? 2 : 4;
+        int branch_id = branches_.size() - 1;
+        Branch this_branch = branches_.get(branch_id);
         int branch_length = this_branch.GetLength();
         assert (isAligned(branch_length, alignment));
         int length = branch_length / alignment;
@@ -1101,12 +1107,11 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
             this_branch.LinkToList(label.position);
             // Now make the label object point to this branch
             // (this forms a linked list of branches preceding this label).
-            int branch_id = branches_.size() - 1;
             label.linkTo(branch_id);
         }
         // Reserve space for the branch.
         for (; length != 0; --length) {
-            if (alignment == 16) {
+            if (alignment == 2) {
                 Emit16(0);
             } else {
                 Emit32(0);
@@ -1747,10 +1752,8 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
 
     // Fence instruction (RV32I): opcode = 0xf, funct3 = 0
 
-    public void Fence(int pred, int succ) {
-        CHECK(Utils.isUInt(4, pred));
-        CHECK(Utils.isUInt(4, succ));
-        EmitI(/* normal fence */ pred << 4 | succ, 0x0, 0x0, 0x0, 0xf);
+    public void Fence(FenceType pred, FenceType succ) {
+        EmitI(/* normal fence */ pred.value() << 4 | succ.value(), 0x0, 0x0, 0x0, 0xf);
     }
 
     public void FenceTso() {
@@ -7599,6 +7602,164 @@ public abstract class RV64Assembler extends Assembler implements RV64AssemblerI 
     public void Csrci(int csr, int uimm5) {
         Csrrci(Zero, csr, uimm5);
     }
+
+    public void Loadb(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lb, rd, rs1, offset);
+    }
+
+    public void Loadh(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lh, rd, rs1, offset);
+    }
+
+    public void Loadw(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lw, rd, rs1, offset);
+    }
+
+    public void Loadd(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Ld, rd, rs1, offset);
+    }
+
+    public void Loadbu(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lbu, rd, rs1, offset);
+    }
+
+    public void Loadhu(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lhu, rd, rs1, offset);
+    }
+
+    public void Loadwu(XRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: LoadFromOffset(Riscv64Assembler::Lwu, rd, rs1, offset);
+    }
+
+    public void Storeb(XRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: StoreToOffset(Riscv64Assembler::Sb, rs2, rs1, offset);
+    }
+
+    public void Storeh(XRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: StoreToOffset(Riscv64Assembler::Sh, rs2, rs1, offset);
+    }
+
+    public void Storew(XRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: StoreToOffset(Riscv64Assembler::Sw, rs2, rs1, offset);
+    }
+
+    public void Stored(XRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: StoreToOffset(Riscv64Assembler::Sd, rs2, rs1, offset);
+    }
+
+    public void FLoadw(FRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: FLoadFromOffset(Riscv64Assembler::FLw, rd, rs1, offset);
+    }
+
+    public void FLoadd(FRegister rd, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: FLoadFromOffset(Riscv64Assembler::FLd, rd, rs1, offset);
+    }
+
+    public void FStorew(FRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: FStoreToOffset(Riscv64Assembler::FSw, rs2, rs1, offset);
+    }
+
+    public void FStored(FRegister rs2, XRegister rs1, int offset) {
+        throw new UnsupportedOperationException();
+        // TODO: FStoreToOffset(Riscv64Assembler::FSd, rs2, rs1, offset);
+    }
+
+    public void LoadConst32(XRegister rd, int value) {
+        // TODO: is value unsigned?
+        Loadw(rd, newI32Literal(value));
+    }
+
+    public void LoadConst64(XRegister rd, long value) {
+        Li(rd, value);
+    }
+
+    public void AddConst32(XRegister rd, XRegister rs1, int value) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public void AddConst64(XRegister rd, XRegister rs1, long value) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    //template <typename ValueType, typename Addi, typename AddLarge>
+    //void AddConstImpl(Riscv64Assembler* assembler,
+    //                  XRegister rd,
+    //                  XRegister rs1,
+    //                  ValueType value,
+    //                  Addi&& addi,
+    //                  AddLarge&& add_large) {
+    //  ScratchRegisterScope srs(assembler);
+    //  // A temporary must be available for adjustment even if it's not needed.
+    //  // However, `rd` can be used as the temporary unless it's the same as `rs1` or SP.
+    //  CHECK_IMPLIES(rd == rs1 || rd == SP, srs.AvailableXRegisters() != 0);
+    //
+    //  if (isInt12(value)) {
+    //    addi(rd, rs1, value);
+    //    return;
+    //  }
+    //
+    //  constexpr int kPositiveValueSimpleAdjustment = 0x7ff;
+    //  constexpr int kHighestValueForSimpleAdjustment = 2 * kPositiveValueSimpleAdjustment;
+    //  constexpr int kNegativeValueSimpleAdjustment = -0x800;
+    //  constexpr int kLowestValueForSimpleAdjustment = 2 * kNegativeValueSimpleAdjustment;
+    //
+    //  if (rd != rs1 && rd != SP) {
+    //    srs.IncludeXRegister(rd);
+    //  }
+    //  XRegister tmp = srs.AllocateXRegister();
+    //  if (value >= 0 && value <= kHighestValueForSimpleAdjustment) {
+    //    addi(tmp, rs1, kPositiveValueSimpleAdjustment);
+    //    addi(rd, tmp, value - kPositiveValueSimpleAdjustment);
+    //  } else if (value < 0 && value >= kLowestValueForSimpleAdjustment) {
+    //    addi(tmp, rs1, kNegativeValueSimpleAdjustment);
+    //    addi(rd, tmp, value - kNegativeValueSimpleAdjustment);
+    //  } else {
+    //    add_large(rd, rs1, value, tmp);
+    //  }
+    //}
+    //
+    //public void AddConst32(XRegister rd, XRegister rs1, int value) {
+    //  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
+    //  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
+    //  auto addiw = [&](XRegister rd, XRegister rs1, int value) { Addiw(rd, rs1, value); };
+    //  auto add_large = [&](XRegister rd, XRegister rs1, int value, XRegister tmp) {
+    //    LoadConst32(tmp, value);
+    //    Addw(rd, rs1, tmp);
+    //  };
+    //  AddConstImpl(this, rd, rs1, value, addiw, add_large);
+    //}
+    //
+    //public void AddConst64(XRegister rd, XRegister rs1, int64_t value) {
+    //  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
+    //  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
+    //  auto addi = [&](XRegister rd, XRegister rs1, int value) { Addi(rd, rs1, value); };
+    //  auto add_large = [&](XRegister rd, XRegister rs1, int64_t value, XRegister tmp) {
+    //    // We may not have another scratch register for `LoadConst64()`, so use `Li()`.
+    //    // TODO(riscv64): Refactor `LoadImmediate()` so that we can reuse the code to detect
+    //    // when the code path using the scratch reg is beneficial, and use that path with a
+    //    // small modification - instead of adding the two parts togeter, add them individually
+    //    // to the input `rs1`. (This works as long as `rd` is not the same as `tmp`.)
+    //    Li(tmp, value);
+    //    Add(rd, rs1, tmp);
+    //  };
+    //  AddConstImpl(this, rd, rs1, value, addi, add_large);
+    //}
 
     public void Beqz(XRegister rs, Riscv64Label label, boolean is_bare) {
         Beq(rs, Zero, label, is_bare);

@@ -49,10 +49,7 @@ final class AssemblerBuffer implements CodeBuffer {
 
     public byte[] getCode() {
         byte[] out = new byte[size()];
-        int old_pos = data.position();
-        data.position(0);
-        data.get(out);
-        data.position(old_pos);
+        data.duplicate().flip().get(out);
         return out;
     }
 
@@ -65,13 +62,21 @@ final class AssemblerBuffer implements CodeBuffer {
     }
 
     public void resize(int new_size) {
-        // TODO
-        throw new UnsupportedOperationException();
+        if (new_size < 0) {
+            throw new IllegalArgumentException("New size is negative: " + new_size);
+        }
+        while (data.capacity() <= new_size) {
+            grow();
+        }
+        data.position(new_size);
     }
 
     public void move(int new_position, int old_position, int size) {
-        // TODO
-        throw new UnsupportedOperationException();
+        Objects.checkFromIndexSize(new_position, size, size());
+        Objects.checkFromIndexSize(old_position, size, size());
+        data.duplicate().position(new_position).put(
+                data.duplicate().position(old_position + size)
+                        .flip().position(old_position));
     }
 
     public void emit8(int value) {
