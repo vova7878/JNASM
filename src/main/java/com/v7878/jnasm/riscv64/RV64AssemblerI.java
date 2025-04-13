@@ -2372,9 +2372,9 @@ public interface RV64AssemblerI {
 
     void Loadd(XRegister rd, Literal literal);
 
-    void FLoadw(FRegister rd, Literal literal);
+    void FLoadw(XRegister tmp, FRegister rd, Literal literal);
 
-    void FLoadd(FRegister rd, Literal literal);
+    void FLoadd(XRegister tmp, FRegister rd, Literal literal);
 
     // Illegal instruction that triggers SIGILL.
     void Unimp();

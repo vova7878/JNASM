@@ -949,7 +949,6 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         return new ScopedExtensionsOverride(no_override_enabled_extensions);
     }
 
-    // TODO: avoid usage of TMP register (make it explicit)
     private void EmitBranch(Branch branch) {
         CHECK(overwriting);
         overwrite_location = branch.GetLocation();
@@ -982,8 +981,7 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
 
             switch (branch.GetType()) {
                 // Compressed branches
-                case kCondCBranch:
-                case kBareCondCBranch: {
+                case kCondCBranch: {
                     try (var ignored1 = useCompression()) {
                         CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
                         assert (branch.IsCompressableCondition());
@@ -995,27 +993,24 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
                     }
                     break;
                 }
-                case kUncondCBranch:
-                case kBareUncondCBranch: {
+                case kUncondCBranch: {
                     try (var ignored1 = useCompression()) {
                         CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
                         CJ(offset);
                     }
                     break;
                 }
+
                 // Short branches.
                 case kUncondBranch:
-                case kBareUncondBranch:
                     CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
                     J(offset);
                     break;
                 case kCondBranch:
-                case kBareCondBranch:
                     CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
                     EmitBcond(condition, lhs, rhs, offset);
                     break;
                 case kCall:
-                case kBareCall:
                     CHECK_EQ(overwrite_location, branch.GetOffsetLocation());
                     CHECK(lhs != Zero);
                     Jal(lhs, offset);
@@ -1033,6 +1028,8 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
                     J(offset);
                     break;
                 }
+
+                // TODO: avoid usage of TMP register (make it explicit)
                 // Long branches.
                 case kLongCondCBranch:
                     emit_cbcondz_opposite.run();
@@ -1072,12 +1069,14 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
                             Ld(lhs, lhs, short_offset));
                     break;
                 case kLiteralFloat:
-                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
-                            FLw(branch.GetFRegister(), TMP, short_offset));
+                    CHECK(lhs != Zero);
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            FLw(branch.GetFRegister(), lhs, short_offset));
                     break;
                 case kLiteralDouble:
-                    emit_auipc_and_next.accept(TMP, (int short_offset) ->
-                            FLd(branch.GetFRegister(), TMP, short_offset));
+                    CHECK(lhs != Zero);
+                    emit_auipc_and_next.accept(lhs, (int short_offset) ->
+                            FLd(branch.GetFRegister(), lhs, short_offset));
                     break;
             }
         }
@@ -1146,16 +1145,18 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
     }
 
     private void LoadLiteral(Literal literal, XRegister rd, Type literal_type) {
+        // TODO: what if literal can be loaded as immediate?
         Riscv64Label label = literal.getLabel();
         CHECK(!label.isBound());
         branches_.add(new Branch(size(), Branch.kUnresolved, rd, literal_type));
         FinalizeLabeledBranch(label);
     }
 
-    private void LoadLiteral(Literal literal, FRegister rd, Type literal_type) {
+    private void LoadLiteral(Literal literal, XRegister tmp, FRegister rd, Type literal_type) {
+        // TODO: what if literal can be loaded as immediate?
         Riscv64Label label = literal.getLabel();
         CHECK(!label.isBound());
-        branches_.add(new Branch(size(), Branch.kUnresolved, rd, literal_type));
+        branches_.add(new Branch(size(), Branch.kUnresolved, tmp, rd, literal_type));
         FinalizeLabeledBranch(label);
     }
 
@@ -7874,14 +7875,16 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         LoadLiteral(literal, rd, Type.kLiteralLong);
     }
 
-    public void FLoadw(FRegister rd, Literal literal) {
+    public void FLoadw(XRegister tmp, FRegister rd, Literal literal) {
+        CHECK_NE(tmp.index(), Zero.index());
         CHECK_EQ(literal.getSize(), 4);
-        LoadLiteral(literal, rd, Type.kLiteralFloat);
+        LoadLiteral(literal, tmp, rd, Type.kLiteralFloat);
     }
 
-    public void FLoadd(FRegister rd, Literal literal) {
+    public void FLoadd(XRegister tmp, FRegister rd, Literal literal) {
+        CHECK_NE(tmp.index(), Zero.index());
         CHECK_EQ(literal.getSize(), 8);
-        LoadLiteral(literal, rd, Type.kLiteralDouble);
+        LoadLiteral(literal, tmp, rd, Type.kLiteralDouble);
     }
 
     public void Unimp() {

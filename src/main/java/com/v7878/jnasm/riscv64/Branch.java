@@ -19,11 +19,6 @@ import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset13;
 import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset21;
 import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset32;
 import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset9;
-import static com.v7878.jnasm.riscv64.Branch.Type.kBareCall;
-import static com.v7878.jnasm.riscv64.Branch.Type.kBareCondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kBareCondCBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kBareUncondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kBareUncondCBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kCall;
 import static com.v7878.jnasm.riscv64.Branch.Type.kCondBranch;
 import static com.v7878.jnasm.riscv64.Branch.Type.kCondBranch21;
@@ -79,44 +74,35 @@ class Branch {
     }
 
     enum Type {
-        // Compressed branches (can be promoted to longer)
+        // Compressed branches
         kCondCBranch(2, 0, kOffset9),
-        kUncondCBranch(2, 0, OffsetBits.kOffset12),
+        kUncondCBranch(2, 0, kOffset12),
 
-        // Compressed branches (can't be promoted to longer)
-        kBareCondCBranch(2, 0, kOffset9),
-        kBareUncondCBranch(2, 0, OffsetBits.kOffset12),
+        // Short branches
+        kCondBranch(4, 0, kOffset13),
+        kUncondBranch(4, 0, kOffset21),
+        kCall(4, 0, kOffset21),
 
-        // Short branches (can be promoted to longer).
-        kCondBranch(4, 0, OffsetBits.kOffset13),
-        kUncondBranch(4, 0, OffsetBits.kOffset21),
-        kCall(4, 0, OffsetBits.kOffset21),
-
-        // Short branches (can't be promoted to longer).
-        kBareCondBranch(4, 0, OffsetBits.kOffset13),
-        kBareUncondBranch(4, 0, OffsetBits.kOffset21),
-        kBareCall(4, 0, OffsetBits.kOffset21),
-
-        // Medium branches (can be promoted to long).
+        // Medium branches
         // Compressed version
-        kCondCBranch21(6, 2, OffsetBits.kOffset21),
-        kCondBranch21(8, 4, OffsetBits.kOffset21),
+        kCondCBranch21(6, 2, kOffset21),
+        kCondBranch21(8, 4, kOffset21),
 
         // Long branches.
-        kLongCondCBranch(10, 2, OffsetBits.kOffset32),
-        kLongCondBranch(12, 4, OffsetBits.kOffset32),
-        kLongUncondBranch(8, 0, OffsetBits.kOffset32),
-        kLongCall(8, 0, OffsetBits.kOffset32),
+        kLongCondCBranch(10, 2, kOffset32),
+        kLongCondBranch(12, 4, kOffset32),
+        kLongUncondBranch(8, 0, kOffset32),
+        kLongCall(8, 0, kOffset32),
 
         // Label.
-        kLabel(8, 0, OffsetBits.kOffset32),
+        kLabel(8, 0, kOffset32),
 
         // Literals.
-        kLiteral(8, 0, OffsetBits.kOffset32),
-        kLiteralUnsigned(8, 0, OffsetBits.kOffset32),
-        kLiteralLong(8, 0, OffsetBits.kOffset32),
-        kLiteralFloat(8, 0, OffsetBits.kOffset32),
-        kLiteralDouble(8, 0, OffsetBits.kOffset32);
+        kLiteral(8, 0, kOffset32),
+        kLiteralUnsigned(8, 0, kOffset32),
+        kLiteralLong(8, 0, kOffset32),
+        kLiteralFloat(8, 0, kOffset32),
+        kLiteralDouble(8, 0, kOffset32);
 
         // Branch length in bytes.
         public final int length;
@@ -153,8 +139,7 @@ class Branch {
 
     public static boolean IsCompressed(Type type) {
         return switch (type) {
-            case kCondCBranch, kUncondCBranch, kBareCondCBranch,
-                 kBareUncondCBranch, kCondCBranch21, kLongCondCBranch -> true;
+            case kCondCBranch, kUncondCBranch, kCondCBranch21, kLongCondCBranch -> true;
             default -> false;
         };
     }
@@ -205,15 +190,14 @@ class Branch {
         this.target_ = target;
         this.lhs_reg_ = rd;
         this.rhs_reg_ = Zero;
-        this.freg_ = null; // TODO: kNoFRegister;
+        this.freg_ = null;
         this.condition_ = kUncond;
+        this.is_bare_ = is_bare;
         this.compression_allowed_ = compression_allowed;
         this.next_branch_id_ = 0;
 
-        InitializeType((rd != Zero ?
-                (is_bare ? kBareCall : kCall) :
-                (is_bare ? (compression_allowed ? kBareUncondCBranch : kBareUncondBranch) :
-                        (compression_allowed ? kUncondCBranch : kUncondBranch))));
+        InitializeType(rd != Zero ? kCall :
+                (compression_allowed ? kUncondCBranch : kUncondBranch));
     }
 
     // Conditional branch.
@@ -224,8 +208,9 @@ class Branch {
         this.target_ = target;
         this.lhs_reg_ = lhs_reg;
         this.rhs_reg_ = rhs_reg;
-        this.freg_ = null; // TODO: kNoFRegister;
+        this.freg_ = null;
         this.condition_ = condition;
+        this.is_bare_ = is_bare;
         this.compression_allowed_ = compression_allowed && IsCompressableCondition();
         this.next_branch_id_ = 0;
 
@@ -234,19 +219,19 @@ class Branch {
         CHECK(!IsUncond(condition, lhs_reg, rhs_reg));
 
         // Note: compression_allowed_ field used instead of compression_allowed parameter
-        InitializeType(is_bare ? (compression_allowed_ ? kBareCondCBranch : kBareCondBranch) :
-                (compression_allowed_ ? kCondCBranch : kCondBranch));
+        InitializeType(compression_allowed_ ? kCondCBranch : kCondBranch);
     }
 
-    // Label address or literal.
+    // Label address or integer literal.
     public Branch(int location, int target, XRegister rd, Type label_or_literal_type) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
         this.lhs_reg_ = rd;
         this.rhs_reg_ = Zero;
-        this.freg_ = null; // TODO: kNoFRegister;
+        this.freg_ = null;
         this.condition_ = kUncond;
+        this.is_bare_ = false;
         this.compression_allowed_ = false;
         this.next_branch_id_ = 0;
 
@@ -255,17 +240,20 @@ class Branch {
         InitializeType(label_or_literal_type);
     }
 
-    // Label address or literal.
-    public Branch(int location, int target, FRegister rd, Type literal_type) {
+    // Floting point literal.
+    public Branch(int location, int target, XRegister tmp, FRegister rd, Type literal_type) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
-        this.lhs_reg_ = Zero;
+        this.lhs_reg_ = tmp;
         this.rhs_reg_ = Zero;
         this.freg_ = rd;
         this.condition_ = kUncond;
+        this.is_bare_ = false;
         this.compression_allowed_ = false;
         this.next_branch_id_ = 0;
+
+        CHECK_NE(tmp.index(), Zero.index());
 
         InitializeType(literal_type);
     }
@@ -278,51 +266,46 @@ class Branch {
             case kCondCBranch:
                 CHECK(IsCompressableCondition());
                 if (condition_ != kUncond) {
-                    InitShortOrLong(
-                            offset_size_needed, kCondCBranch, kCondBranch, kCondCBranch21, kLongCondCBranch);
+                    if (is_bare_) {
+                        InitShortOrLong(offset_size_needed, kCondCBranch,
+                                kCondBranch, kCondCBranch21);
+                    } else {
+                        InitShortOrLong(offset_size_needed, kCondCBranch,
+                                kCondBranch, kCondCBranch21, kLongCondCBranch);
+                    }
                     break;
                 }
                 // fall through
             case kUncondCBranch:
-                InitShortOrLong(offset_size_needed, kUncondCBranch, kUncondBranch, kLongUncondBranch);
-                break;
-            case kBareCondCBranch:
-                if (condition_ != kUncond) {
-                    type_ = kBareCondCBranch;
-                    CHECK_LE(offset_size_needed.value(), GetOffsetSize().value());
-                    break;
+                if (is_bare_) {
+                    InitShortOrLong(offset_size_needed, kUncondCBranch, kUncondBranch);
+                } else {
+                    InitShortOrLong(offset_size_needed, kUncondCBranch, kUncondBranch, kLongUncondBranch);
                 }
-                // fall through
-            case kBareUncondCBranch:
-                type_ = kBareUncondCBranch;
-                CHECK_LE(offset_size_needed.value(), GetOffsetSize().value());
                 break;
             case kCondBranch:
                 if (condition_ != kUncond) {
-                    InitShortOrLong(offset_size_needed, kCondBranch, kCondBranch21, kLongCondBranch);
+                    if (is_bare_) {
+                        InitShortOrLong(offset_size_needed, kCondBranch, kCondBranch21);
+                    } else {
+                        InitShortOrLong(offset_size_needed, kCondBranch, kCondBranch21, kLongCondBranch);
+                    }
                     break;
                 }
                 // fall through
             case kUncondBranch:
-                InitShortOrLong(offset_size_needed, kUncondBranch, kLongUncondBranch);
+                if (is_bare_) {
+                    InitShortOrLong(offset_size_needed, kUncondBranch);
+                } else {
+                    InitShortOrLong(offset_size_needed, kUncondBranch, kLongUncondBranch);
+                }
                 break;
             case kCall:
-                InitShortOrLong(offset_size_needed, kCall, kLongCall);
-                break;
-            case kBareCondBranch:
-                if (condition_ != kUncond) {
-                    type_ = kBareCondBranch;
-                    CHECK_LE(offset_size_needed.value(), GetOffsetSize().value());
-                    break;
+                if (is_bare_) {
+                    InitShortOrLong(offset_size_needed, kCall);
+                } else {
+                    InitShortOrLong(offset_size_needed, kCall, kLongCall);
                 }
-                // fall through
-            case kBareUncondBranch:
-                type_ = kBareUncondBranch;
-                CHECK_LE(offset_size_needed.value(), GetOffsetSize().value());
-                break;
-            case kBareCall:
-                type_ = kBareCall;
-                CHECK_LE(offset_size_needed.value(), GetOffsetSize().value());
                 break;
             case kLabel:
                 type_ = initial_type;
@@ -350,8 +333,11 @@ class Branch {
                 return;
             }
         }
-        // TODO: call shouldNotReachHere()
-        throw new AssertionError();
+        throw illegalOffset();
+    }
+
+    private static RuntimeException illegalOffset() {
+        throw new IllegalStateException("Offset exceeds limit");
     }
 
     private final int old_location_;  // Offset into assembler buffer in bytes.
@@ -368,13 +354,13 @@ class Branch {
     private Type type_;      // Current type of the branch.
     private Type old_type_;  // Initial type of the branch.
 
+    private final boolean is_bare_;
     private final boolean compression_allowed_;
 
     // Id of the next branch bound to the same label in singly-linked zero-terminated list
     // NOTE: encoded the same way as a position in a linked Label (id + BIAS)
     // Label itself is used to hold the 'head' of this list
     private int next_branch_id_;
-
 
     public Type GetType() {
         return type_;
@@ -434,14 +420,6 @@ class Branch {
         return GetOldLocation() + GetOldLength();
     }
 
-    public boolean IsBare() {
-        return switch (type_) {
-            case kBareCondCBranch, kBareUncondCBranch, kBareUncondBranch,
-                 kBareCondBranch, kBareCall -> true;
-            default -> false;
-        };
-    }
-
     public boolean IsResolved() {
         return target_ != kUnresolved;
     }
@@ -487,15 +465,23 @@ class Branch {
         CHECK(IsResolved());
         Type old_type = type_;
         switch (type_) {
-            // Compressed branches (can be promoted to longer)
+            // Compressed branches
             case kUncondCBranch: {
                 OffsetBits needed_size = GetOffsetSizeNeeded(GetOffsetLocation(), target_);
                 if (needed_size.value() <= GetOffsetSize().value()) {
                     return 0;
                 }
 
-                type_ = needed_size.value() <= kUncondBranch.offset_size.value() ? kUncondBranch :
-                        kLongUncondBranch;
+                if (needed_size.value() <= kUncondBranch.offset_size.value()) {
+                    type_ = kUncondBranch;
+                    break;
+                }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
+                type_ = kLongUncondBranch;
                 break;
             }
             case kCondCBranch: {
@@ -509,19 +495,18 @@ class Branch {
                     type_ = kCondBranch;
                     break;
                 }
+
                 // fall through
             }
-            // Short branches (can be promoted to longer).
+            // Short branches
             case kCondBranch: {
                 OffsetBits needed_size = GetOffsetSizeNeeded(GetOffsetLocation(), target_);
                 if (needed_size.value() <= GetOffsetSize().value()) {
                     return 0;
                 }
 
-                Type cond21Type =
-                        (compression_allowed_ && IsCompressableCondition()) ? kCondCBranch21 : kCondBranch21;
-                Type longCondType =
-                        (compression_allowed_ && IsCompressableCondition()) ? kLongCondCBranch : kLongCondBranch;
+                Type cond21Type = compression_allowed_ ? kCondCBranch21 : kCondBranch21;
+                Type longCondType = compression_allowed_ ? kLongCondCBranch : kLongCondBranch;
 
                 // The offset remains the same for `kCond[C]Branch21` for forward branches.
                 assert (cond21Type.length - cond21Type.pc_offset ==
@@ -530,27 +515,52 @@ class Branch {
                     // Calculate the needed size for kCond[C]Branch21.
                     needed_size = GetOffsetSizeNeeded(location_ + cond21Type.pc_offset, target_);
                 }
-                type_ = (needed_size.value() <= cond21Type.offset_size.value()) ? cond21Type : longCondType;
+
+                if (needed_size.value() <= cond21Type.offset_size.value()) {
+                    type_ = cond21Type;
+                    break;
+                }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
+                type_ = longCondType;
                 break;
             }
             case kUncondBranch:
                 if (GetOffsetSizeNeeded(GetOffsetLocation(), target_).value() <= GetOffsetSize().value()) {
                     return 0;
                 }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
                 type_ = kLongUncondBranch;
                 break;
             case kCall:
                 if (GetOffsetSizeNeeded(GetOffsetLocation(), target_).value() <= GetOffsetSize().value()) {
                     return 0;
                 }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
                 type_ = kLongCall;
                 break;
-            // Medium branches (can be promoted to long).
+            // Medium branches
             case kCondCBranch21: {
                 OffsetBits needed_size = GetOffsetSizeNeeded(GetOffsetLocation(), target_);
                 if (needed_size.value() <= GetOffsetSize().value()) {
                     return 0;
                 }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
                 type_ = kLongCondCBranch;
                 break;
             }
@@ -559,6 +569,11 @@ class Branch {
                 if (needed_size.value() <= GetOffsetSize().value()) {
                     return 0;
                 }
+
+                if (is_bare_) {
+                    throw illegalOffset();
+                }
+
                 type_ = kLongCondBranch;
                 break;
             }
