@@ -59,9 +59,23 @@ public class Utils {
         return value == 0 || value == -1;
     }
 
+    public static boolean isPowerOfTwo(int value) {
+        return (value & (value - 1)) == 0;
+    }
+
     public static boolean isAligned(int value, int alignment) {
-        // TODO: assert isPowerOfTwo(alignment);
+        assert isPowerOfTwo(alignment);
         return (value & (alignment - 1)) == 0;
+    }
+
+    public static int roundDown(int x, int alignment) {
+        assert isPowerOfTwo(alignment);
+        return x & -alignment;
+    }
+
+    public static int roundUp(int x, int alignment) {
+        assert isPowerOfTwo(alignment);
+        return roundDown(Math.addExact(x, alignment - 1), alignment);
     }
 
     public static boolean isLUInt(int width, long value) {

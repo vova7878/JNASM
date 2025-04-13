@@ -9,6 +9,7 @@ import static com.v7878.jnasm.Utils.CHECK_LT;
 import static com.v7878.jnasm.Utils.CHECK_NE;
 import static com.v7878.jnasm.Utils.isAligned;
 import static com.v7878.jnasm.Utils.isInt;
+import static com.v7878.jnasm.Utils.roundUp;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondNE;
@@ -829,6 +830,38 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         }
     }
 
+    private void AlignLiterals(List<Literal> literals, int element_size) {
+        // This can increase the PC-relative distance but all literals are accessed with AUIPC+Load(imm12)
+        // without branch promotion, so this late adjustment cannot take them out of instruction range.
+        if (!literals.isEmpty()) {
+            int first_literal_location = GetLabelLocation(literals.getFirst().getLabel());
+            int padding = roundUp(first_literal_location, element_size) - first_literal_location;
+            if (padding != 0) {
+                // Insert the padding and fill it with zeros.
+                getBuffer().resize(size() + padding);
+                int lit_size = literals.size() * element_size;
+                getBuffer().move(first_literal_location + padding, first_literal_location, lit_size);
+                for (int i = 0; i < padding; i++) {
+                    store8(first_literal_location + i, 0);
+                }
+                // Increase target addresses in literal and address loads in order for correct
+                // offsets from PC to be generated.
+                for (var branch : branches_) {
+                    var target = branch.GetTarget();
+                    if (target >= first_literal_location) {
+                        branch.Resolve(target + padding);
+                    }
+                }
+                // If after this we ever call GetLabelLocation() to get the location of a literal,
+                // we need to adjust the location of the literal's label as well.
+                for (var literal : literals) {
+                    // Bound label's position is negative, hence decrementing it instead of incrementing.
+                    literal.getLabel().position -= padding;
+                }
+            }
+        }
+    }
+
     private void PromoteBranches() {
         // Promote short branches to long as necessary.
         boolean changed;
@@ -869,40 +902,9 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
             }
         }
 
-        // Align 64-bit literals by moving them up by 6/4/2 bytes if needed.
-        // This can increase the PC-relative distance but all literals are accessed with AUIPC+Load(imm12)
-        // without branch promotion, so this late adjustment cannot take them out of instruction range.
-        if (!long_literals_.isEmpty()) {
-            int first_literal_location = GetLabelLocation(long_literals_.getFirst().getLabel());
-            int lit_size = long_literals_.size() * 8;
-            int buf_size = size();
-            // 64-bit literals must be at the very end of the buffer.
-            CHECK_EQ(first_literal_location + lit_size, buf_size);
-            if (!isAligned(first_literal_location, 8)) {
-                // Insert the padding.
-                getBuffer().resize(buf_size + 4);
-                getBuffer().move(first_literal_location + 4, first_literal_location, lit_size);
-                assert (!overwriting);
-                overwriting = true;
-                overwrite_location = first_literal_location;
-                Emit32(0);  // Illegal instruction.
-                overwriting = false;
-                // Increase target addresses in literal and address loads by 4 bytes in order for correct
-                // offsets from PC to be generated.
-                for (var branch : branches_) {
-                    var target = branch.GetTarget();
-                    if (target >= first_literal_location) {
-                        branch.Resolve(target + 4);
-                    }
-                }
-                // If after this we ever call GetLabelLocation() to get the location of a 64-bit literal,
-                // we need to adjust the location of the literal's label as well.
-                for (var literal : long_literals_) {
-                    // Bound label's position is negative, hence decrementing it instead of incrementing.
-                    literal.getLabel().position -= 4;
-                }
-            }
-        }
+        // Align literals by moving them up if needed.
+        AlignLiterals(literals_, 4);
+        AlignLiterals(long_literals_, 8);
     }
 
     private void EmitBcond(BranchCondition cond,
