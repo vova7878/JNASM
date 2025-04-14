@@ -2286,35 +2286,35 @@ public interface RV64AssemblerI {
     void Csrci(int /* 12-bit */ csr, /* unsigned */ int uimm5);
 
     // Load/store macros for arbitrary 32-bit offsets.
-    void Loadb(XRegister rd, XRegister rs1, int offset);
+    void Loadb(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadh(XRegister rd, XRegister rs1, int offset);
+    void Loadh(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadw(XRegister rd, XRegister rs1, int offset);
+    void Loadw(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadd(XRegister rd, XRegister rs1, int offset);
+    void Loadd(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadbu(XRegister rd, XRegister rs1, int offset);
+    void Loadbu(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadhu(XRegister rd, XRegister rs1, int offset);
+    void Loadhu(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Loadwu(XRegister rd, XRegister rs1, int offset);
+    void Loadwu(XRegister tmp, XRegister rd, XRegister rs1, int offset);
 
-    void Storeb(XRegister rs2, XRegister rs1, int offset);
+    void Storeb(XRegister tmp, XRegister rs2, XRegister rs1, int offset);
 
-    void Storeh(XRegister rs2, XRegister rs1, int offset);
+    void Storeh(XRegister tmp, XRegister rs2, XRegister rs1, int offset);
 
-    void Storew(XRegister rs2, XRegister rs1, int offset);
+    void Storew(XRegister tmp, XRegister rs2, XRegister rs1, int offset);
 
-    void Stored(XRegister rs2, XRegister rs1, int offset);
+    void Stored(XRegister tmp, XRegister rs2, XRegister rs1, int offset);
 
-    void FLoadw(FRegister rd, XRegister rs1, int offset);
+    void FLoadw(XRegister tmp, FRegister rd, XRegister rs1, int offset);
 
-    void FLoadd(FRegister rd, XRegister rs1, int offset);
+    void FLoadd(XRegister tmp, FRegister rd, XRegister rs1, int offset);
 
-    void FStorew(FRegister rs2, XRegister rs1, int offset);
+    void FStorew(XRegister tmp, FRegister rs2, XRegister rs1, int offset);
 
-    void FStored(FRegister rs2, XRegister rs1, int offset);
+    void FStored(XRegister tmp, FRegister rs2, XRegister rs1, int offset);
 
     // Macros for loading constants.
     void LoadConst32(XRegister rd, int value);

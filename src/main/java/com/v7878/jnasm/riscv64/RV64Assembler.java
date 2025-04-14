@@ -9,6 +9,7 @@ import static com.v7878.jnasm.Utils.CHECK_LT;
 import static com.v7878.jnasm.Utils.CHECK_NE;
 import static com.v7878.jnasm.Utils.isAligned;
 import static com.v7878.jnasm.Utils.isInt;
+import static com.v7878.jnasm.Utils.roundDown;
 import static com.v7878.jnasm.Utils.roundUp;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
@@ -1158,6 +1159,91 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         CHECK(!label.isBound());
         branches_.add(new Branch(size(), Branch.kUnresolved, tmp, rd, literal_type));
         FinalizeLabeledBranch(label);
+    }
+
+    // This method is used to adjust the base register and offset pair for
+    // a load/store when the offset doesn't fit into 12-bit signed integer.
+    private void AdjustBaseAndOffset(XRegister tmp, XRegister[] base, int[] offset) {
+        if (isInt(12, offset[0])) {
+            return;
+        }
+
+        final int kPositiveOffsetMaxSimpleAdjustment = 0x7ff;
+        final int kHighestOffsetForSimpleAdjustment = 2 * kPositiveOffsetMaxSimpleAdjustment;
+        final int kPositiveOffsetSimpleAdjustmentAligned8 =
+                roundDown(kPositiveOffsetMaxSimpleAdjustment, 8);
+        final int kPositiveOffsetSimpleAdjustmentAligned4 =
+                roundDown(kPositiveOffsetMaxSimpleAdjustment, 4);
+        final int kNegativeOffsetSimpleAdjustment = -0x800;
+        final int kLowestOffsetForSimpleAdjustment = 2 * kNegativeOffsetSimpleAdjustment;
+
+        if (offset[0] >= 0 && offset[0] <= kHighestOffsetForSimpleAdjustment) {
+            // Make the adjustment 8-byte aligned (0x7f8) except for offsets that cannot be reached
+            // with this adjustment, then try 4-byte alignment, then just half of the offset.
+            int adjustment = isInt(12, offset[0] - kPositiveOffsetSimpleAdjustmentAligned8)
+                    ? kPositiveOffsetSimpleAdjustmentAligned8
+                    : isInt(12, offset[0] - kPositiveOffsetSimpleAdjustmentAligned4)
+                    ? kPositiveOffsetSimpleAdjustmentAligned4
+                    : offset[0] / 2;
+            CHECK(isInt(12, adjustment));
+            Addi(tmp, base[0], adjustment);
+            offset[0] -= adjustment;
+        } else if (offset[0] < 0 && offset[0] >= kLowestOffsetForSimpleAdjustment) {
+            Addi(tmp, base[0], kNegativeOffsetSimpleAdjustment);
+            offset[0] -= kNegativeOffsetSimpleAdjustment;
+        } else if (offset[0] >= 0x7ffff800) {
+            // Support even large offsets outside the range supported by `SplitOffset()`.
+            LoadConst32(tmp, offset[0]);
+            Add(tmp, tmp, base[0]);
+            offset[0] = 0;
+        } else {
+            var pair = SplitOffset(offset[0]);
+            Lui(tmp, pair.imm20);
+            Add(tmp, tmp, base[0]);
+            offset[0] = pair.short_offset;
+        }
+        base[0] = tmp;
+    }
+
+    private interface XXI {
+        void apply(XRegister x1, XRegister x2, int i);
+    }
+
+    private void LoadFromOffset(XXI insn, XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        CHECK(tmp != rs1);
+        XRegister[] rs1_arr = {rs1};
+        int[] offset_arr = {offset};
+        AdjustBaseAndOffset(tmp, rs1_arr, offset_arr);
+        insn.apply(rd, rs1_arr[0], offset_arr[0]);
+    }
+
+    private void StoreToOffset(XXI insn, XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
+        CHECK(tmp != rs1);
+        CHECK(tmp != rs2);
+        XRegister[] rs1_arr = {rs1};
+        int[] offset_arr = {offset};
+        AdjustBaseAndOffset(tmp, rs1_arr, offset_arr);
+        insn.apply(rs2, rs1_arr[0], offset_arr[0]);
+    }
+
+    private interface FXI {
+        void apply(FRegister f1, XRegister x2, int i);
+    }
+
+    private void FLoadFromOffset(FXI insn, XRegister tmp, FRegister rd, XRegister rs1, int offset) {
+        CHECK(tmp != rs1);
+        XRegister[] rs1_arr = {rs1};
+        int[] offset_arr = {offset};
+        AdjustBaseAndOffset(tmp, rs1_arr, offset_arr);
+        insn.apply(rd, rs1_arr[0], offset_arr[0]);
+    }
+
+    private void FStoreToOffset(FXI insn, XRegister tmp, FRegister rs2, XRegister rs1, int offset) {
+        CHECK(tmp != rs1);
+        XRegister[] rs1_arr = {rs1};
+        int[] offset_arr = {offset};
+        AdjustBaseAndOffset(tmp, rs1_arr, offset_arr);
+        insn.apply(rs2, rs1_arr[0], offset_arr[0]);
     }
 
     //_____________________________ RV64 VARIANTS extension _____________________________//
@@ -7370,7 +7456,6 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
     }
 
     public void Li(XRegister rd, long imm) {
-        // TODO: Is this really equivalent?
         Loadd(rd, newI64Literal(imm));
     }
 
@@ -7606,83 +7691,67 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         Csrrci(Zero, csr, uimm5);
     }
 
-    public void Loadb(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lb, rd, rs1, offset);
+    public void Loadb(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lb, tmp, rd, rs1, offset);
     }
 
-    public void Loadh(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lh, rd, rs1, offset);
+    public void Loadh(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lh, tmp, rd, rs1, offset);
     }
 
-    public void Loadw(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lw, rd, rs1, offset);
+    public void Loadw(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lw, tmp, rd, rs1, offset);
     }
 
-    public void Loadd(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Ld, rd, rs1, offset);
+    public void Loadd(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Ld, tmp, rd, rs1, offset);
     }
 
-    public void Loadbu(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lbu, rd, rs1, offset);
+    public void Loadbu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lbu, tmp, rd, rs1, offset);
     }
 
-    public void Loadhu(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lhu, rd, rs1, offset);
+    public void Loadhu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lhu, tmp, rd, rs1, offset);
     }
 
-    public void Loadwu(XRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: LoadFromOffset(Riscv64Assembler::Lwu, rd, rs1, offset);
+    public void Loadwu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        LoadFromOffset(this::Lwu, tmp, rd, rs1, offset);
     }
 
-    public void Storeb(XRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: StoreToOffset(Riscv64Assembler::Sb, rs2, rs1, offset);
+    public void Storeb(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
+        StoreToOffset(this::Sb, tmp, rs2, rs1, offset);
     }
 
-    public void Storeh(XRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: StoreToOffset(Riscv64Assembler::Sh, rs2, rs1, offset);
+    public void Storeh(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
+        StoreToOffset(this::Sh, tmp, rs2, rs1, offset);
     }
 
-    public void Storew(XRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: StoreToOffset(Riscv64Assembler::Sw, rs2, rs1, offset);
+    public void Storew(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
+        StoreToOffset(this::Sw, tmp, rs2, rs1, offset);
     }
 
-    public void Stored(XRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: StoreToOffset(Riscv64Assembler::Sd, rs2, rs1, offset);
+    public void Stored(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
+        StoreToOffset(this::Sd, tmp, rs2, rs1, offset);
     }
 
-    public void FLoadw(FRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: FLoadFromOffset(Riscv64Assembler::FLw, rd, rs1, offset);
+    public void FLoadw(XRegister tmp, FRegister rd, XRegister rs1, int offset) {
+        FLoadFromOffset(this::FLw, tmp, rd, rs1, offset);
     }
 
-    public void FLoadd(FRegister rd, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: FLoadFromOffset(Riscv64Assembler::FLd, rd, rs1, offset);
+    public void FLoadd(XRegister tmp, FRegister rd, XRegister rs1, int offset) {
+        FLoadFromOffset(this::FLd, tmp, rd, rs1, offset);
     }
 
-    public void FStorew(FRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: FStoreToOffset(Riscv64Assembler::FSw, rs2, rs1, offset);
+    public void FStorew(XRegister tmp, FRegister rs2, XRegister rs1, int offset) {
+        FStoreToOffset(this::FSw, tmp, rs2, rs1, offset);
     }
 
-    public void FStored(FRegister rs2, XRegister rs1, int offset) {
-        throw new UnsupportedOperationException();
-        // TODO: FStoreToOffset(Riscv64Assembler::FSd, rs2, rs1, offset);
+    public void FStored(XRegister tmp, FRegister rs2, XRegister rs1, int offset) {
+        FStoreToOffset(this::FSd, tmp, rs2, rs1, offset);
     }
 
     public void LoadConst32(XRegister rd, int value) {
-        // TODO: is value unsigned?
         Loadw(rd, newI32Literal(value));
     }
 

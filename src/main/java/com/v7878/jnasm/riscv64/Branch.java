@@ -240,7 +240,7 @@ class Branch {
         InitializeType(label_or_literal_type);
     }
 
-    // Floting point literal.
+    // Floating point literal.
     public Branch(int location, int target, XRegister tmp, FRegister rd, Type literal_type) {
         this.old_location_ = location;
         this.location_ = location;
