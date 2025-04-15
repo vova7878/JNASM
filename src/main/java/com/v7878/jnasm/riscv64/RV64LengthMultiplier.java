@@ -1,6 +1,6 @@
 package com.v7878.jnasm.riscv64;
 
-public enum LengthMultiplier {
+public enum RV64LengthMultiplier {
     kM1Over8(0b101),
     kM1Over4(0b110),
     kM1Over2(0b111),
@@ -12,7 +12,7 @@ public enum LengthMultiplier {
 
     private final int value;
 
-    LengthMultiplier(int value) {
+    RV64LengthMultiplier(int value) {
         this.value = value;
     }
 

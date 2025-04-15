@@ -3,40 +3,40 @@ package com.v7878.jnasm.riscv64;
 import static com.v7878.jnasm.Utils.CHECK;
 import static com.v7878.jnasm.Utils.CHECK_LE;
 import static com.v7878.jnasm.Utils.CHECK_NE;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondEQ;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGE;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGEU;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGT;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondGTU;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondLE;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondLEU;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondLT;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondLTU;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kCondNE;
-import static com.v7878.jnasm.riscv64.Branch.BranchCondition.kUncond;
-import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset12;
-import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset13;
-import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset21;
-import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset32;
-import static com.v7878.jnasm.riscv64.Branch.OffsetBits.kOffset9;
-import static com.v7878.jnasm.riscv64.Branch.Type.kCall;
-import static com.v7878.jnasm.riscv64.Branch.Type.kCondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kCondBranch21;
-import static com.v7878.jnasm.riscv64.Branch.Type.kCondCBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kCondCBranch21;
-import static com.v7878.jnasm.riscv64.Branch.Type.kLongCall;
-import static com.v7878.jnasm.riscv64.Branch.Type.kLongCondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kLongCondCBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kLongUncondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kUncondBranch;
-import static com.v7878.jnasm.riscv64.Branch.Type.kUncondCBranch;
-import static com.v7878.jnasm.riscv64.XRegister.Zero;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondEQ;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondGE;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondGEU;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondGT;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondGTU;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondLE;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondLEU;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondLT;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondLTU;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kCondNE;
+import static com.v7878.jnasm.riscv64.RV64Branch.BranchCondition.kUncond;
+import static com.v7878.jnasm.riscv64.RV64Branch.OffsetBits.kOffset12;
+import static com.v7878.jnasm.riscv64.RV64Branch.OffsetBits.kOffset13;
+import static com.v7878.jnasm.riscv64.RV64Branch.OffsetBits.kOffset21;
+import static com.v7878.jnasm.riscv64.RV64Branch.OffsetBits.kOffset32;
+import static com.v7878.jnasm.riscv64.RV64Branch.OffsetBits.kOffset9;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kCall;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kCondBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kCondBranch21;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kCondCBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kCondCBranch21;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kLongCall;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kLongCondBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kLongCondCBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kLongUncondBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kUncondBranch;
+import static com.v7878.jnasm.riscv64.RV64Branch.Type.kUncondCBranch;
+import static com.v7878.jnasm.riscv64.RV64XRegister.Zero;
 
 import com.v7878.jnasm.Utils;
 
 // Note that PC-relative literal loads are handled as pseudo branches because they need
 // to be emitted after branch relocation to use correct offsets.
-class Branch {
+class RV64Branch {
     public static final int kUnresolved = 0xffffffff;  // Unresolved target_
     public static final int kMaxBranchLength = 12;  // In bytes.
 
@@ -122,14 +122,14 @@ class Branch {
 
     // Some conditional branches with lhs = rhs are effectively NOPs, while some
     // others are effectively unconditional.
-    public static boolean IsNop(BranchCondition condition, XRegister lhs, XRegister rhs) {
+    public static boolean IsNop(BranchCondition condition, RV64XRegister lhs, RV64XRegister rhs) {
         return switch (condition) {
             case kCondNE, kCondLT, kCondGT, kCondLTU, kCondGTU -> lhs == rhs;
             default -> false;
         };
     }
 
-    public static boolean IsUncond(BranchCondition condition, XRegister lhs, XRegister rhs) {
+    public static boolean IsUncond(BranchCondition condition, RV64XRegister lhs, RV64XRegister rhs) {
         return switch (condition) {
             case kUncond -> true;
             case kCondEQ, kCondGE, kCondLE, kCondLEU, kCondGEU -> lhs == rhs;
@@ -184,7 +184,7 @@ class Branch {
     }
 
     // Unconditional branch or call.
-    public Branch(int location, int target, XRegister rd, boolean is_bare, boolean compression_allowed) {
+    public RV64Branch(int location, int target, RV64XRegister rd, boolean is_bare, boolean compression_allowed) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
@@ -201,8 +201,8 @@ class Branch {
     }
 
     // Conditional branch.
-    public Branch(int location, int target, BranchCondition condition, XRegister lhs_reg,
-                  XRegister rhs_reg, boolean is_bare, boolean compression_allowed) {
+    public RV64Branch(int location, int target, BranchCondition condition, RV64XRegister lhs_reg,
+                      RV64XRegister rhs_reg, boolean is_bare, boolean compression_allowed) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
@@ -223,7 +223,7 @@ class Branch {
     }
 
     // Label address or integer literal.
-    public Branch(int location, int target, XRegister rd, Type label_or_literal_type) {
+    public RV64Branch(int location, int target, RV64XRegister rd, Type label_or_literal_type) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
@@ -241,7 +241,7 @@ class Branch {
     }
 
     // Floating point literal.
-    public Branch(int location, int target, XRegister tmp, FRegister rd, Type literal_type) {
+    public RV64Branch(int location, int target, RV64XRegister tmp, RV64FRegister rd, Type literal_type) {
         this.old_location_ = location;
         this.location_ = location;
         this.target_ = target;
@@ -346,9 +346,9 @@ class Branch {
 
     // Left-hand side register in conditional branches or
     // destination register in calls or literals.
-    private final XRegister lhs_reg_;
-    private final XRegister rhs_reg_;          // Right-hand side register in conditional branches.
-    private final FRegister freg_;             // Destination register in FP literals.
+    private final RV64XRegister lhs_reg_;
+    private final RV64XRegister rhs_reg_;          // Right-hand side register in conditional branches.
+    private final RV64FRegister freg_;             // Destination register in FP literals.
     private final BranchCondition condition_;  // Condition for conditional branches.
 
     private Type type_;      // Current type of the branch.
@@ -374,21 +374,21 @@ class Branch {
         return condition_;
     }
 
-    public XRegister GetLeftRegister() {
+    public RV64XRegister GetLeftRegister() {
         return lhs_reg_;
     }
 
-    public XRegister GetRightRegister() {
+    public RV64XRegister GetRightRegister() {
         return rhs_reg_;
     }
 
-    public XRegister GetNonZeroRegister() {
+    public RV64XRegister GetNonZeroRegister() {
         assert (GetLeftRegister() == Zero || GetRightRegister() == Zero);
         assert (GetLeftRegister() != Zero || GetRightRegister() != Zero);
         return GetLeftRegister() == Zero ? GetRightRegister() : GetLeftRegister();
     }
 
-    public FRegister GetFRegister() {
+    public RV64FRegister GetFRegister() {
         return freg_;
     }
 

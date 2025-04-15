@@ -1,6 +1,6 @@
 package com.v7878.jnasm.riscv64;
 
-public enum SelectedElementWidth {
+public enum RV64SelectedElementWidth {
     kE8(0b000),
     kE16(0b001),
     kE32(0b010),
@@ -12,7 +12,7 @@ public enum SelectedElementWidth {
 
     private final int value;
 
-    SelectedElementWidth(int value) {
+    RV64SelectedElementWidth(int value) {
         this.value = value;
     }
 

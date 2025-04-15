@@ -1,14 +1,14 @@
 package com.v7878.jnasm.riscv64;
 
-public class Literal {
-    private final Riscv64Label label;
+public class RV64Literal {
+    private final RV64Label label;
     private final long value;
     private final boolean is_32_bit;
 
-    Literal(long value, boolean is_32_bit) {
+    RV64Literal(long value, boolean is_32_bit) {
         this.value = value;
         this.is_32_bit = is_32_bit;
-        this.label = new Riscv64Label();
+        this.label = new RV64Label();
     }
 
     public int getSize() {
@@ -19,7 +19,7 @@ public class Literal {
         return value;
     }
 
-    public Riscv64Label getLabel() {
+    public RV64Label getLabel() {
         return label;
     }
 }

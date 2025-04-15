@@ -1,6 +1,6 @@
 package com.v7878.jnasm.riscv64;
 
-public enum Riscv64Extension {
+public enum RV64Extension {
     // Pseudo-extension encompassing all loads and stores. Used to check that
     // we do not have loads and stores in the middle of a LR/SC sequence.
     kLoadStore(0),
@@ -24,17 +24,17 @@ public enum Riscv64Extension {
 
     public static final int kRiscv64AllExtensionsMask = (1 << (kZcb.index() + 1)) - 1;
     public static final int kRiscv64CompressedExtensionsMask =
-            Riscv64Extension.kZca.extensionBit()
-                    | Riscv64Extension.kZcd.extensionBit()
-                    | Riscv64Extension.kZcb.extensionBit();
+            RV64Extension.kZca.extensionBit()
+                    | RV64Extension.kZcd.extensionBit()
+                    | RV64Extension.kZcb.extensionBit();
 
     private final int value;
 
-    Riscv64Extension(int value) {
+    RV64Extension(int value) {
         this.value = value;
     }
 
-    public static Riscv64Extension of(int index) {
+    public static RV64Extension of(int index) {
         return values()[index];
     }
 

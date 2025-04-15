@@ -1,22 +1,22 @@
 package com.v7878.jnasm.riscv64;
 
-import static com.v7878.jnasm.riscv64.FRegister.kNumberOfFRegisters;
-import static com.v7878.jnasm.riscv64.XRegister.kNumberOfXRegisters;
+import static com.v7878.jnasm.riscv64.RV64FRegister.kNumberOfFRegisters;
+import static com.v7878.jnasm.riscv64.RV64XRegister.kNumberOfXRegisters;
 
 import com.v7878.jnasm.ManagedRegister;
 
 // An instance of class 'ManagedRegister' represents a single Riscv64 register.
 // A register can be one of the following:
-//  * core register (enum XRegister)
-//  * floating-point register (enum FRegister)
-// TODO?: * vector register (enum VRegister)
+//  * core register (enum RV64XRegister)
+//  * floating-point register (enum RV64FRegister)
+// TODO?: * vector register (enum RV64VRegister)
 //
 // 'ManagedRegister::NoRegister()' provides an invalid register.
 // There is a one-to-one mapping between ManagedRegister and register id.
 public class RV64ManagedRegister extends ManagedRegister {
     // Register ids map:
-    //   [0..R[  core registers (enum XRegister)
-    //   [R..F[  floating-point registers (enum FRegister)
+    //   [0..R[  core registers (enum RV64XRegister)
+    //   [R..F[  floating-point registers (enum RV64FRegister)
     // where
     //   R = kNumberOfXRegIds
     //   F = R + kNumberOfFRegIds
@@ -37,11 +37,11 @@ public class RV64ManagedRegister extends ManagedRegister {
         return new RV64ManagedRegister();
     }
 
-    public static RV64ManagedRegister fromXRegister(XRegister r) {
+    public static RV64ManagedRegister fromXRegister(RV64XRegister r) {
         return new RV64ManagedRegister(r.index());
     }
 
-    public static RV64ManagedRegister fromFRegister(FRegister r) {
+    public static RV64ManagedRegister fromFRegister(RV64FRegister r) {
         return new RV64ManagedRegister(r.index() + kNumberOfXRegIds);
     }
 
@@ -54,12 +54,12 @@ public class RV64ManagedRegister extends ManagedRegister {
         return 0 <= test && test < kNumberOfFRegisters;
     }
 
-    public XRegister asXRegister() {
-        return XRegister.of(id);
+    public RV64XRegister asXRegister() {
+        return RV64XRegister.of(id);
     }
 
-    public FRegister asFRegister() {
-        return FRegister.of(id - kNumberOfXRegIds);
+    public RV64FRegister asFRegister() {
+        return RV64FRegister.of(id - kNumberOfXRegIds);
     }
 
     @Override
@@ -67,9 +67,9 @@ public class RV64ManagedRegister extends ManagedRegister {
         if (isNoRegister()) {
             return "No Register";
         } else if (isXRegister()) {
-            return "XRegister: " + asXRegister();
+            return "RV64XRegister: " + asXRegister();
         } else if (isFRegister()) {
-            return "FRegister: " + asFRegister();
+            return "RV64FRegister: " + asFRegister();
         }
         return "???: " + id;
     }

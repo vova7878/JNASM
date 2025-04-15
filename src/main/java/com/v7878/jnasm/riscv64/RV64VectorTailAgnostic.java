@@ -1,13 +1,12 @@
 package com.v7878.jnasm.riscv64;
 
-// Vector mask
-public enum VM {
-    kV0_t(0),
-    kUnmasked(1);
+public enum RV64VectorTailAgnostic {
+    kUndisturbed(0),
+    kAgnostic(1);
 
     private final int value;
 
-    VM(int value) {
+    RV64VectorTailAgnostic(int value) {
         this.value = value;
     }
 

@@ -1,6 +1,6 @@
 package com.v7878.jnasm.riscv64;
 
-public enum VRegister {
+public enum RV64VRegister {
     V0(0), // argument 0
     V1(1), // callee-saved 0
     V2(2), // callee-saved 1
@@ -41,11 +41,11 @@ public enum VRegister {
 
     private final int value;
 
-    VRegister(int value) {
+    RV64VRegister(int value) {
         this.value = value;
     }
 
-    public static VRegister of(int index) {
+    public static RV64VRegister of(int index) {
         return values()[index];
     }
 

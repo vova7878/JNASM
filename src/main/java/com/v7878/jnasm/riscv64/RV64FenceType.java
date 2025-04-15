@@ -1,6 +1,6 @@
 package com.v7878.jnasm.riscv64;
 
-public enum FenceType {
+public enum RV64FenceType {
     // bitmask of
     // kFenceWrite = 0x1
     // kFenceRead = 0x2
@@ -25,11 +25,11 @@ public enum FenceType {
     kFenceIORN(0b1110),
     kFenceIORW(0b1111);
 
-    public static final FenceType kFenceDefault = kFenceIORW;
+    public static final RV64FenceType kFenceDefault = kFenceIORW;
 
     private final int value;
 
-    FenceType(int value) {
+    RV64FenceType(int value) {
         this.value = value;
     }
 
