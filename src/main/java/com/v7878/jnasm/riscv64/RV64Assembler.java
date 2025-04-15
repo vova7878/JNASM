@@ -9,6 +9,7 @@ import static com.v7878.jnasm.Utils.CHECK_LT;
 import static com.v7878.jnasm.Utils.CHECK_NE;
 import static com.v7878.jnasm.Utils.isAligned;
 import static com.v7878.jnasm.Utils.isInt;
+import static com.v7878.jnasm.Utils.isLInt;
 import static com.v7878.jnasm.Utils.roundDown;
 import static com.v7878.jnasm.Utils.roundUp;
 import static com.v7878.jnasm.riscv64.Branch.BranchCondition;
@@ -1122,7 +1123,6 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
     }
 
     private void Bcond(Riscv64Label label, boolean is_bare, BranchCondition condition, XRegister lhs, XRegister rhs) {
-        // TODO(riscv64): Should an assembler perform these optimizations, or should we remove them?
         // If lhs = rhs, this can be a NOP.
         if (Branch.IsNop(condition, lhs, rhs)) {
             return;
@@ -1167,6 +1167,7 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         if (isInt(12, offset[0])) {
             return;
         }
+        CHECK(tmp != Zero);
 
         final int kPositiveOffsetMaxSimpleAdjustment = 0x7ff;
         final int kHighestOffsetForSimpleAdjustment = 2 * kPositiveOffsetMaxSimpleAdjustment;
@@ -1210,6 +1211,7 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
     }
 
     private void LoadFromOffset(XXI insn, XRegister tmp, XRegister rd, XRegister rs1, int offset) {
+        // tmp may be equal to rd
         CHECK(tmp != rs1);
         XRegister[] rs1_arr = {rs1};
         int[] offset_arr = {offset};
@@ -1244,6 +1246,37 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         int[] offset_arr = {offset};
         AdjustBaseAndOffset(tmp, rs1_arr, offset_arr);
         insn.apply(rs2, rs1_arr[0], offset_arr[0]);
+    }
+
+    private interface XXLX {
+        void apply(XRegister x1, XRegister x2, long l, XRegister x3);
+    }
+
+    private void AddConstImpl(XRegister tmp, XRegister rd, XRegister rs1,
+                              long value, XXI addi, XXLX add_large) {
+        CHECK(tmp != rs1);
+        CHECK(tmp != SP); // TODO: Why?
+
+        if (isLInt(12, value)) {
+            addi.apply(rd, rs1, (int) value);
+            return;
+        }
+        CHECK(tmp != Zero);
+
+        final int kPositiveValueSimpleAdjustment = 0x7ff;
+        final int kHighestValueForSimpleAdjustment = 2 * kPositiveValueSimpleAdjustment;
+        final int kNegativeValueSimpleAdjustment = -0x800;
+        final int kLowestValueForSimpleAdjustment = 2 * kNegativeValueSimpleAdjustment;
+
+        if (value >= 0 && value <= kHighestValueForSimpleAdjustment) {
+            addi.apply(tmp, rs1, kPositiveValueSimpleAdjustment);
+            addi.apply(rd, tmp, (int) (value - kPositiveValueSimpleAdjustment));
+        } else if (value < 0 && value >= kLowestValueForSimpleAdjustment) {
+            addi.apply(tmp, rs1, kNegativeValueSimpleAdjustment);
+            addi.apply(rd, tmp, (int) (value - kNegativeValueSimpleAdjustment));
+        } else {
+            add_large.apply(rd, rs1, value, tmp);
+        }
     }
 
     //_____________________________ RV64 VARIANTS extension _____________________________//
@@ -7691,62 +7724,77 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         Csrrci(Zero, csr, uimm5);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadb(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lb, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadh(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lh, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadw(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lw, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadd(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Ld, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadbu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lbu, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadhu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lhu, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Loadwu(XRegister tmp, XRegister rd, XRegister rs1, int offset) {
         LoadFromOffset(this::Lwu, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Storeb(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
         StoreToOffset(this::Sb, tmp, rs2, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Storeh(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
         StoreToOffset(this::Sh, tmp, rs2, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Storew(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
         StoreToOffset(this::Sw, tmp, rs2, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void Stored(XRegister tmp, XRegister rs2, XRegister rs1, int offset) {
         StoreToOffset(this::Sd, tmp, rs2, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void FLoadw(XRegister tmp, FRegister rd, XRegister rs1, int offset) {
         FLoadFromOffset(this::FLw, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void FLoadd(XRegister tmp, FRegister rd, XRegister rs1, int offset) {
         FLoadFromOffset(this::FLd, tmp, rd, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void FStorew(XRegister tmp, FRegister rs2, XRegister rs1, int offset) {
         FStoreToOffset(this::FSw, tmp, rs2, rs1, offset);
     }
 
+    // If you are sure that tmp register is not needed, set it to Zero.
     public void FStored(XRegister tmp, FRegister rs2, XRegister rs1, int offset) {
         FStoreToOffset(this::FSd, tmp, rs2, rs1, offset);
     }
@@ -7759,79 +7807,21 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         Li(rd, value);
     }
 
-    public void AddConst32(XRegister rd, XRegister rs1, int value) {
-        // TODO
-        throw new UnsupportedOperationException();
+    // If you are sure that tmp register is not needed, set it to Zero.
+    public void AddConst32(XRegister tmp, XRegister rd, XRegister rs1, int value) {
+        AddConstImpl(tmp, rd, rs1, value, this::Addiw, (rd_, rs1_, value_, tmp_) -> {
+            LoadConst32(tmp_, (int) value_);
+            Addw(rd_, rs1_, tmp_);
+        });
     }
 
-    public void AddConst64(XRegister rd, XRegister rs1, long value) {
-        // TODO
-        throw new UnsupportedOperationException();
+    // If you are sure that tmp register is not needed, set it to Zero.
+    public void AddConst64(XRegister tmp, XRegister rd, XRegister rs1, long value) {
+        AddConstImpl(tmp, rd, rs1, value, this::Addi, (rd_, rs1_, value_, tmp_) -> {
+            LoadConst64(tmp_, value_);
+            Add(rd_, rs1_, tmp_);
+        });
     }
-
-    //template <typename ValueType, typename Addi, typename AddLarge>
-    //void AddConstImpl(Riscv64Assembler* assembler,
-    //                  XRegister rd,
-    //                  XRegister rs1,
-    //                  ValueType value,
-    //                  Addi&& addi,
-    //                  AddLarge&& add_large) {
-    //  ScratchRegisterScope srs(assembler);
-    //  // A temporary must be available for adjustment even if it's not needed.
-    //  // However, `rd` can be used as the temporary unless it's the same as `rs1` or SP.
-    //  CHECK_IMPLIES(rd == rs1 || rd == SP, srs.AvailableXRegisters() != 0);
-    //
-    //  if (isInt12(value)) {
-    //    addi(rd, rs1, value);
-    //    return;
-    //  }
-    //
-    //  constexpr int kPositiveValueSimpleAdjustment = 0x7ff;
-    //  constexpr int kHighestValueForSimpleAdjustment = 2 * kPositiveValueSimpleAdjustment;
-    //  constexpr int kNegativeValueSimpleAdjustment = -0x800;
-    //  constexpr int kLowestValueForSimpleAdjustment = 2 * kNegativeValueSimpleAdjustment;
-    //
-    //  if (rd != rs1 && rd != SP) {
-    //    srs.IncludeXRegister(rd);
-    //  }
-    //  XRegister tmp = srs.AllocateXRegister();
-    //  if (value >= 0 && value <= kHighestValueForSimpleAdjustment) {
-    //    addi(tmp, rs1, kPositiveValueSimpleAdjustment);
-    //    addi(rd, tmp, value - kPositiveValueSimpleAdjustment);
-    //  } else if (value < 0 && value >= kLowestValueForSimpleAdjustment) {
-    //    addi(tmp, rs1, kNegativeValueSimpleAdjustment);
-    //    addi(rd, tmp, value - kNegativeValueSimpleAdjustment);
-    //  } else {
-    //    add_large(rd, rs1, value, tmp);
-    //  }
-    //}
-    //
-    //public void AddConst32(XRegister rd, XRegister rs1, int value) {
-    //  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
-    //  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
-    //  auto addiw = [&](XRegister rd, XRegister rs1, int value) { Addiw(rd, rs1, value); };
-    //  auto add_large = [&](XRegister rd, XRegister rs1, int value, XRegister tmp) {
-    //    LoadConst32(tmp, value);
-    //    Addw(rd, rs1, tmp);
-    //  };
-    //  AddConstImpl(this, rd, rs1, value, addiw, add_large);
-    //}
-    //
-    //public void AddConst64(XRegister rd, XRegister rs1, int64_t value) {
-    //  CHECK_EQ((1 << rs1) & available_scratch_core_registers_, 0);
-    //  CHECK_EQ((1 << rd) & available_scratch_core_registers_, 0);
-    //  auto addi = [&](XRegister rd, XRegister rs1, int value) { Addi(rd, rs1, value); };
-    //  auto add_large = [&](XRegister rd, XRegister rs1, int64_t value, XRegister tmp) {
-    //    // We may not have another scratch register for `LoadConst64()`, so use `Li()`.
-    //    // TODO(riscv64): Refactor `LoadImmediate()` so that we can reuse the code to detect
-    //    // when the code path using the scratch reg is beneficial, and use that path with a
-    //    // small modification - instead of adding the two parts togeter, add them individually
-    //    // to the input `rs1`. (This works as long as `rd` is not the same as `tmp`.)
-    //    Li(tmp, value);
-    //    Add(rd, rs1, tmp);
-    //  };
-    //  AddConstImpl(this, rd, rs1, value, addi, add_large);
-    //}
 
     public void Beqz(XRegister rs, Riscv64Label label, boolean is_bare) {
         Beq(rs, Zero, label, is_bare);
@@ -7956,19 +7946,19 @@ public class RV64Assembler extends Assembler implements RV64AssemblerI {
         LoadLiteral(literal, tmp, rd, Type.kLiteralDouble);
     }
 
+    public void LoadLabelAddress(XRegister rd, Riscv64Label label) {
+        CHECK_NE(rd.index(), Zero.index());
+        int target = label.isBound() ? GetLabelLocation(label) : Branch.kUnresolved;
+        branches_.add(new Branch(size(), target, rd, Type.kLabel));
+        FinalizeLabeledBranch(label);
+    }
+
     public void Unimp() {
         if (IsExtensionEnabled(Riscv64Extension.kZca)) {
             CUnimp();
         } else {
             Emit32(0xC0001073);
         }
-    }
-
-    public void LoadLabelAddress(XRegister rd, Riscv64Label label) {
-        CHECK_NE(rd.index(), Zero.index());
-        int target = label.isBound() ? GetLabelLocation(label) : Branch.kUnresolved;
-        branches_.add(new Branch(size(), target, rd, Type.kLabel));
-        FinalizeLabeledBranch(label);
     }
 
     //______________________________ RV64 MACRO Instructions END _____________________________//

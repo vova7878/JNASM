@@ -2183,6 +2183,7 @@ public interface RV64AssemblerI {
     //____________________________ RISC-V Vector Instructions  END ____________________________//
 
     //____________________________ RV64 MACRO Instructions  START _____________________________//
+
     // These pseudo instructions are from "RISC-V Assembly Programmer's Manual".
 
     void Nop();
@@ -2322,9 +2323,9 @@ public interface RV64AssemblerI {
     void LoadConst64(XRegister rd, long value);
 
     // Macros for adding constants.
-    void AddConst32(XRegister rd, XRegister rs1, int value);
+    void AddConst32(XRegister tmp, XRegister rd, XRegister rs1, int value);
 
-    void AddConst64(XRegister rd, XRegister rs1, long value);
+    void AddConst64(XRegister tmp, XRegister rd, XRegister rs1, long value);
 
     // Jumps and branches to a label.
     void Beqz(XRegister rs, Riscv64Label label, boolean is_bare);
@@ -2375,6 +2376,8 @@ public interface RV64AssemblerI {
     void FLoadw(XRegister tmp, FRegister rd, Literal literal);
 
     void FLoadd(XRegister tmp, FRegister rd, Literal literal);
+
+    void LoadLabelAddress(XRegister rd, Riscv64Label label);
 
     // Illegal instruction that triggers SIGILL.
     void Unimp();
